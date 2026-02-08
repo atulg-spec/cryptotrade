@@ -1,0 +1,267 @@
+{% extends 'dashboard/base.html' %}
+{% load humanize %}
+
+{% block body %}
+<section class="w-full max-w-7xl mx-auto md:px-8 py-6">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <div class="flex items-center gap-4 mb-6">
+            <div class="p-2 bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30 rounded-2xl shadow-lg">
+                <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h1 class="text-lg font-bold text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                    Portfolio Overview
+                </h1>
+                <p class="text-xs text-gray-400">
+                    Track your investments and performance
+                </p>
+            </div>
+        </div>
+
+        <!-- Portfolio Stats Cards -->
+        <div class="grid grid-cols-2 gap-2 mb-6">
+            <!-- Total Investment -->
+            <div class="bg-gray-800/40 border border-gray-700/30 rounded-2xl p-3 backdrop-blur-xl">
+                <div class="flex items-center justify-between">
+                    <div class="w-full">
+                        <p class="text-gray-400 text-sm mb-2 text-center">Total Investment</p>
+                        <p class="text-white font-bold text-1xl text-center">
+                            ₹ {{ total_investment|floatformat:2|intcomma }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Value -->
+            <div class="bg-gray-800/40 border border-gray-700/30 rounded-2xl p-3 backdrop-blur-xl">
+                <div class="flex items-center justify-between">
+                    <div class="w-full">
+                        <p class="text-gray-400 text-sm mb-2 text-center">Current Value</p>
+                        <p class="{% if current_value > total_investment %}text-green-500{% else %}text-red-500{% endif %} font-bold text-1xl text-center">
+                            ₹ {{ current_value|floatformat:2|intcomma }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <!-- Left Column - Holdings Summary -->
+        <div class="xl:col-span-2 space-y-6">
+            <!-- Holdings Summary -->
+            <div class="bg-gray-900/40 backdrop-blur-xl border border-gray-700/30 rounded-2xl shadow-2xl overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-700/30 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+                    <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        Your Holdings
+                    </h2>
+                </div>
+                <div class="p-6">
+                    {% if position_summary %}
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-gray-700/30">
+                                    <th class="text-left py-3 px-4 text-gray-400 text-sm font-medium">Stock</th>
+                                    <th class="text-right py-3 px-4 text-gray-400 text-sm font-medium">Quantity</th>
+                                    <th class="text-right py-3 px-4 text-gray-400 text-sm font-medium">Avg. Buy</th>
+                                    <th class="text-right py-3 px-4 text-gray-400 text-sm font-medium">Current</th>
+                                    <th class="text-right py-3 px-4 text-gray-400 text-sm font-medium">P&L</th>
+                                    <th class="text-right py-3 px-4 text-gray-400 text-sm font-medium">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for symbol, summary in position_summary.items %}
+                                <tr class="border-b border-gray-700/10 hover:bg-gray-800/20 transition-colors">
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
+                                                <span class="text-blue-400 font-bold text-sm">{{ summary.stock.symbol|slice:":3" }}</span>
+                                            </div>
+                                            <div>
+                                                <p class="text-white font-medium text-sm">{{ summary.stock.name }}</p>
+                                                <p class="text-gray-400 text-xs">{{ summary.stock.symbol }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <p class="text-white font-medium">{{ summary.total_quantity }}</p>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <p class="text-white font-medium">₹{{ summary.avg_buy_price|floatformat:2 }}</p>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <p class="text-white font-medium">₹{{ summary.current_value|floatformat:2 }}</p>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <div class="flex flex-col items-end">
+                                            <p class="font-medium {% if summary.unrealised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
+                                                ₹{{ summary.unrealised_pnl|floatformat:2 }}
+                                            </p>
+                                            <p class="text-xs {% if summary.unrealised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
+                                                {{ summary.pnl_percentage|floatformat:2 }}%
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <form method="post" action="{% url 'close_position' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="stock_id" value="{{ summary.stock.id }}">
+                                            <input type="hidden" name="quantity" value="{{ summary.total_quantity }}">
+                                            <button type="submit"
+                                                class="close-position-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-red-400/40 text-red-300 hover:bg-red-500/10 transition-colors"
+                                                data-stock="{{ summary.stock.symbol }}">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                                Close
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-800/50 border border-gray-700/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-white font-bold text-lg mb-2">No Holdings Yet</h3>
+                        <p class="text-gray-400 text-sm mb-4">Start building your portfolio by making your first trade</p>
+                        <a href="{% url 'watchlist' %}" 
+                           class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 border border-blue-500/30 text-white font-semibold rounded-xl transition-all duration-200 hover:scale-105 active:scale-95">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                            Start Trading
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Positions -->
+            <div class="bg-gray-900/40 backdrop-blur-xl border border-gray-700/30 rounded-2xl shadow-2xl overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-700/30 bg-gradient-to-r from-green-500/10 to-blue-500/10">
+                    <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                        Recent Positions
+                    </h2>
+                </div>
+                <div class="p-6">
+                    {% if positions %}
+                    <div class="space-y-4">
+                        {% for position in positions|slice:":5" %}
+                        <div class="flex items-center justify-between p-4 bg-gray-800/30 border border-gray-700/30 rounded-xl hover:bg-gray-800/50 transition-colors">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-gradient-to-br {% if position.is_closed %}from-gray-500/20 to-gray-600/20 border-gray-500/30{% else %}from-blue-500/20 to-purple-500/20 border-blue-500/30{% endif %} border rounded-xl flex items-center justify-center">
+                                    <span class="text-white font-bold text-sm">{{ position.stock.symbol|slice:":3" }}</span>
+                                </div>
+                                <div>
+                                    <p class="text-white font-medium text-sm">{{ position.stock.name }}</p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span class="text-xs px-2 py-1 rounded-full {% if position.is_closed %}bg-gray-500/20 text-gray-400{% else %}bg-green-500/20 text-green-400{% endif %}">
+                                            {% if position.is_closed %}Closed{% else %}Open{% endif %}
+                                        </span>
+                                        <span class="text-gray-400 text-xs">at {{ position.last_traded_datetime }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-white font-semibold text-sm">{{ position.last_traded_quantity }} shares</p>
+                                <p class="text-gray-400 text-xs">₹{{ position.buy_price|floatformat:2 }}</p>
+                                {% if position.realised_pnl != 0 %}
+                                <p class="text-xs {% if position.realised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %} mt-1">
+                                    P&L: ₹{{ position.realised_pnl|floatformat:2 }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-8">
+                        <svg class="w-12 h-12 text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        <p class="text-gray-400 text-sm">No positions found.</p>
+                        <p class="text-gray-500 text-xs mt-1">Your trading positions will appear here.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Performance & Actions -->
+            {% include 'dashboard/partials/portfolio-allocation-chart.html' %}
+
+    </div>
+</section>
+
+<style>
+    /* Custom scrollbar for tables */
+    .overflow-x-auto::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 3px;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 3px;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Smooth transitions */
+    .transition-colors {
+        transition: background-color 0.2s ease;
+    }
+
+    /* Hover effects */
+    .hover\:scale-105:hover {
+        transform: scale(1.05);
+    }
+
+    .active\:scale-95:active {
+        transform: scale(0.95);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.close-position-btn').forEach((button) => {
+            button.addEventListener('click', function (event) {
+                const symbol = this.dataset.stock;
+                const confirmed = confirm(`Close the open position in ${symbol}?`);
+                if (!confirmed) {
+                    event.preventDefault();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

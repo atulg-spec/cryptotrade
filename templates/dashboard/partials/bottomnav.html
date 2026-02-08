@@ -1,0 +1,75 @@
+<!-- Bottom Navbar -->
+<nav class="fixed bottom-0 left-0 right-0 z-40 bg-gray-900 border-t border-gray-800 shadow-lg md:hidden">
+    <ul class="flex justify-around items-center h-16 text-gray-400 text-sm">
+        
+        <!-- Home -->
+        <li>
+            <a href="{% url 'dashboard' %}" 
+               class="flex flex-col items-center {% if request.path == '/dashboard/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 9.75L12 4l9 5.75M4.5 10.5V20h15V10.5" />
+                </svg>
+                <span>Home</span>
+            </a>
+        </li>
+
+        <!-- Watchlist -->
+        <li>
+            <a href="{% url 'watchlist' %}" 
+               class="flex flex-col items-center {% if request.path == '/stock/watchlist/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m12 3 8 4.5 0 9 -8 4.5 -8 -4.5 0 -9L12 3" stroke-width="2"></path>
+                    <path d="m12 12 8 -4.5" stroke-width="2"></path>
+                    <path d="m12 12 0 9" stroke-width="2"></path>
+                    <path d="M12 12 4 7.5" stroke-width="2"></path>
+                </svg>
+                <span>Watchlist</span>
+            </a>
+        </li>
+
+        <!-- Orders -->
+        <li>
+            <a href="{% url 'orders' %}" 
+               class="flex flex-col items-center {% if request.path == '/assets/orders/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-1" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                        d="M7 5.5c3.5899 0 6.5 -1.11929 6.5 -2.5S10.5899 0.5 7 0.5C3.41015 0.5 0.5 1.61929 0.5 3S3.41015 5.5 7 5.5Z"
+                        stroke-width="1.2"></path>
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                        d="M0.5 3v8c0 1.38 2.91 2.5 6.5 2.5s6.5 -1.12 6.5 -2.5V3" stroke-width="1.2"></path>
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                        d="M13.5 7c0 1.38 -2.91 2.5 -6.5 2.5S0.5 8.38 0.5 7" stroke-width="1.2"></path>
+                </svg>
+                <span>Orders</span>
+            </a>
+        </li>
+
+        <!-- Portfolio -->
+        <li>
+            <a href="{% url 'portfolio' %}" 
+               class="flex flex-col items-center {% if request.path == '/assets/portfolio/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" height="24" width="24">
+                    <path fill="currentColor"
+                        d="M5 19h16v2H4c-0.55228 0 -1 -0.4477 -1 -1V3h2zM21 8.91406l-5.5 5.50004 -4-4 -4.5 4.5v-2.8282l4.5 -4.49996 4 3.99996L21 6.08594z" />
+                </svg>
+                <span>Portfolio</span>
+            </a>
+        </li>
+
+        <!-- Profile -->
+        <li>
+            <a href="{% url 'profile' %}" 
+               class="flex flex-col items-center {% if request.path == '/accounts/profile/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5.121 17.804A10.97 10.97 0 0112 15c2.485 0 4.774.83 6.879 2.804M12 12a4 4 0 100-8 4 4 0 000 8z" />
+                </svg>
+                <span>Profile</span>
+            </a>
+        </li>
+    </ul>
+</nav>

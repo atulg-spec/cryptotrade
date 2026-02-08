@@ -1,0 +1,409 @@
+{% extends 'dashboard/base.html' %}
+{% load humanize %}
+
+{% block body %}
+<div class="min-h-screen pb-20">
+    <!-- Header Section -->
+    <header class="bg-gray-900/95 backdrop-blur-md border-b border-gray-700/50">
+        <div class="px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-blue-500/20 rounded-xl">
+                        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-white">Orders</h1>
+                        <p class="text-xs text-gray-400">{{ total_orders }} orders • ₹{{ total_investment|floatformat:2|intcomma }}</p>
+                    </div>
+                </div>
+                <button onclick="toggleFilters()" class="p-2 bg-gray-800 rounded-xl">
+                    <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Quick Stats -->
+    <div class="md:px-4 py-3">
+        <div class="grid grid-cols-3 gap-3">
+            <div class="bg-gray-800/50 rounded-xl p-3 text-center border border-gray-700/30">
+                <p class="text-xs text-gray-400 mb-1">Total</p>
+                <p class="text-white font-bold">{{ total_orders }}</p>
+            </div>
+            <div class="bg-gray-800/50 rounded-xl p-3 text-center border border-gray-700/30">
+                <p class="text-xs text-gray-400 mb-1">Completed</p>
+                <p class="text-green-400 font-bold">{{ orders.paginator.count|default:0 }}</p>
+            </div>
+            <div class="bg-gray-800/50 rounded-xl p-3 text-center border border-gray-700/30">
+                <p class="text-xs text-gray-400 mb-1">Invested</p>
+                <p class="text-blue-400 font-bold">₹{{ total_investment|floatformat:2|intcomma }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="md:px-4 py-3">
+        <div class="relative">
+            <input type="text" 
+                   id="searchInput"
+                   placeholder="Search orders..." 
+                   value="{{ search_query }}"
+                   class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 pl-11 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-sm">
+            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Filter Panel (Hidden by default) -->
+    <div id="filterPanel" class="hidden px-4 py-3 bg-gray-800/50 border-b border-gray-700/30">
+        <div class="space-y-4">
+            <!-- Status Filter -->
+            <div>
+                <p class="text-xs font-medium text-gray-400 mb-2">STATUS</p>
+                <div class="flex flex-wrap gap-2">
+                    <button data-filter="status" data-value="all" 
+                            class="filter-chip px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 {% if status_filter == 'all' %}bg-blue-500 text-white{% else %}bg-gray-700 text-gray-300{% endif %}">
+                        All
+                    </button>
+                    <button data-filter="status" data-value="completed" 
+                            class="filter-chip px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 {% if status_filter == 'completed' %}bg-green-500 text-white{% else %}bg-gray-700 text-gray-300{% endif %}">
+                        Completed
+                    </button>
+                    <button data-filter="status" data-value="pending" 
+                            class="filter-chip px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 {% if status_filter == 'pending' %}bg-yellow-500 text-white{% else %}bg-gray-700 text-gray-300{% endif %}">
+                        Pending
+                    </button>
+                </div>
+            </div>
+
+            <!-- Type Filter -->
+            <div>
+                <p class="text-xs font-medium text-gray-400 mb-2">TYPE</p>
+                <div class="flex flex-wrap gap-2">
+                    <button data-filter="type" data-value="all" 
+                            class="filter-chip px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 {% if order_type_filter == 'all' %}bg-blue-500 text-white{% else %}bg-gray-700 text-gray-300{% endif %}">
+                        All
+                    </button>
+                    <button data-filter="type" data-value="BUY" 
+                            class="filter-chip px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 {% if order_type_filter == 'BUY' %}bg-green-500 text-white{% else %}bg-gray-700 text-gray-300{% endif %}">
+                        Buy
+                    </button>
+                    <button data-filter="type" data-value="SELL" 
+                            class="filter-chip px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 {% if order_type_filter == 'SELL' %}bg-red-500 text-white{% else %}bg-gray-700 text-gray-300{% endif %}">
+                        Sell
+                    </button>
+                </div>
+            </div>
+
+            <!-- Time Filter -->
+            <div>
+                <p class="text-xs font-medium text-gray-400 mb-2">TIME</p>
+                <div class="flex flex-wrap gap-2">
+                    <button data-filter="time" data-value="all" 
+                            class="filter-chip px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 {% if time_filter == 'all' %}bg-blue-500 text-white{% else %}bg-gray-700 text-gray-300{% endif %}">
+                        All Time
+                    </button>
+                    <button data-filter="time" data-value="today" 
+                            class="filter-chip px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 {% if time_filter == 'today' %}bg-purple-500 text-white{% else %}bg-gray-700 text-gray-300{% endif %}">
+                        Today
+                    </button>
+                    <button data-filter="time" data-value="week" 
+                            class="filter-chip px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 {% if time_filter == 'week' %}bg-purple-500 text-white{% else %}bg-gray-700 text-gray-300{% endif %}">
+                        This Week
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders List -->
+    <div class="md:px-4 py-3">
+        {% if orders %}
+        <div class="space-y-3">
+            {% for order in orders %}
+            <div class="order-card bg-gray-800 rounded-xl p-4 border border-gray-700/30 active:scale-95 transition-transform duration-200">
+                <!-- Order Header -->
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center {% if order.order_type == 'BUY' %}bg-green-500/20{% else %}bg-red-500/20{% endif %}">
+                            <svg class="w-5 h-5 {% if order.order_type == 'BUY' %}text-green-400{% else %}text-red-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                {% if order.order_type == 'BUY' %}
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                {% else %}
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                {% endif %}
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-white font-bold text-sm">{{ order.stock.symbol }}</h3>
+                            <p class="text-gray-400 text-xs">{{ order.stock.name|truncatechars:20 }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="status-badge px-2 py-1 rounded-full text-xs font-semibold 
+                            {% if order.status == 'completed' %}bg-green-500/20 text-green-400
+                            {% elif order.status == 'pending' %}bg-yellow-500/20 text-yellow-400
+                            {% elif order.status == 'initiated' %}bg-blue-500/20 text-blue-400
+                            {% elif order.status == 'cancelled' %}bg-gray-500/20 text-gray-400
+                            {% else %}bg-red-500/20 text-red-400{% endif %}">
+                            {{ order.status|title }}
+                        </span>
+                        <p class="text-gray-500 text-xs mt-1">{{ order.created_at|timesince }} ago</p>
+                    </div>
+                </div>
+
+                <!-- Order Details -->
+                <div class="grid grid-cols-2 gap-4 pt-3 border-t border-gray-700/30">
+                    <div>
+                        <p class="text-gray-400 text-xs mb-1">Quantity</p>
+                        <p class="text-white font-semibold">{{ order.quantity }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-xs mb-1">Price</p>
+                        <p class="text-white font-semibold">₹{{ order.price|floatformat:2 }}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <p class="text-gray-400 text-xs mb-1">Total Amount</p>
+                        <p class="text-white font-bold text-lg">₹{{ order.amount|floatformat:2|intcomma }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if orders.has_other_pages %}
+        <div class="flex justify-center items-center mt-6">
+            <div class="flex items-center gap-2">
+                {% if orders.has_previous %}
+                <a href="?page={{ orders.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if order_type_filter != 'all' %}&type={{ order_type_filter }}{% endif %}{% if time_filter != 'all' %}&time={{ time_filter }}{% endif %}" 
+                   class="px-4 py-2 bg-gray-700 rounded-lg text-white text-sm active:scale-95 transition-transform">
+                    ←
+                </a>
+                {% endif %}
+
+                <span class="px-3 py-2 text-gray-400 text-sm">
+                    Page {{ orders.number }} of {{ orders.paginator.num_pages }}
+                </span>
+
+                {% if orders.has_next %}
+                <a href="?page={{ orders.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}{% if order_type_filter != 'all' %}&type={{ order_type_filter }}{% endif %}{% if time_filter != 'all' %}&time={{ time_filter }}{% endif %}" 
+                   class="px-4 py-2 bg-gray-700 rounded-lg text-white text-sm active:scale-95 transition-transform">
+                    →
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-20 h-20 bg-gray-800 rounded-2xl flex items-center justify-center mb-4 border border-gray-700/30">
+                <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">
+                {% if search_query or status_filter != 'all' or order_type_filter != 'all' or time_filter != 'all' %}
+                No Orders Found
+                {% else %}
+                No Orders Yet
+                {% endif %}
+            </h3>
+            <p class="text-gray-400 text-sm mb-6 max-w-xs">
+                {% if search_query or status_filter != 'all' or order_type_filter != 'all' or time_filter != 'all' %}
+                Try adjusting your filters or search terms
+                {% else %}
+                Start trading to see your order history here
+                {% endif %}
+            </p>
+            {% if search_query or status_filter != 'all' or order_type_filter != 'all' or time_filter != 'all' %}
+            <button onclick="clearAllFilters()" 
+                    class="px-6 py-3 bg-blue-600 text-white font-medium rounded-xl active:scale-95 transition-transform text-sm">
+                Clear Filters
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Mobile-First Interactions
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const filterChips = document.querySelectorAll('.filter-chip');
+        
+        // Toggle filter panel
+        window.toggleFilters = function() {
+            const panel = document.getElementById('filterPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        // Debounce search
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Update filters
+        function updateFilters() {
+            const params = new URLSearchParams(window.location.search);
+            
+            const activeFilters = {
+                status: 'all',
+                type: 'all', 
+                time: 'all'
+            };
+            
+            filterChips.forEach(chip => {
+                if (chip.classList.contains('bg-blue-500') || 
+                    chip.classList.contains('bg-green-500') ||
+                    chip.classList.contains('bg-red-500') ||
+                    chip.classList.contains('bg-yellow-500') ||
+                    chip.classList.contains('bg-purple-500')) {
+                    const filterType = chip.dataset.filter;
+                    const filterValue = chip.dataset.value;
+                    activeFilters[filterType] = filterValue;
+                }
+            });
+            
+            // Update params
+            params.delete('status');
+            params.delete('type');
+            params.delete('time');
+            params.delete('search');
+            params.delete('page');
+            
+            if (activeFilters.status !== 'all') params.set('status', activeFilters.status);
+            if (activeFilters.type !== 'all') params.set('type', activeFilters.type);
+            if (activeFilters.time !== 'all') params.set('time', activeFilters.time);
+            if (searchInput.value) params.set('search', searchInput.value);
+            
+            window.location.href = '?' + params.toString();
+        }
+
+        // Filter chip interactions
+        filterChips.forEach(chip => {
+            chip.addEventListener('click', function() {
+                const filterType = this.dataset.filter;
+                const filterValue = this.dataset.value;
+                
+                // Remove active state from other chips of same type
+                document.querySelectorAll(`[data-filter="${filterType}"]`).forEach(otherChip => {
+                    otherChip.classList.remove(
+                        'bg-blue-500', 'text-white',
+                        'bg-green-500', 'text-white',
+                        'bg-red-500', 'text-white',
+                        'bg-yellow-500', 'text-white',
+                        'bg-purple-500', 'text-white'
+                    );
+                    otherChip.classList.add('bg-gray-700', 'text-gray-300');
+                });
+                
+                // Add active state to clicked chip
+                if (filterValue === 'all') {
+                    this.classList.add('bg-blue-500', 'text-white');
+                    this.classList.remove('bg-gray-700', 'text-gray-300');
+                } else if (filterType === 'status') {
+                    const statusColors = {
+                        'completed': 'green',
+                        'pending': 'yellow'
+                    };
+                    const color = statusColors[filterValue] || 'blue';
+                    this.classList.add(`bg-${color}-500`, 'text-white');
+                    this.classList.remove('bg-gray-700', 'text-gray-300');
+                } else if (filterType === 'type') {
+                    const color = filterValue === 'BUY' ? 'green' : 'red';
+                    this.classList.add(`bg-${color}-500`, 'text-white');
+                    this.classList.remove('bg-gray-700', 'text-gray-300');
+                } else if (filterType === 'time') {
+                    this.classList.add('bg-purple-500', 'text-white');
+                    this.classList.remove('bg-gray-700', 'text-gray-300');
+                }
+                
+                updateFilters();
+            });
+        });
+
+        // Search with debouncing
+        searchInput.addEventListener('input', debounce(updateFilters, 500));
+        
+        // Clear all filters
+        window.clearAllFilters = function() {
+            window.location.href = '{% url "orders" %}';
+        };
+
+        // Touch feedback for order cards
+        document.querySelectorAll('.order-card').forEach(card => {
+            card.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.98)';
+            });
+            
+            card.addEventListener('touchend', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    });
+</script>
+
+<style>
+    /* Mobile-optimized styles */
+    .order-card {
+        min-height: 44px;
+        touch-action: manipulation;
+    }
+    
+    .filter-chip {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Hide scrollbars but keep functionality */
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    
+    /* Smooth transitions */
+    * {
+        transition: all 0.2s ease-in-out;
+    }
+    
+    /* Improved focus states for accessibility */
+    button:focus-visible,
+    input:focus-visible {
+        outline: 2px solid #3B82F6;
+        outline-offset: 2px;
+    }
+    
+    /* Prevent text selection on interactive elements */
+    .order-card,
+    .filter-chip,
+    button {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+</style>
+{% endblock %}

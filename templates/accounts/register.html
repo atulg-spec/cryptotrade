@@ -1,0 +1,158 @@
+{% extends 'home/base.html' %}
+{% block body %}
+<div class="min-h-screen flex items-center justify-center py-24 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-6">
+        <div class="text-center" data-aos="fade-down">
+            <div class="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-cyber-primary to-cyber-secondary flex items-center justify-center mb-6">
+                <i class="fas fa-user-plus text-2xl text-cyber-dark"></i>
+            </div>
+            <h2 class="text-3xl font-bold terminal-text">
+                CREATE ACCOUNT
+            </h2>
+            <p class="mt-2 text-gray-400">
+                Join our trading platform today
+            </p>
+        </div>
+        <div class="cyber-border p-2" data-aos="fade-up">
+            <form class="space-y-3" method="POST">
+                {% csrf_token %}
+                
+                <!-- Display form errors -->
+                {% if form.errors %}
+                <div class="bg-red-900/50 border border-red-500 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle text-red-400 mr-3"></i>
+                        <div>
+                            <h4 class="text-sm font-bold text-red-200">Please correct the following errors:</h4>
+                            <ul class="mt-1 text-xs text-red-300">
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <li>{{ field.label }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                <!-- Display messages -->
+                {% if messages %}
+                <div class="space-y-2">
+                    {% for message in messages %}
+                    <div class="{% if message.tags == 'success' %}bg-green-900/50 border border-green-500{% else %}bg-red-900/50 border border-red-500{% endif %} rounded-lg p-4">
+                        <div class="flex items-center">
+                            <i class="fas {% if message.tags == 'success' %}fa-check-circle text-green-400{% else %}fa-exclamation-triangle text-red-400{% endif %} mr-3"></i>
+                            <span class="text-sm {% if message.tags == 'success' %}text-green-200{% else %}text-red-200{% endif %}">{{ message }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <!-- Username Field -->
+                <div>
+                    <label for="id_username" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-user mr-2 text-cyber-primary"></i>Username
+                    </label>
+                    {{ form.username }}
+                    {% if form.username.help_text %}
+                    <p class="mt-1 text-xs text-gray-500">{{ form.username.help_text }}</p>
+                    {% endif %}
+                </div>
+                <!-- Email Field -->
+                <div>
+                    <label for="id_email" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-envelope mr-2 text-cyber-primary"></i>Email Address
+                    </label>
+                    {{ form.email }}
+                </div>
+                <!-- Phone Number Field -->
+                <div>
+                    <label for="id_phone_number" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-phone mr-2 text-cyber-primary"></i>Phone Number (Optional)
+                    </label>
+                    {{ form.phone_number }}
+                </div>
+                <!-- Password Field -->
+                <div>
+                    <label for="id_password1" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-lock mr-2 text-cyber-primary"></i>Password
+                    </label>
+                    {{ form.password1 }}
+                    {% if form.password1.help_text %}
+                    <div class="mt-2 text-xs text-gray-500">
+                        {{ form.password1.help_text }}
+                    </div>
+                    {% endif %}
+                </div>
+                <!-- Confirm Password Field -->
+                <div>
+                    <label for="id_password2" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-lock mr-2 text-cyber-primary"></i>Confirm Password
+                    </label>
+                    {{ form.password2 }}
+                </div>
+                <!-- Submit Button -->
+                <div>
+                    <button type="submit" 
+                            class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-md text-cyber-dark bg-cyber-primary hover:bg-cyber-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyber-primary transition-all hover:shadow-lg hover:shadow-cyber-primary/30">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        CREATE ACCOUNT
+                    </button>
+                </div>
+            </form>
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-400">
+                    Already have an account?
+                    <a href="{% url 'login' %}" class="font-bold text-cyber-primary hover:text-cyber-primary/80 transition-colors ml-1">
+                        Sign in here
+                    </a>
+                </p>
+            </div>
+        </div>
+        <!-- Security Features -->
+        <div class="text-center">
+            <div class="flex items-center justify-center space-x-6 text-xs text-gray-500">
+                <div class="flex items-center">
+                    <i class="fas fa-shield-alt text-cyber-primary mr-2"></i>
+                    <span>Bank-level Security</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-lock text-cyber-primary mr-2"></i>
+                    <span>Encrypted Data</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add real-time validation feedback
+    document.addEventListener('DOMContentLoaded', function() {
+        const formInputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="number"]');
+        
+        formInputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value.trim() !== '') {
+                    this.classList.add('border-green-500');
+                    this.classList.remove('border-gray-700');
+                } else {
+                    this.classList.remove('border-green-500');
+                    this.classList.add('border-gray-700');
+                }
+            });
+            input.addEventListener('input', function() {
+                if (this.value.trim() !== '') {
+                    this.classList.add('border-cyber-primary');
+                this.classList.remove('border-gray-700');
+                this.classList.remove('border-red-500');
+                this.classList.remove('border-green-500');
+                this.parentElement.querySelector('.error-message')?.remove();
+            }
+        });
+    });
+</script>
+
+{% endblock %}

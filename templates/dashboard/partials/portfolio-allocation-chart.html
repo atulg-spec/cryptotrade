@@ -1,0 +1,79 @@
+{% if chart_data.data %}
+<div class="bg-gray-800 rounded-2xl p-4 shadow-md mb-6 md:max-h-80">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-white">Portfolio Allocation</h3>
+    </div>
+    <div class="chart-container">
+        <canvas id="portfolio-allocation-chart" height="" class="md:max-h-56"></canvas>
+    </div>
+</div>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const chartData = JSON.parse('{{ chart_data_json|safe }}');
+
+    const ctx = document.getElementById('portfolio-allocation-chart');
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                label: 'Portfolio Allocation',
+                data: chartData.data,
+                backgroundColor: [
+                    'rgb(52, 152, 219)',   // Soft blue
+                    'rgb(46, 204, 113)',   // Emerald green
+                    'rgb(231, 76, 60)',    // Coral red
+                    'rgb(241, 196, 15)',   // Gold yellow
+                    'rgb(155, 89, 182)',   // Amethyst purple
+                    'rgb(26, 188, 156)',   // Teal
+                    'rgb(230, 126, 34)',   // Orange accent
+                    'rgb(52, 73, 94)',     // Slate gray
+                    'rgb(149, 165, 166)',  // Silver gray
+                    'rgb(243, 156, 18)',   // Warm amber
+                    'rgb(41, 128, 185)',   // Royal blue
+                    'rgb(39, 174, 96)',    // Leaf green
+                    'rgb(192, 57, 43)',    // Crimson red
+                    'rgb(142, 68, 173)',   // Deep violet
+                    'rgb(44, 62, 80)',     // Gunmetal
+                    'rgb(127, 140, 141)',  // Muted gray
+                    'rgb(10, 189, 227)',   // Cyan accent
+                    'rgb(214, 48, 49)',    // Cherry red
+                    'rgb(253, 203, 110)',  // Soft gold
+                    'rgb(225, 112, 85)',   // Clay orange
+                    'rgb(178, 190, 195)',  // Soft steel
+                    'rgb(0, 184, 148)',    // Aqua green
+                    'rgb(108, 92, 231)',   // Indigo
+                    'rgb(232, 67, 147)',   // Rose pink
+                    'rgb(99, 110, 114)',   // Graphite
+                    'rgb(253, 121, 168)',  // Soft magenta
+                    'rgb(83, 92, 104)',    // Charcoal
+                    'rgb(112, 161, 255)',  // Sky blue
+                    'rgb(255, 177, 66)',   // Bright amber
+                    'rgb(255, 107, 107)'   // Light coral
+                ],
+                borderColor: 'rgba(255, 255, 255, 0.2)',
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: 'white'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ₹${context.parsed.toFixed(2)}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>

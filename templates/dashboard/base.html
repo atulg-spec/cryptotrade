@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{site_settings.site_name}} - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gray: {
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#334155',
+                            600: '#475569',
+                            500: '#64748b',
+                            400: '#94a3b8',
+                            300: '#cbd5e1',
+                            200: '#e2e8f0',
+                            100: '#f1f5f9',
+                        },
+                        blue: {
+                            600: '#2563eb',
+                            500: '#3b82f6',
+                        },
+                        green: {
+                            600: '#16a34a',
+                            500: '#22c55e',
+                        },
+                        red: {
+                            600: '#dc2626',
+                            500: '#ef4444',
+                        }
+                    }
+                }
+            }
+        }
+    })
+    </script>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans">
+    {% include 'dashboard/partials/alerts.html' %}
+    <!-- Main Layout -->
+    <div class="flex h-screen">
+        {% include 'dashboard/partials/sidebar.html' %}
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            {% include 'dashboard/partials/header.html' %}
+
+            <!-- Content Area -->
+            <main class="flex-1 overflow-y-auto p-4 md:p-6">
+
+                {% block body %}
+                {% endblock %}
+
+            </main>
+        </div>
+    </div>
+
+    {% include 'dashboard/partials/support-button.html' %}
+    {% include 'dashboard/partials/bottomnav.html' %}
+</body>
+</html>

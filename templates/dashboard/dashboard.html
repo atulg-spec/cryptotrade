@@ -1,0 +1,92 @@
+{% extends 'dashboard/base.html' %}
+{% block body %}
+<section id="overview" class="content-section text-white">
+    <h2 class="text-2xl font-bold mb-6">Dashboard Overview</h2>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-gray-800 rounded-2xl p-4 shadow-md">
+            <p class="text-gray-400 text-sm">Total Assets</p>
+            <p class="text-xl font-bold mt-1">₹{{ portfolio_value|floatformat:2 }}</p>
+        </div>
+        <div class="bg-gray-800 rounded-2xl p-4 shadow-md">
+            <p class="text-gray-400 text-sm">Available Funds</p>
+            <p class="text-xl font-bold mt-1">₹{{ request.user.wallet|floatformat:2 }}</p>
+        </div>
+        <div class="bg-gray-800 rounded-2xl p-4 shadow-md">
+            <p class="text-gray-400 text-sm">Today's P/L</p>
+            <p
+                class="text-xl font-bold mt-1 {% if unrealised_pnl >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+                ₹{{ unrealised_pnl|floatformat:2 }}
+            </p>
+        </div>
+        <div class="bg-gray-800 rounded-2xl p-4 shadow-md">
+            <p class="text-gray-400 text-sm">Holdings</p>
+            <p class="text-xl font-bold mt-1">{{ holdings }}</p>
+        </div>
+    </div>
+
+    <!-- Mini Chart -->
+    {% include 'dashboard/partials/portfolio-allocation-chart.html' %}
+
+    <!-- Recent Activity -->
+    <div class="bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-2xl py-4 shadow-md">
+        <div class="px-3 py-2 border-b border-gray-700/30">
+            <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                Recent Positions
+            </h2>
+        </div>
+        <div class="py-6 px-3">
+            {% if positions %}
+            <div class="space-y-4">
+                {% for position in positions|slice:":5" %}
+                <div
+                    class="flex items-center justify-between p-4 bg-gray-800/30 border border-gray-700/30 rounded-xl hover:bg-gray-800/50 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-12 h-12 bg-gradient-to-br {% if position.is_closed %}from-gray-500/20 to-gray-600/20 border-gray-500/30{% else %}from-blue-500/20 to-purple-500/20 border-blue-500/30{% endif %} border rounded-xl flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">{{ position.stock.symbol|slice:":3" }}</span>
+                        </div>
+                        <div>
+                            <p class="text-white font-medium text-sm">{{ position.stock.name }}</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span
+                                    class="text-xs px-2 py-1 rounded-full {% if position.is_closed %}bg-gray-500/20 text-gray-400{% else %}bg-green-500/20 text-green-400{% endif %}">
+                                    {% if position.is_closed %}Closed{% else %}Open{% endif %}
+                                </span>
+                                <span class="text-gray-400 text-xs">at {{ position.last_traded_datetime }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-white font-semibold text-sm">{{ position.last_traded_quantity }} shares</p>
+                        <p class="text-gray-400 text-xs">₹{{ position.buy_price|floatformat:2 }}</p>
+                        {% if position.realised_pnl != 0 %}
+                        <p
+                            class="text-xs {% if position.realised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %} mt-1">
+                            P&L: ₹{{ position.realised_pnl|floatformat:2 }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-8">
+                <svg class="w-12 h-12 text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <p class="text-gray-400 text-sm">No positions found.</p>
+                <p class="text-gray-500 text-xs mt-1">Your trading positions will appear here.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+<br><br><br><br>
+{% endblock %}
