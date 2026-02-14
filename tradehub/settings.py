@@ -143,3 +143,19 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
+
+ALLOWED_HOSTS = [
+    "eserviceindia.in",
+    "www.eserviceindia.in"
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://eserviceindia.in",
+    "https://www.eserviceindia.in"
+]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
