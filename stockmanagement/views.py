@@ -10,7 +10,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 @login_required(login_url='login')
 def watchlist(request):
-    stocks = Stock.objects.all().order_by('symbol')
+    stocks = Stock.objects.all().order_by('-current_price')
     context = {
         'stocks': stocks,
     }

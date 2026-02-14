@@ -12,8 +12,8 @@ class StockAdmin(admin.ModelAdmin):
         'symbol', 'name',
         'formatted_current_price', 'formatted_open_price',
         'formatted_high_price', 'formatted_low_price',
-        'price_change_colored', 'formatted_market_cap',
-        'formatted_pe_ratio', 'formatted_dividend_yield',
+        'price_change_colored', 'formatted_price_change', 'formatted_percentage_change',
+        'formatted_market_cap', 'formatted_pe_ratio', 'formatted_dividend_yield',
         'formatted_volume', 'last_updated'
     )
     list_display_links = ('symbol', 'name')
@@ -35,6 +35,11 @@ class StockAdmin(admin.ModelAdmin):
                 "volume", "market_cap", "pe_ratio", "dividend_yield"
             )
         }),
+        ("Change Metrics", {
+            "fields": (
+                "price_change", "percentage_change"
+            )
+        }),
         ("System Info", {"fields": ("last_updated",)}),
     )
 
@@ -53,7 +58,7 @@ class StockAdmin(admin.ModelAdmin):
 
     def formatted_current_price(self, obj):
         value = self.as_decimal(obj.current_price)
-        return format_html(f'<b style="color:#22c55e;">₹{value}</b>')
+        return format_html(f'<b style="color:#22c55e;">₹{value:,.2f}</b>')
     formatted_current_price.short_description = "Current Price"
 
     def formatted_open_price(self, obj):
@@ -93,15 +98,33 @@ class StockAdmin(admin.ModelAdmin):
         return f"{value:.2f}%"
     formatted_dividend_yield.short_description = "Dividend Yield"
 
+    def formatted_price_change(self, obj):
+        value = self.as_decimal(obj.price_change)
+        color = "#22c55e" if value > 0 else "#ef4444" if value < 0 else "#6b7280"
+        arrow = "▲" if value > 0 else "▼" if value < 0 else "◆"
+        return format_html(
+            f'<span style="color:{color}; font-weight:600;">{arrow} ₹{abs(value):,.2f}</span>'
+        )
+    formatted_price_change.short_description = "Price Change"
+
+    def formatted_percentage_change(self, obj):
+        value = self.as_decimal(obj.percentage_change)
+        color = "#22c55e" if value > 0 else "#ef4444" if value < 0 else "#6b7280"
+        arrow = "▲" if value > 0 else "▼" if value < 0 else "◆"
+        return format_html(
+            f'<span style="color:{color}; font-weight:600;">{arrow} {abs(value):.2f}%</span>'
+        )
+    formatted_percentage_change.short_description = "% Change"
+
     def price_change_colored(self, obj):
-        """Show colored percentage change (green/red)."""
+        """Show colored percentage change (green/red) from the model property."""
         change = obj.get_change_percentage or Decimal('0.00')
         color = "#22c55e" if change > 0 else "#ef4444"
         arrow = "▲" if change > 0 else "▼"
         return format_html(
             f'<span style="color:{color}; font-weight:600;">{arrow} {change}%</span>'
         )
-    price_change_colored.short_description = "Change (%)"
+    price_change_colored.short_description = "Change (Prop)"
 
     class Media:
         css = {

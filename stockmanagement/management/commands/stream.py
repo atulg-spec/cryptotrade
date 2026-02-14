@@ -62,7 +62,7 @@ class Command(BaseCommand):
 
         await self.save_assets(symbols)
 
-        streams = [s["symbol"].lower() + "@trade" for s in symbols]
+        streams = [s["symbol"].lower() + "@ticker" for s in symbols]
 
         self.stdout.write(f"✅ {len(streams)} symbols loaded")
         self.stdout.write(f"🔌 Starting {WORKER_COUNT} websocket connections...")
@@ -85,7 +85,12 @@ class Command(BaseCommand):
             Stock(
                 symbol=s["symbol"],
                 name=f"{s['baseAsset']} / {s['quoteAsset']}",
-                current_price=Decimal("0")
+                current_price=Decimal("0"),
+                open_price=Decimal("0"),
+                high_price=Decimal("0"),
+                low_price=Decimal("0"),
+                close_price=Decimal("0"),
+                volume=0
             )
             for s in symbols
         ]
@@ -116,8 +121,16 @@ class Command(BaseCommand):
                             continue
 
                         symbol = payload["s"]
-                        price = Decimal(payload["p"])
-                        buffer[symbol] = price
+                        # Map all required fields from Binance ticker stream
+                        buffer[symbol] = {
+                            'c': Decimal(payload["c"]),  # current price
+                            'o': Decimal(payload["o"]),  # open price
+                            'h': Decimal(payload["h"]),  # high price
+                            'l': Decimal(payload["l"]),  # low price
+                            'v': Decimal(payload["v"]),  # volume
+                            'p': Decimal(payload["p"]),  # volume
+                            'P': Decimal(payload["P"]),  # volume
+                        }
 
                         now = asyncio.get_event_loop().time()
                         if now - last_flush >= FLUSH_INTERVAL:
@@ -140,6 +153,13 @@ class Command(BaseCommand):
 
         assets = Stock.objects.filter(symbol__in=price_map.keys())
         for asset in assets:
-            asset.current_price = price_map[asset.symbol]
+            price_data = price_map[asset.symbol]
+            asset.current_price = price_data['c']
+            asset.open_price = price_data['o']
+            asset.high_price = price_data['h']
+            asset.low_price = price_data['l']
+            asset.volume = price_data['v']
+            asset.price_change = price_data['p']
+            asset.percentage_change = price_data['P']
 
-        Stock.objects.bulk_update(assets, ["current_price"])
+        Stock.objects.bulk_update(assets, ["current_price", "open_price", "high_price", "low_price", "volume", "price_change", "percentage_change"])

@@ -2,7 +2,9 @@
 {% load humanize %}
 
 {% block body %}
-<section id="overview" class="w-full max-w-7xl mx-auto py-1">
+{% include 'stockmanagement/partials/charts.html' %}
+
+<section id="overview" class="w-full mx-auto py-1">
     <!-- Enhanced Header Section -->
     <div class="">
         <div class="flex items-center justify-between mb-6">
@@ -35,7 +37,7 @@
 
     {% if stocks %}
     <!-- Enhanced Stock List -->
-    <div class="bg-gray-900/40 backdrop-blur-xl border border-gray-700/30 rounded-md shadow-2xl overflow-hidden">
+    <div class="bg-gray-900/40 border-t border-gray-700/30 overflow-hidden">
         <!-- Stock Items -->
         <div class="divide-y divide-gray-800/40">
             {% for stock in stocks %}
@@ -51,7 +53,7 @@
                 data-dividend-yield="{{ stock.dividend_yield|floatformat:2 }}"
                 data-last-updated="{{ stock.last_updated|date:'Y-m-d H:i:s' }}">
 
-                <div class="flex flex-col  gap-3 sm:px-6 py-4">
+                <div class="flex flex-col  gap-3 py-4">
                     <!-- Stock Info -->
                     <div class="flex justify-between">
                         <div class="sm:col-span-4 flex items-center gap-3">
@@ -62,6 +64,17 @@
                         </div>
                         <!-- Actions -->
                         <div class="sm:col-span-4 flex justify-end gap-2">
+                            <button onclick="openChart(this.closest('.stock-item'))"
+                                class="action-btn buy-btn px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 border border-blue-500/30 text-white text-xs font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 hover:scale-105 active:scale-95 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" id="Signal-Full--Streamline-Core" height="14" width="14">
+                                    <desc>
+                                        Signal Full Streamline Icon: https://streamlinehq.com
+                                    </desc>
+                                    <g id="signal-full--phone-mobile-device-signal-wireless-smartphone-iphone-bar-bars-full-android">
+                                        <path id="Union" fill="#000000" fill-rule="evenodd" d="M13.0005 1H10.338c-0.2761 0 -0.49999 0.22386 -0.49999 0.5v12c0 0.2761 0.22389 0.5 0.49999 0.5h2.6625c0.2761 0 0.5 -0.2239 0.5 -0.5v-12c0 -0.27614 -0.2239 -0.5 -0.5 -0.5ZM3.16247 8H0.5c-0.276142 0 -0.5 0.22386 -0.5 0.5v5c0 0.2761 0.223857 0.5 0.5 0.5h2.66247c0.27615 0 0.5 -0.2239 0.5 -0.5v-5c0 -0.27614 -0.22385 -0.5 -0.5 -0.5Zm2.25678 -3h2.66248c0.27614 0 0.5 0.22386 0.5 0.5v8c0 0.2761 -0.22386 0.5 -0.5 0.5H5.41925c-0.27614 0 -0.5 -0.2239 -0.5 -0.5v-8c0 -0.27614 0.22386 -0.5 0.5 -0.5Z" clip-rule="evenodd" stroke-width="1"></path>
+                                    </g>
+                                </svg>
+                            </button>
                             <button onclick="openStockModal(this.closest('.stock-item'), 'buy')"
                                 class="action-btn buy-btn px-4 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 border border-emerald-500/30 text-white text-xs font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:scale-105 active:scale-95 flex items-center gap-2">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,11 +98,11 @@
                     <div class="sm:col-span-2 flex sm:block justify-between items-center">
                         <div class="text-gray-400 text-sm sm:hidden">Market Price</div>
                         <div class="flex space-x-4">
-                            <div class="text-white font-semibold text-sm">
+                            <div id="price-{{ stock.id }}" class="text-white font-semibold text-sm price-value">
                                 ₹{{ stock.current_price|floatformat:2|intcomma }}</div>
 
-                            {% with change=stock.get_change_percentage %}
-                            <div class="flex items-center gap-1 justify-end sm:justify-start">
+                            {% with change=stock.percentage_change %}
+                            <div id="change-{{ stock.id }}" class="flex items-center gap-1 justify-end sm:justify-start change-value">
                                 {% if change > 0 %}
                                 <svg class="w-3 h-3 text-green-400 flex-shrink-0" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -169,4 +182,114 @@
         <span id="toastMessage" class="font-semibold">Operation completed successfully!</span>
     </div>
 </div>
+
+<script>
+(function() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws/watchlist/`;
+    
+    let ws = null;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    let reconnectTimeout = null;
+
+    function connect() {
+        try {
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = function() {
+                console.log('WebSocket connected');
+                reconnectAttempts = 0;
+            };
+
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                if (data.type === 'price_update' && data.updates) {                    
+                    updatePrices(data.updates);
+                }
+            };
+
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+            };
+
+            ws.onclose = function() {
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 10000);
+                    reconnectTimeout = setTimeout(connect, delay);
+                }
+            };
+        } catch (error) {
+            console.error('Failed to connect WebSocket:', error);
+        }
+    }
+
+    function updatePrices(updates) {
+        updates.forEach(update => {
+            const stockId = update.id;
+            const priceElement = document.getElementById(`price-${stockId}`);
+            const changeElement = document.getElementById(`change-${stockId}`);
+            const stockItem = document.querySelector(`[data-stock-id="${stockId}"]`);
+            
+            if (!priceElement || !stockItem) return;
+
+            const oldPrice = parseFloat(priceElement.textContent.replace(/[₹,]/g, ''));
+            const newPrice = update.current_price;
+            const streamPercentage = update.percentage_change;
+
+            if (!oldPrice || oldPrice === 0) {
+                priceElement.textContent = `₹${newPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                return;
+            }
+
+            // 🔥 PRICE COLOR
+            priceElement.textContent = `₹${newPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            priceElement.classList.remove('text-green-400', 'text-red-400', 'text-white');
+            if (newPrice > oldPrice) priceElement.classList.add('text-green-400');
+            else if (newPrice < oldPrice) priceElement.classList.add('text-red-400');
+            else priceElement.classList.add('text-white');
+
+            // 🔥 % CHANGE FROM STREAM (not calculated on frontend)
+            if (changeElement && streamPercentage !== undefined) {
+                const isPositive = streamPercentage > 0;
+                const isNegative = streamPercentage < 0;
+                const absChange = Math.abs(streamPercentage);
+
+                changeElement.innerHTML = `
+                    ${isPositive ? `
+                        <svg class="w-3 h-3 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7" />
+                        </svg>
+                        <span class="text-green-400 font-semibold text-sm">+${absChange.toFixed(2)}%</span>
+                    ` : isNegative ? `
+                        <svg class="w-3 h-3 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <span class="text-red-400 font-medium text-xs">-${absChange.toFixed(2)}%</span>
+                    ` : `
+                        <span class="text-gray-400 font-medium text-xs">0.00%</span>
+                    `}
+                `;
+            }
+        });
+    }
+
+    connect();
+})();
+</script>
+
+<style>
+    @keyframes priceFlash {
+        0% { background-color: transparent; }
+        50% { background-color: rgba(59, 130, 246, 0.3); }
+        100% { background-color: transparent; }
+    }
+
+    .price-update-flash {
+        animation: priceFlash 0.6s ease-in-out;
+        border-radius: 4px;
+        padding: 2px 4px;
+    }
+</style>
 {% endblock %}
