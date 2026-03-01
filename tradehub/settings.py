@@ -119,7 +119,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
@@ -144,10 +144,6 @@ CHANNEL_LAYERS = {
     },
 }
 
-ALLOWED_HOSTS = [
-    "eserviceindia.in",
-    "www.eserviceindia.in"
-]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://eserviceindia.in",
@@ -158,4 +154,3 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
-

@@ -58,10 +58,7 @@ class WatchlistConsumer(AsyncWebsocketConsumer):
                 'close_price': float(stock.close_price),
                 'price_change': float(stock.price_change),
                 'percentage_change': float(stock.percentage_change),
-                'volume': stock.volume,
-                'market_cap': float(stock.market_cap),
-                'pe_ratio': float(stock.pe_ratio),
-                'dividend_yield': float(stock.dividend_yield),
+                'volume': float(stock.quote_volume_24h),
                 'last_updated': stock.last_updated.isoformat() if stock.last_updated else None,
             }
             for stock in stocks
@@ -107,7 +104,7 @@ class WatchlistConsumer(AsyncWebsocketConsumer):
                     }))
                 
                 # Wait before next poll (poll every 1 second for real-time feel)
-                await asyncio.sleep(1)
+                await asyncio.sleep(0.5)
                 
             except asyncio.CancelledError:
                 break

@@ -4,6 +4,8 @@ from decimal import Decimal
 class Stock(models.Model):
     """Stock master table"""
     symbol = models.CharField(max_length=15, unique=True, db_index=True)
+    base_asset = models.CharField(max_length=10, null=True, blank=True)
+    quote_asset = models.CharField(max_length=10, null=True, blank=True)
     name = models.CharField(max_length=150)
 
     # Price-related fields
@@ -11,16 +13,17 @@ class Stock(models.Model):
     high_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
     low_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
     close_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
-    current_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
-    
+    current_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'), verbose_name="Last Price")
+
+    bid_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    ask_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+
+    high_24h = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    low_24h = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    quote_volume_24h = models.DecimalField(max_digits=20, decimal_places=2, default=Decimal('0.00'))
+
     price_change = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
     percentage_change = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
-
-    # Additional stock metrics
-    volume = models.BigIntegerField(default=0)
-    market_cap = models.DecimalField(max_digits=20, decimal_places=2, default=Decimal('0.00'))
-    pe_ratio = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal('0.00'))
-    dividend_yield = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.00'))
 
     last_updated = models.DateTimeField(auto_now=True)
 

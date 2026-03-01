@@ -1,134 +1,177 @@
+# admin.py
 from django.contrib import admin
 from django.utils.html import format_html
+from django.db.models import F, ExpressionWrapper, DecimalField
 from .models import Stock
-from decimal import Decimal, InvalidOperation
 
 
 @admin.register(Stock)
 class StockAdmin(admin.ModelAdmin):
-    """Elegant Django admin for Stock with safe formatting and visuals."""
+    """
+    Premium Professional Admin Configuration for Stock Model
+    Optimized for performance, readability, and real-time monitoring
+    """
 
+    # =========================
+    # LIST VIEW CONFIGURATION
+    # =========================
     list_display = (
-        'symbol', 'name',
-        'formatted_current_price', 'formatted_open_price',
-        'formatted_high_price', 'formatted_low_price',
-        'price_change_colored', 'formatted_price_change', 'formatted_percentage_change',
-        'formatted_market_cap', 'formatted_pe_ratio', 'formatted_dividend_yield',
-        'formatted_volume', 'last_updated'
+        "symbol",
+        "name",
+        "base_asset",
+        "quote_asset",
+        "colored_current_price",
+        "colored_price_change",
+        "colored_percentage_change",
+        "bid_price",
+        "ask_price",
+        "last_updated",
     )
-    list_display_links = ('symbol', 'name')
-    search_fields = ('symbol', 'name')
-    list_filter = ('last_updated',)
-    ordering = ('symbol',)
-    readonly_fields = ("last_updated",)
 
+    list_display_links = ("symbol", "name")
+
+    list_filter = (
+        "base_asset",
+        "quote_asset",
+        "last_updated",
+    )
+
+    search_fields = (
+        "symbol",
+        "name",
+        "base_asset",
+        "quote_asset",
+    )
+
+    ordering = ("symbol",)
+
+    list_per_page = 50
+
+    date_hierarchy = "last_updated"
+
+    # =========================
+    # READONLY FIELDS
+    # =========================
+    readonly_fields = (
+        "last_updated",
+        "colored_percentage_change",
+        "colored_price_change",
+        "daily_range_display",
+        "spread_display",
+    )
+
+    # =========================
+    # FIELDSETS (PREMIUM LAYOUT)
+    # =========================
     fieldsets = (
-        ("Basic Info", {"fields": ("symbol", "name")}),
-        ("Price Details", {
+
+        ("Basic Information", {
             "fields": (
-                "open_price", "high_price", "low_price",
-                "close_price", "current_price"
-            )
+                "symbol",
+                "name",
+                ("base_asset", "quote_asset"),
+            ),
         }),
-        ("Stock Metrics", {
+
+        ("Price Information", {
             "fields": (
-                "volume", "market_cap", "pe_ratio", "dividend_yield"
-            )
+                ("current_price", "open_price"),
+                ("high_price", "low_price"),
+                ("high_24h", "low_24h"),
+            ),
         }),
-        ("Change Metrics", {
+
+        ("Market Data", {
             "fields": (
-                "price_change", "percentage_change"
-            )
+                ("bid_price", "ask_price"),
+                "spread_display",
+                ("quote_volume_24h",),
+            ),
         }),
-        ("System Info", {"fields": ("last_updated",)}),
+
+        ("Change Statistics", {
+            "fields": (
+                "price_change",
+                "colored_price_change",
+                "percentage_change",
+                "colored_percentage_change",
+                "daily_range_display",
+            ),
+        }),
+
+        ("System Information", {
+            "fields": ("last_updated",),
+        }),
+
     )
 
-    # =============== SAFE HELPER ===============
+    # =========================
+    # PERFORMANCE OPTIMIZATION
+    # =========================
+    list_select_related = ()
 
-    def as_decimal(self, value):
-        """Safely convert a value to Decimal, returning 0.00 if invalid."""
-        try:
-            if isinstance(value, (float, int, Decimal)):
-                return Decimal(str(value))
-            return Decimal(str(value).replace(',', ''))
-        except (InvalidOperation, TypeError, ValueError):
-            return Decimal('0.00')
+    # =========================
+    # CUSTOM DISPLAY METHODS
+    # =========================
 
-    # =============== FORMATTED DISPLAY FIELDS ===============
-
-    def formatted_current_price(self, obj):
-        value = self.as_decimal(obj.current_price)
-        return format_html(f'<b style="color:#22c55e;">₹{value:,.2f}</b>')
-    formatted_current_price.short_description = "Current Price"
-
-    def formatted_open_price(self, obj):
-        value = self.as_decimal(obj.open_price)
-        return f"₹{value:,.2f}"
-    formatted_open_price.short_description = "Open"
-
-    def formatted_high_price(self, obj):
-        value = self.as_decimal(obj.high_price)
-        return f"₹{value:,.2f}"
-    formatted_high_price.short_description = "High"
-
-    def formatted_low_price(self, obj):
-        value = self.as_decimal(obj.low_price)
-        return f"₹{value:,.2f}"
-    formatted_low_price.short_description = "Low"
-
-    def formatted_market_cap(self, obj):
-        value = self.as_decimal(obj.market_cap)
-        return f"₹{value:,.2f}"
-    formatted_market_cap.short_description = "Market Cap"
-
-    def formatted_volume(self, obj):
-        try:
-            return f"{int(obj.volume):,}"
-        except (ValueError, TypeError):
-            return "—"
-    formatted_volume.short_description = "Volume"
-
-    def formatted_pe_ratio(self, obj):
-        value = self.as_decimal(obj.pe_ratio)
-        return f"{value:.2f}"
-    formatted_pe_ratio.short_description = "P/E"
-
-    def formatted_dividend_yield(self, obj):
-        value = self.as_decimal(obj.dividend_yield)
-        return f"{value:.2f}%"
-    formatted_dividend_yield.short_description = "Dividend Yield"
-
-    def formatted_price_change(self, obj):
-        value = self.as_decimal(obj.price_change)
-        color = "#22c55e" if value > 0 else "#ef4444" if value < 0 else "#6b7280"
-        arrow = "▲" if value > 0 else "▼" if value < 0 else "◆"
+    def colored_current_price(self, obj):
+        """Premium styled current price"""
+        color = "#16a34a" if obj.is_price_positive else "#dc2626"
         return format_html(
-            f'<span style="color:{color}; font-weight:600;">{arrow} ₹{abs(value):,.2f}</span>'
+            '<strong style="color:{}; font-size:14px;">{}</strong>',
+            color,
+            obj.current_price
         )
-    formatted_price_change.short_description = "Price Change"
+    colored_current_price.short_description = "Last Price"
+    colored_current_price.admin_order_field = "current_price"
 
-    def formatted_percentage_change(self, obj):
-        value = self.as_decimal(obj.percentage_change)
-        color = "#22c55e" if value > 0 else "#ef4444" if value < 0 else "#6b7280"
-        arrow = "▲" if value > 0 else "▼" if value < 0 else "◆"
+    def colored_price_change(self, obj):
+        """Color coded price change"""
+        color = "#16a34a" if obj.price_change >= 0 else "#dc2626"
+        sign = "+" if obj.price_change >= 0 else ""
         return format_html(
-            f'<span style="color:{color}; font-weight:600;">{arrow} {abs(value):.2f}%</span>'
+            '<strong style="color:{};">{}{}</strong>',
+            color,
+            sign,
+            obj.price_change
         )
-    formatted_percentage_change.short_description = "% Change"
+    colored_price_change.short_description = "Price Change"
+    colored_price_change.admin_order_field = "price_change"
 
-    def price_change_colored(self, obj):
-        """Show colored percentage change (green/red) from the model property."""
-        change = obj.get_change_percentage or Decimal('0.00')
-        color = "#22c55e" if change > 0 else "#ef4444"
-        arrow = "▲" if change > 0 else "▼"
+    def colored_percentage_change(self, obj):
+        """Color coded percentage change"""
+        percent = obj.get_change_percentage
+        color = "#16a34a" if percent >= 0 else "#dc2626"
+        sign = "+" if percent >= 0 else ""
+
         return format_html(
-            f'<span style="color:{color}; font-weight:600;">{arrow} {change}%</span>'
+            '<strong style="color:{};">{}{}%</strong>',
+            color,
+            sign,
+            percent
         )
-    price_change_colored.short_description = "Change (Prop)"
+    colored_percentage_change.short_description = "% Change"
 
-    class Media:
-        css = {
-            'all': (
-                'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css',
-            )
-        }
+    def daily_range_display(self, obj):
+        """Display daily range professionally"""
+        return format_html(
+            '<span style="font-weight:500;">{}</span>',
+            obj.get_daily_range
+        )
+    daily_range_display.short_description = "Daily Range"
+
+    def spread_display(self, obj):
+        """Display bid-ask spread"""
+        spread = obj.ask_price - obj.bid_price
+        return format_html(
+            '<span style="color:#2563eb; font-weight:500;">{}</span>',
+            spread
+        )
+    spread_display.short_description = "Spread"
+
+    # =========================
+    # ADMIN HEADER IMPROVEMENTS
+    # =========================
+    def get_queryset(self, request):
+        """Optimized queryset"""
+        return super().get_queryset(request)
