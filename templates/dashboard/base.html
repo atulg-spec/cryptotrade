@@ -120,3 +120,56 @@
 
 </body>
 </html>
+
+<script>
+// Shared WebSocket helper for live price streaming
+(function () {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const priceWsUrl = `${protocol}//${window.location.host}/ws/watchlist/`;
+    const eventsWsUrl = `${protocol}//${window.location.host}/ws/user-events/`;
+
+    function createSocket(url, onMessage) {
+        let ws;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+
+        function connect() {
+            ws = new WebSocket(url);
+            ws.onopen = () => {
+                reconnectAttempts = 0;
+            };
+            ws.onmessage = (event) => {
+                if (typeof onMessage === 'function') {
+                    onMessage(event);
+                }
+            };
+            ws.onclose = () => {
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 10000);
+                    setTimeout(connect, delay);
+                }
+            };
+        }
+
+        connect();
+    }
+
+    window.TradehubStreams = {
+        connectPrices: function (handler) {
+            createSocket(priceWsUrl, function (event) {
+                const data = JSON.parse(event.data);
+                if (data.type === 'price_update' && Array.isArray(data.updates)) {
+                    handler(data.updates);
+                }
+            });
+        },
+        connectUserEvents: function (handler) {
+            createSocket(eventsWsUrl, function (event) {
+                const data = JSON.parse(event.data);
+                handler(data);
+            });
+        },
+    };
+})();
+</script>

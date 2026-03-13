@@ -29,7 +29,9 @@
                 <div class="flex items-center justify-between">
                     <div class="w-full">
                         <p class="text-gray-400 text-sm mb-2 text-center">Total Investment</p>
-                        <p class="text-white font-bold text-1xl text-center">
+                        <p class="text-white font-bold text-1xl text-center"
+                           data-portfolio-total-investment
+                           data-base-value="{{ total_investment|floatformat:2 }}">
                             ₹ {{ total_investment|floatformat:2|intcomma }}
                         </p>
                     </div>
@@ -41,7 +43,8 @@
                 <div class="flex items-center justify-between">
                     <div class="w-full">
                         <p class="text-gray-400 text-sm mb-2 text-center">Current Value</p>
-                        <p class="{% if current_value > total_investment %}text-green-500{% else %}text-red-500{% endif %} font-bold text-1xl text-center">
+                        <p class="{% if current_value > total_investment %}text-green-500{% else %}text-red-500{% endif %} font-bold text-1xl text-center"
+                           data-portfolio-current-value>
                             ₹ {{ current_value|floatformat:2|intcomma }}
                         </p>
                     </div>
@@ -81,7 +84,11 @@
                             </thead>
                             <tbody>
                                 {% for symbol, summary in position_summary.items %}
-                                <tr class="border-b border-gray-700/10 hover:bg-gray-800/20 transition-colors">
+                                <tr class="border-b border-gray-700/10 hover:bg-gray-800/20 transition-colors"
+                                    data-portfolio-row
+                                    data-symbol="{{ summary.stock.symbol }}"
+                                    data-qty="{{ summary.total_quantity }}"
+                                    data-avg-buy="{{ summary.avg_buy_price|floatformat:4 }}">
                                     <td class="py-4 px-4">
                                         <div class="flex items-center gap-3">
                                             <div class="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
@@ -100,14 +107,16 @@
                                         <p class="text-white font-medium">₹{{ summary.avg_buy_price|floatformat:2 }}</p>
                                     </td>
                                     <td class="py-4 px-4 text-right">
-                                        <p class="text-white font-medium">₹{{ summary.current_value|floatformat:2 }}</p>
+                                        <p class="text-white font-medium" data-cell="current_value">₹{{ summary.current_value|floatformat:2 }}</p>
                                     </td>
                                     <td class="py-4 px-4 text-right">
                                         <div class="flex flex-col items-end">
-                                            <p class="font-medium {% if summary.unrealised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
+                                            <p class="font-medium {% if summary.unrealised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %}"
+                                               data-cell="unrealised_pnl">
                                                 ₹{{ summary.unrealised_pnl|floatformat:2 }}
                                             </p>
-                                            <p class="text-xs {% if summary.unrealised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
+                                            <p class="text-xs {% if summary.unrealised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %}"
+                                               data-cell="pnl_percentage">
                                                 {{ summary.pnl_percentage|floatformat:2 }}%
                                             </p>
                                         </div>
@@ -263,5 +272,63 @@
             });
         });
     });
+</script>
+<script>
+// Live portfolio recalculation from WebSocket price stream
+document.addEventListener('DOMContentLoaded', function () {
+    if (!window.TradehubStreams || !window.TradehubStreams.connectPrices) return;
+
+    const totalInvestmentEl = document.querySelector('[data-portfolio-total-investment]');
+    const currentValueEl = document.querySelector('[data-portfolio-current-value]');
+
+    const baseInvestment = totalInvestmentEl
+        ? parseFloat(totalInvestmentEl.getAttribute('data-base-value') || '0')
+        : 0;
+
+    const rows = document.querySelectorAll('tr[data-portfolio-row]');
+    const holdings = {};
+    rows.forEach(row => {
+        const symbol = row.getAttribute('data-symbol');
+        const qty = parseFloat(row.getAttribute('data-qty') || '0');
+        const avgBuy = parseFloat(row.getAttribute('data-avg-buy') || '0');
+        if (!symbol || !qty) return;
+        holdings[symbol] = { qty, avgBuy, row };
+    });
+
+    TradehubStreams.connectPrices(function (updates) {
+        let totalCurrentValue = 0;
+
+        updates.forEach(update => {
+            const h = holdings[update.symbol];
+            if (!h) return;
+
+            const currentValue = h.qty * update.current_price;
+            const cost = h.qty * h.avgBuy;
+            const unrealised = currentValue - cost;
+            totalCurrentValue += currentValue;
+
+            const currentCell = h.row.querySelector('[data-cell="current_value"]');
+            const pnlCell = h.row.querySelector('[data-cell="unrealised_pnl"]');
+            const pctCell = h.row.querySelector('[data-cell="pnl_percentage"]');
+
+            if (currentCell) currentCell.textContent = `₹${currentValue.toFixed(2)}`;
+            if (pnlCell) {
+                pnlCell.textContent = `₹${unrealised.toFixed(2)}`;
+                pnlCell.classList.toggle('text-green-400', unrealised >= 0);
+                pnlCell.classList.toggle('text-red-400', unrealised < 0);
+            }
+            if (pctCell && cost > 0) {
+                const pct = (unrealised / cost) * 100;
+                pctCell.textContent = `${pct.toFixed(2)}%`;
+            }
+        });
+
+        if (currentValueEl && totalCurrentValue > 0) {
+            currentValueEl.textContent = `₹ ${totalCurrentValue.toFixed(2)}`;
+            currentValueEl.classList.toggle('text-green-500', totalCurrentValue > baseInvestment);
+            currentValueEl.classList.toggle('text-red-500', totalCurrentValue <= baseInvestment);
+        }
+    });
+});
 </script>
 {% endblock %}
