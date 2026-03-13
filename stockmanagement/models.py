@@ -10,21 +10,21 @@ class Stock(models.Model):
     exchange = models.CharField(max_length=10, null=True, blank=True)
 
     # Price-related fields
-    open_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
-    high_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
-    low_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
-    close_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
-    current_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'), verbose_name="Last Price")
+    open_price = models.DecimalField(max_digits=12, decimal_places=5, default=Decimal('0.00'))
+    high_price = models.DecimalField(max_digits=12, decimal_places=5, default=Decimal('0.00'))
+    low_price = models.DecimalField(max_digits=12, decimal_places=5, default=Decimal('0.00'))
+    close_price = models.DecimalField(max_digits=12, decimal_places=5, default=Decimal('0.00'))
+    current_price = models.DecimalField(max_digits=12, decimal_places=5, default=Decimal('0.00'), verbose_name="Last Price")
 
-    bid_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
-    ask_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    bid_price = models.DecimalField(max_digits=12, decimal_places=5, default=Decimal('0.00'))
+    ask_price = models.DecimalField(max_digits=12, decimal_places=5, default=Decimal('0.00'))
 
-    high_24h = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
-    low_24h = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
-    quote_volume_24h = models.DecimalField(max_digits=20, decimal_places=2, default=Decimal('0.00'))
+    high_24h = models.DecimalField(max_digits=12, decimal_places=5, default=Decimal('0.00'))
+    low_24h = models.DecimalField(max_digits=12, decimal_places=5, default=Decimal('0.00'))
+    quote_volume_24h = models.DecimalField(max_digits=20, decimal_places=5, default=Decimal('0.00'))
 
-    price_change = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
-    percentage_change = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    price_change = models.DecimalField(max_digits=12, decimal_places=5, default=Decimal('0.00'))
+    percentage_change = models.DecimalField(max_digits=12, decimal_places=5, default=Decimal('0.00'))
 
     last_updated = models.DateTimeField(auto_now=True)
 

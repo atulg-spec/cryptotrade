@@ -9,7 +9,7 @@ from django.utils import timezone
 from datetime import timedelta
 from .models import order as Order
 from .models import Position
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse
@@ -97,20 +97,46 @@ def initiate_order(request):
 
     symbol = (request.POST.get("symbol") or "").strip().upper()
     order_type = (request.POST.get("order_type") or "BUY").upper()
-    quantity_raw = request.POST.get("quantity")
-
-    try:
-        quantity = int(quantity_raw)
-        if quantity <= 0:
-            raise ValueError
-    except (TypeError, ValueError):
-        return _order_response(request, False, "Please enter a valid quantity.", is_ajax)
 
     stock = Stock.objects.filter(symbol=symbol).first()
     if not stock:
         return _order_response(request, False, "Selected stock could not be found.", is_ajax)
 
-    status, response = place_order(request.user, stock, quantity, order_type)
+    # BUY: primary input is investment amount (value-based trading)
+    # SELL: primary input is quantity (supports fractional lots)
+    amount_raw = request.POST.get("amount")
+    quantity_raw = request.POST.get("quantity")
+
+    try:
+        if order_type == "BUY":
+            amount = Decimal(str(amount_raw))
+            if amount <= 0:
+                raise InvalidOperation
+
+            price = stock.current_price or Decimal("0")
+            if price <= 0:
+                return _order_response(
+                    request,
+                    False,
+                    "Unable to place order. Invalid stock price.",
+                    is_ajax,
+                )
+
+            quantity = amount / price
+        else:
+            quantity = Decimal(str(quantity_raw))
+            if quantity <= 0:
+                raise InvalidOperation
+            amount = None  # derived inside place_order
+    except (InvalidOperation, TypeError):
+        error_msg = (
+            "Please enter a valid investment amount."
+            if order_type == "BUY"
+            else "Please enter a valid quantity."
+        )
+        return _order_response(request, False, error_msg, is_ajax)
+
+    status, response = place_order(request.user, stock, quantity, order_type, amount=amount)
     return _order_response(request, status, response, is_ajax)
     
 
@@ -212,8 +238,8 @@ def close_position(request):
     quantity_raw = request.POST.get('quantity')
 
     try:
-        quantity = int(quantity_raw)
-    except (TypeError, ValueError):
+        quantity = Decimal(str(quantity_raw))
+    except (TypeError, InvalidOperation):
         messages.error(request, 'Unable to close the position. Invalid quantity provided.')
         return redirect('portfolio')
 

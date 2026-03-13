@@ -75,22 +75,42 @@
 
                     <!-- Order Form -->
                     <div class="space-y-4">
+                        <!-- Investment Amount (value-based) -->
                         <div>
-                            <label class="block text-gray-400 text-sm font-medium mb-3">Quantity</label>
+                            <label class="block text-gray-400 text-sm font-medium mb-2">Investment Amount</label>
                             <div class="relative">
-                                <input type="number" id="quantity" min="1" value="1"
+                                <input type="number" id="investmentAmount" min="0.01" step="0.01" value=""
+                                    class="w-full bg-gray-700/50 border border-gray-600/30 rounded-lg px-4 py-2 text-lg text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200"
+                                    placeholder="Enter amount to invest">
+                                <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
+                                    ₹
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">
+                                For buy orders, quantity will be calculated as <span class="font-semibold">amount ÷ price</span>.
+                            </p>
+                        </div>
+
+                        <!-- Fractional Quantity / Lot Size -->
+                        <div>
+                            <label class="block text-gray-400 text-sm font-medium mb-2">Quantity (Lots)</label>
+                            <div class="relative">
+                                <input type="number" id="quantity" min="0.01" step="0.01" value="1"
                                     class="w-full bg-gray-700/50 border border-gray-600/30 rounded-lg px-4 py-2 text-lg text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200">
                                 <div class="absolute right-3 top-1/2 transform -translate-y-1/2 flex gap-1">
-                                    <button onclick="adjustQuantity(5)"
-                                        class="w-8 h-8 bg-gray-600 hover:bg-gray-500 rounded-lg flex items-center justify-center text-gray-300 transition-colors">
-                                        +5
+                                    <button onclick="adjustQuantity(0.25)"
+                                        class="w-9 h-8 bg-gray-600 hover:bg-gray-500 rounded-lg flex items-center justify-center text-gray-300 text-xs transition-colors">
+                                        +0.25
                                     </button>
-                                    <button onclick="adjustQuantity(10)"
-                                        class="w-8 h-8 bg-gray-600 hover:bg-gray-500 rounded-lg flex items-center justify-center text-gray-300 transition-colors">
-                                        +10
+                                    <button onclick="adjustQuantity(0.5)"
+                                        class="w-9 h-8 bg-gray-600 hover:bg-gray-500 rounded-lg flex items-center justify-center text-gray-300 text-xs transition-colors">
+                                        +0.5
                                     </button>
                                 </div>
                             </div>
+                            <p class="text-xs text-gray-500 mt-1">
+                                You can enter fractional quantities like <span class="font-semibold">0.25, 0.5, 0.75</span>.
+                            </p>
                         </div>
 
                         <!-- Order Summary -->
@@ -247,7 +267,14 @@
 
         // Update order content
         document.getElementById('modalCurrentPrice').textContent = `₹${currentStockData.currentPrice.toFixed(2)}`;
-        updateOrderSummary();
+        // Initialize quantity and amount summary using the new fractional logic
+        const qtyInput = document.getElementById('quantity');
+        if (qtyInput) {
+            qtyInput.value = '1.00';
+        }
+        if (typeof syncFromQuantity === 'function') {
+            syncFromQuantity();
+        }
 
         // Update analyse content
         updateAnalysisContent();
@@ -321,16 +348,53 @@
 
     function adjustQuantity(amount) {
         const quantityInput = document.getElementById('quantity');
-        const currentValue = parseInt(quantityInput.value) || 0;
-        quantityInput.value = Math.max(1, currentValue + amount);
-        updateOrderSummary();
+        const currentValue = parseFloat(quantityInput.value) || 0;
+        const newValue = Math.max(0.01, currentValue + amount);
+        quantityInput.value = newValue.toFixed(2);
+        syncFromQuantity();
     }
 
-    function updateOrderSummary() {
+    function syncFromAmount() {
+        if (!currentStockData) return;
+        const amountInput = document.getElementById('investmentAmount');
+        const quantityInput = document.getElementById('quantity');
+
+        const amount = parseFloat(amountInput.value) || 0;
+        const price = currentStockData.currentPrice || 0;
+        const quantity = price > 0 ? amount / price : 0;
+
+        if (!isNaN(quantity) && quantity > 0) {
+            quantityInput.value = quantity.toFixed(4);
+        }
+
+        updateOrderSummaryDisplay(amount);
+    }
+
+    function syncFromQuantity() {
+        if (!currentStockData) return;
+        const amountInput = document.getElementById('investmentAmount');
+        const quantityInput = document.getElementById('quantity');
+
+        const quantity = parseFloat(quantityInput.value) || 0;
+        const price = currentStockData.currentPrice || 0;
+        const amount = quantity * price;
+
+        if (!isNaN(amount) && amount > 0) {
+            amountInput.value = amount.toFixed(2);
+        }
+
+        updateOrderSummaryDisplay(amount);
+    }
+
+    function updateOrderSummaryDisplay(amountOverride = null) {
         if (!currentStockData) return;
 
-        const quantity = parseInt(document.getElementById('quantity').value) || 1;
-        const estimatedCost = quantity * currentStockData.currentPrice;
+        const amountInput = document.getElementById('investmentAmount');
+        const effectiveAmount = amountOverride !== null
+            ? amountOverride
+            : (parseFloat(amountInput.value) || 0);
+
+        const estimatedCost = effectiveAmount;
         const totalAmount = estimatedCost;
 
         document.getElementById('estimatedCost').textContent = `₹${estimatedCost.toFixed(2)}`;
@@ -403,18 +467,34 @@
     async function placeOrder() {
         if (!currentStockData || isPlacingOrder) return;
 
-        const quantity = parseInt(document.getElementById('quantity').value, 10) || 0;
-        if (quantity <= 0) {
+        const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+        const investmentAmount = parseFloat(document.getElementById('investmentAmount').value) || 0;
+
+        if (currentAction === 'buy' && investmentAmount <= 0) {
+            showToast('Please enter a valid investment amount.', 'error');
+            return;
+        }
+
+        if (currentAction === 'sell' && quantity <= 0) {
             showToast('Please enter a valid quantity.', 'error');
             return;
         }
 
         const orderType = currentAction === 'buy' ? 'BUY' : 'SELL';
-        const payload = new URLSearchParams({
+        const payloadData = {
             symbol: currentStockData.symbol,
-            quantity: quantity,
             order_type: orderType,
-        });
+        };
+
+        if (orderType === 'BUY') {
+            payloadData['amount'] = investmentAmount;
+            // quantity will be derived on backend; we still send for transparency
+            payloadData['quantity'] = quantity;
+        } else {
+            payloadData['quantity'] = quantity;
+        }
+
+        const payload = new URLSearchParams(payloadData);
 
         setOrderButtonState(true);
 
@@ -525,8 +605,9 @@
         document.getElementById('sellTab').addEventListener('click', () => switchTab('sell'));
         document.getElementById('analyseTab').addEventListener('click', () => switchTab('analyse'));
 
-        // Quantity input changes
-        document.getElementById('quantity').addEventListener('input', updateOrderSummary);
+        // Amount & Quantity input changes (bidirectional sync)
+        document.getElementById('investmentAmount').addEventListener('input', syncFromAmount);
+        document.getElementById('quantity').addEventListener('input', syncFromQuantity);
 
         // Order action button
         document.getElementById('orderActionBtn').addEventListener('click', placeOrder);
