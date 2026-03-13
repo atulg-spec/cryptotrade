@@ -65,3 +65,20 @@ class PromoCode(models.Model):
 
     def __str__(self):
         return f"{self.promo_code}"
+
+
+
+class APISettings(models.Model):
+    api_name = models.CharField(max_length=150)
+    api_key = models.CharField(max_length=255)
+    secret_key = models.CharField(max_length=255)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "API Setting"
+        verbose_name_plural = "API Settings"
+
+    def __str__(self):
+        return self.api_name

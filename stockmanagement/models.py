@@ -7,6 +7,7 @@ class Stock(models.Model):
     base_asset = models.CharField(max_length=10, null=True, blank=True)
     quote_asset = models.CharField(max_length=10, null=True, blank=True)
     name = models.CharField(max_length=150)
+    exchange = models.CharField(max_length=10, null=True, blank=True)
 
     # Price-related fields
     open_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))

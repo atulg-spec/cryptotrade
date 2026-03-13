@@ -7,7 +7,50 @@ admin.site.unregister(Group)
 
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import SiteSettings, PromoCode
+from .models import SiteSettings, PromoCode, APISettings
+
+
+@admin.register(APISettings)
+class APISettingsAdmin(admin.ModelAdmin):
+    
+    list_display = (
+        "api_name",
+        "short_api_key",
+        "masked_secret_key",
+        "created_at",
+        "updated_at",
+    )
+
+    search_fields = ("api_name", "api_key")
+    
+    list_filter = ("created_at", "updated_at")
+
+    ordering = ("api_name",)
+
+    readonly_fields = ("created_at", "updated_at")
+
+    fieldsets = (
+        ("API Information", {
+            "fields": ("api_name",)
+        }),
+        ("Authentication", {
+            "fields": ("api_key", "secret_key")
+        }),
+        ("Metadata", {
+            "fields": ("created_at", "updated_at"),
+            "classes": ("collapse",)
+        }),
+    )
+
+    def short_api_key(self, obj):
+        return obj.api_key[:8] + "..." if obj.api_key else "-"
+    short_api_key.short_description = "API Key"
+
+    def masked_secret_key(self, obj):
+        return "********"
+    masked_secret_key.short_description = "Secret Key"
+
+
 
 
 @admin.register(SiteSettings)
@@ -83,9 +126,6 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         if SiteSettings.objects.exists():
             return False
         return True
-
-from django.contrib import admin
-from .models import PromoCode
 
 
 @admin.register(PromoCode)

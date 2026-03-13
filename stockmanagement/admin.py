@@ -20,6 +20,7 @@ class StockAdmin(admin.ModelAdmin):
         "name",
         "base_asset",
         "quote_asset",
+        "exchange",
         "colored_current_price",
         "colored_price_change",
         "colored_percentage_change",
@@ -32,6 +33,7 @@ class StockAdmin(admin.ModelAdmin):
 
     list_filter = (
         "base_asset",
+        "exchange",
         "quote_asset",
         "last_updated",
     )
@@ -41,6 +43,7 @@ class StockAdmin(admin.ModelAdmin):
         "name",
         "base_asset",
         "quote_asset",
+        "exchange",
     )
 
     ordering = ("symbol",)
@@ -69,7 +72,7 @@ class StockAdmin(admin.ModelAdmin):
             "fields": (
                 "symbol",
                 "name",
-                ("base_asset", "quote_asset"),
+                ("base_asset", "quote_asset", "exchange"),
             ),
         }),
 
