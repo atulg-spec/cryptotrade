@@ -1,11 +1,11 @@
 <!-- Bottom Navbar -->
 <nav class="fixed bottom-0 left-0 right-0 z-40 bg-gray-900 border-t border-gray-800 shadow-lg md:hidden">
     <ul class="flex justify-around items-center h-16 text-gray-400 text-sm">
-
+        
         <!-- Home -->
         <li>
-            <a href="{% url 'dashboard' %}"
-                class="flex flex-col items-center {% if request.path == '/dashboard/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
+            <a href="{% url 'dashboard' %}" 
+               class="flex flex-col items-center {% if request.path == '/dashboard/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -17,8 +17,8 @@
 
         <!-- Watchlist -->
         <li>
-            <a href="{% url 'watchlist' %}"
-                class="flex flex-col items-center {% if request.path == '/stock/watchlist/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
+            <a href="{% url 'watchlist' %}" 
+               class="flex flex-col items-center {% if request.path == '/stock/watchlist/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                     <path d="m12 3 8 4.5 0 9 -8 4.5 -8 -4.5 0 -9L12 3" stroke-width="2"></path>
@@ -32,8 +32,8 @@
 
         <!-- Orders -->
         <li>
-            <a href="{% url 'orders' %}"
-                class="flex flex-col items-center {% if request.path == '/assets/orders/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
+            <a href="{% url 'orders' %}" 
+               class="flex flex-col items-center {% if request.path == '/assets/orders/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-1" fill="none" viewBox="0 0 14 14">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                         d="M7 5.5c3.5899 0 6.5 -1.11929 6.5 -2.5S10.5899 0.5 7 0.5C3.41015 0.5 0.5 1.61929 0.5 3S3.41015 5.5 7 5.5Z"
@@ -49,8 +49,8 @@
 
         <!-- Portfolio -->
         <li>
-            <a href="{% url 'portfolio' %}"
-                class="flex flex-col items-center {% if request.path == '/assets/portfolio/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
+            <a href="{% url 'portfolio' %}" 
+               class="flex flex-col items-center {% if request.path == '/assets/portfolio/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" height="24" width="24">
                     <path fill="currentColor"
                         d="M5 19h16v2H4c-0.55228 0 -1 -0.4477 -1 -1V3h2zM21 8.91406l-5.5 5.50004 -4-4 -4.5 4.5v-2.8282l4.5 -4.49996 4 3.99996L21 6.08594z" />
@@ -61,8 +61,8 @@
 
         <!-- Profile -->
         <li>
-            <a href="{% url 'profile' %}"
-                class="flex flex-col items-center {% if request.path == '/accounts/profile/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
+            <a href="{% url 'profile' %}" 
+               class="flex flex-col items-center {% if request.path == '/accounts/profile/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

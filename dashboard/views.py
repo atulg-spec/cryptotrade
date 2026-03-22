@@ -6,12 +6,17 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import PromoCode
-from assets.models import Position
+from assets.models import Position, order as Order, Watchlist
 from stockmanagement.models import Stock
 from django.core.serializers.json import DjangoJSONEncoder
 
 @login_required(login_url='login')
 def dashboard(request):
+    watchlist_items = Watchlist.objects.filter(user=request.user).select_related('stock')
+    favorites = []
+    for item in watchlist_items:
+        item.stock.is_favorite = True
+        favorites.append(item.stock)
     positions = Position.objects.filter(user=request.user).select_related('stock')
     open_positions = Position.objects.filter(user=request.user, is_closed=False)
     portfolio_value = Decimal('0')
@@ -31,7 +36,16 @@ def dashboard(request):
         portfolio_purchased_value += Decimal(str(position.buy_price)) * Decimal(position.quantity)
 
     unrealised_pnl = float(portfolio_value - portfolio_purchased_value) if open_positions else 0
+    total_equity = float(request.user.wallet) + float(portfolio_value)
+    invested_amount = float(portfolio_purchased_value)
+    today_pnl = float(unrealised_pnl)
+    daily_return_pct = (today_pnl / invested_amount * 100) if invested_amount > 0 else 0
+    pnl_history_data = [] 
+    pnl_history_labels = []
+    recent_orders = Order.objects.filter(user=request.user).order_by('-created_at')[:50]
+
     context = {
+        'favorites': favorites,
         'portfolio_value': portfolio_value,
         'positions': positions,
         'unrealised_pnl': unrealised_pnl,
@@ -39,9 +53,22 @@ def dashboard(request):
         'open_positions': open_positions,
         'chart_data': chart_data,
         'chart_data_json': chart_data_json,
+        'wallet': request.user.wallet,
+        'total_equity': total_equity,
+        'invested_amount': invested_amount,
+        'today_pnl': today_pnl,
+        'daily_return_pct': daily_return_pct,
+        'pnl_history_data': json.dumps(pnl_history_data, cls=DjangoJSONEncoder),
+        'pnl_history_labels': json.dumps(pnl_history_labels, cls=DjangoJSONEncoder),
+        'recent_orders': recent_orders,
     }
 
-    return render(request, "dashboard/dashboard.html", context)
+    user_agent = request.META.get('HTTP_USER_AGENT', '').lower()
+    is_mobile = any(keyword in user_agent for keyword in ['mobile', 'android', 'iphone', 'ipad', 'webos', 'opera mini', 'iemobile'])
+    
+    template_name = "dashboard/dashboard_mobile.html" if is_mobile else "dashboard/dashboard_desktop.html"
+    
+    return render(request, template_name, context)
 
 
 @csrf_exempt

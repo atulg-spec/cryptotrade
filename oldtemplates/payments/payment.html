@@ -1,0 +1,97 @@
+{% extends 'dashboard/base.html' %}
+{% block body %}
+<div class="min-h-screen bg-gray-900/95 backdrop-blur-md">
+    <!-- Main Content -->
+    <div class="w-full mx-auto lg:px-8 pb-24">
+        <div class="bg-gray-800 text-white rounded-xl shadow-lg overflow-hidden border border-gray-900">
+            <div class="px-6 py-4 border-b border-gray-900 bg-gray-800">
+                <h2 class="text-lg font-semibold text-white">Payment Instructions</h2>
+            </div>
+            
+            <div class="p-6">
+                {% if qr_code %}
+                <div class="mb-8 text-center">
+                    <p class="text-sm text-white mb-4">Scan this QR code to make payment</p>
+                    <img src="data:image/png;base64,{{ qr_code }}" alt="Payment QR Code" class="mx-auto h-48 w-48 object-contain border border-gray-900 rounded-lg">
+                    {% if upi_id %}
+                    <p class="mt-4 text-sm font-medium text-white">UPI ID: {{ upi_id }}</p>
+                    <button onclick="copyToClipboard('{{ upi_id }}')" 
+                            class="mt-2 px-3 py-1 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 text-xs rounded hover:bg-blue-200 transition-colors">
+                        Copy UPI ID
+                    </button>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <div class="mb-8">
+                    <h3 class="text-md font-medium text-white mb-2">Payment Steps:</h3>
+                    <ol class="list-decimal list-inside space-y-2 text-sm text-white">
+                        <li>Make payment using the QR code or UPI ID above</li>
+                        <li>Note down the transaction ID from your payment app</li>
+                        <li>Fill the form below with payment details</li>
+                        <li>Upload screenshot of successful payment</li>
+                        <li>Submit for verification</li>
+                    </ol>
+                    <p class="mt-4 text-sm text-red-600">* Please don't close this page until you complete the payment and submit the form.</p>
+                </div>
+                
+                <form method="POST" enctype="multipart/form-data" class="space-y-6" action="{% url 'save-payment-requests' %}">
+                    {% csrf_token %}
+                    
+                    <!-- Amount Field -->
+                    <div>
+                        <label for="amount" class="block text-sm font-medium text-white">Amount (₹)</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">₹</span>
+                            </div>
+                            <input type="number" name="amount" id="amount" value="{{amount}}"
+                                   class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 py-2 sm:text-sm border-gray-300 rounded-md text-black" 
+                                   placeholder="0.00" required step="0.01" min="1" style="border: 1px solid rgb(150, 150, 150);">
+                        </div>
+                    </div>
+                    
+                    <!-- Transaction ID Field -->
+                    <div>
+                        <label for="transaction_id" class="block text-sm font-medium text-white">UPI Transaction ID</label>
+                        <input type="text" name="transaction_id" id="transaction_id" 
+                               class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 py-2 text-black sm:text-sm border-gray-300 rounded-md" style="border: 1px solid rgb(150, 150, 150);"
+                               required>
+                        <p class="mt-1 text-xs text-gray-500">Transaction ID from your payment app/bank</p>
+                    </div>
+                    
+                    <!-- Screenshot Upload -->
+                    <div>
+                        <label for="screenshot" class="block text-sm font-medium text-white">Payment Screenshot</label>
+                        <div class="mt-1 flex items-center">
+                            <input type="file" name="screenshot" id="screenshot" 
+                                   class="focus:ring-blue-500 focus:border-blue-500 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" 
+                                   accept="image/*" required>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">Upload screenshot of successful payment (optional but recommended)</p>
+                    </div>
+                    <input type="hidden" name="promocode" value="{{promo}}">
+                    <!-- Submit Button -->
+                    <div class="pt-4">
+                        <button type="submit" 
+                                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Submit Payment Details
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        alert('UPI ID copied to clipboard!');
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+    });
+}
+</script>
+
+{% endblock body %}

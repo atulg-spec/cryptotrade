@@ -1,0 +1,77 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#F9FAFB">
+    <title>{% block title %}{{site_settings.site_name}}{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<style>
+    html, body {
+        touch-action: manipulation;
+        overscroll-behavior: none;
+    }
+</style>
+
+<body class="bg-gray-50">
+    {% include 'includes/header.html' %}
+    
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+    
+    {% include 'includes/footer.html' %}
+    
+    {% block extra_js %}
+    {% endblock %}
+
+    <script>
+        // Disable CTRL + scroll zoom
+        document.addEventListener('wheel', function(e) {
+            if (e.ctrlKey) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Disable CTRL + +, -, =
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && (
+                e.key === '+' ||
+                e.key === '-' ||
+                e.key === '=' ||
+                e.key === '_'
+            )) {
+                e.preventDefault();
+            }
+        });
+
+        // Disable pinch zoom on touch devices
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Disable double tap zoom
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+
+</body>
+</html>

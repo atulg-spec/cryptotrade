@@ -1,0 +1,129 @@
+{% load humanize %}
+<div class="order-panel hidden px-3 py-2 bg-[#0d1017]" data-symbol="{{ symbol }}">
+    <!-- Symbol info bar -->
+    <div class="flex items-center justify-between mb-2 text-[10px] text-slate-600 font-mono">
+        <span class="flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.5">
+                <circle cx="6" cy="6" r="5" />
+                <line x1="6" y1="4" x2="6" y2="6" />
+                <line x1="6" y1="8" x2="6" y2="8" />
+            </svg>
+            LOT <span class="qty-value">0.01</span> · LEV 1:20
+        </span>
+        <span class="flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.5">
+                <rect x="1" y="3" width="10" height="7" rx="1" />
+                <path d="M4 3V2a2 2 0 014 0v1" />
+            </svg>
+            MARGIN <span class="notional-value">~0 USD</span>
+        </span>
+        <span class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+            ACTIVE
+        </span>
+    </div>
+
+    <div class="flex gap-2 mb-2">
+        <!-- SELL -->
+        <button
+            class="flex-1 rounded-lg py-2.5 text-center bg-red-900/30 border border-red-800/30 hover:bg-red-900/50 transition-colors"
+            onclick="placeOrder('{{ symbol }}', 'SELL', this)">
+            <div class="flex items-center justify-center gap-1 mb-0.5">
+                <svg class="w-2.5 h-2.5 text-red-400" fill="none" viewBox="0 0 10 10" stroke="currentColor"
+                    stroke-width="2">
+                    <line x1="5" y1="1" x2="5" y2="9" />
+                    <polyline points="2,6 5,9 8,6" />
+                </svg>
+                <span class="text-xs font-medium text-red-300">SELL</span>
+            </div>
+            <div class="font-mono font-bold text-white text-sm bid-price">--</div>
+            <div class="text-[9px] text-red-400/60 font-mono mt-0.5 spread-display">−0.70 spread</div>
+        </button>
+
+        <!-- QTY -->
+        <div
+            class="flex-1 rounded-lg flex flex-col items-center justify-center gap-0.5 py-2 bg-white/[0.04] border border-white/[0.07]">
+            <div class="text-[9px] text-slate-600 font-mono tracking-wider">QTY</div>
+            <div class="font-mono text-xs text-slate-300 font-semibold qty-display">
+                <span class="qty-value">0.01</span>
+            </div>
+            <div class="text-[9px] text-slate-600 notional-value">≈ 0 USD</div>
+            <div class="flex gap-2 mt-1">
+                <button onclick="changeQty(this, -0.01)"
+                    class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white transition-colors bg-white/[0.06] text-base leading-none">−</button>
+                <button onclick="changeQty(this, 0.01)"
+                    class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white transition-colors bg-white/[0.06] text-base leading-none">+</button>
+            </div>
+        </div>
+
+        <!-- BUY -->
+        <button
+            class="flex-1 rounded-lg py-2.5 text-center bg-green-900/30 border border-green-800/30 hover:bg-green-900/50 transition-colors"
+            onclick="placeOrder('{{ symbol }}', 'BUY', this)">
+            <div class="flex items-center justify-center gap-1 mb-0.5">
+                <svg class="w-2.5 h-2.5 text-green-400" fill="none" viewBox="0 0 10 10" stroke="currentColor"
+                    stroke-width="2">
+                    <line x1="5" y1="9" x2="5" y2="1" />
+                    <polyline points="2,4 5,1 8,4" />
+                </svg>
+                <span class="text-xs font-medium text-green-300">BUY</span>
+            </div>
+            <div class="font-mono font-bold text-white text-sm ask-price">--</div>
+            <div class="text-[9px] text-green-400/60 font-mono mt-0.5 spread-display">+0.70 spread</div>
+        </button>
+    </div>
+
+    <!-- Order placement feedback (hidden by default) -->
+    <div class="order-feedback hidden text-center text-xs py-1 rounded bg-gray-800"></div>
+</div>
+
+<script>
+    function placeOrder(symbol, side, button) {
+        const panel = button.closest('.order-panel');
+        const qty = parseFloat(panel.querySelector('.qty-value').textContent);
+        const price = side === 'BUY'
+            ? parseFloat(panel.querySelector('.ask-price').textContent)
+            : parseFloat(panel.querySelector('.bid-price').textContent);
+
+        if (!price || isNaN(price)) {
+            showFeedback(panel, 'Price not available', 'error');
+            return;
+        }
+
+        fetch('/place-order/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                symbol: symbol,
+                side: side,
+                quantity: qty,
+                price: price
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showFeedback(panel, `Order placed: ${side} ${qty} ${symbol} @ ${price}`, 'success');
+                } else {
+                    showFeedback(panel, data.error || 'Order failed', 'error');
+                }
+            })
+            .catch(error => {
+                showFeedback(panel, 'Network error', 'error');
+            });
+    }
+
+    function showFeedback(panel, message, type) {
+        const feedback = panel.querySelector('.order-feedback');
+        feedback.textContent = message;
+        feedback.classList.remove('hidden', 'bg-green-900/30', 'bg-red-900/30');
+        feedback.classList.add(type === 'success' ? 'bg-green-900/30' : 'bg-red-900/30');
+
+        setTimeout(() => {
+            feedback.classList.add('hidden');
+        }, 3000);
+    }
+</script>

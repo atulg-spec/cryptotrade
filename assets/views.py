@@ -14,6 +14,7 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import JsonResponse
 from django.urls import reverse
+from assets.models import Watchlist
 
 @login_required
 def orders_view(request):
@@ -259,3 +260,60 @@ def close_position(request):
         messages.error(request, response)
 
     return redirect('portfolio')
+
+
+
+
+@login_required
+def watchlist_add(request, symbol):
+    """
+    API endpoint to add a stock to the user's watchlist.
+    """
+    symbol = symbol.strip().upper()
+    try:
+        stock = Stock.objects.get(symbol=symbol)
+        Watchlist.objects.get_or_create(user=request.user, stock=stock)
+        return JsonResponse({'success': True, 'message': f'{symbol} added to watchlist.'})
+    except Stock.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Stock not found.'}, status=404)
+
+@login_required
+def watchlist_remove(request, symbol):
+    """
+    API endpoint to remove a stock from the user's watchlist.
+    """
+    symbol = symbol.strip().upper()
+    try:
+        stock = Stock.objects.get(symbol=symbol)
+        Watchlist.objects.filter(user=request.user, stock=stock).delete()
+        return JsonResponse({'success': True, 'message': f'{symbol} removed from watchlist.'})
+    except Stock.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Stock not found.'}, status=404)
+
+@login_required
+def stock_search(request):
+    """
+    API endpoint for real-time stock search.
+    """
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return JsonResponse({'results': []})
+
+    stocks = Stock.objects.filter(
+        Q(symbol__icontains=query) | Q(name__icontains=query)
+    ).values('symbol', 'name', 'current_price', 'percentage_change')[:10]
+
+    # Check which stocks are already in the user's watchlist
+    watchlist_symbols = set(Watchlist.objects.filter(user=request.user).values_list('stock__symbol', flat=True))
+    
+    results = []
+    for s in stocks:
+        results.append({
+            'symbol': s['symbol'],
+            'name': s['name'],
+            'price': float(s['current_price']),
+            'change': float(s['percentage_change']),
+            'is_in_watchlist': s['symbol'] in watchlist_symbols
+        })
+
+    return JsonResponse({'results': results})
