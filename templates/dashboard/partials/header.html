@@ -1,32 +1,83 @@
-<header class="bg-gradient-to-r from-orange-500/10 via-emerald-500/5 to-sky-500/10 border-b border-orange-200/40 px-6 py-4 flex items-center justify-between shadow-lg">
-    <div class="flex items-center space-x-4 w-full">
-        {% if site_settings and site_settings.logo %}
-        <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}" class="h-10 w-auto rounded-xl border border-white/20 shadow">
-        {% else %}
-        <div class="w-12 h-12 rounded-2xl bg-orange-500/20 border border-orange-400/40 flex items-center justify-center">
-            <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l6-6 4 4 7-7" />
-            </svg>
+{% load humanize %}
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-30 bg-dark-900/80 backdrop-blur-xl border-b border-white/5">
+    <div class="flex items-center justify-between px-4 py-3">
+        <!-- Left Section: Hamburger Menu + Page Title -->
+        <div class="flex items-center gap-3">
+            <!-- Hamburger Menu Button (Mobile Only) -->
+            <button onclick="openMobileSidebar()" class="lg:hidden p-2 rounded-xl hover:bg-white/5 text-slate-400 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            
+            <!-- Breadcrumb / Page Title -->
+            <div>
+                <h1 class="text-base font-bold text-white">
+                    {% if request.resolver_match.url_name == 'dashboard' %}
+                    Dashboard
+                    {% elif request.resolver_match.url_name == 'watchlist' %}
+                    Watchlist
+                    {% elif request.resolver_match.url_name == 'portfolio' %}
+                    Portfolio
+                    {% elif request.resolver_match.url_name == 'orders' %}
+                    Orders
+                    {% elif request.resolver_match.url_name == 'wallet' %}
+                    Wallet
+                    {% elif request.resolver_match.url_name == 'profile' %}
+                    Profile
+                    {% else %}
+                    {{ site_settings.site_name|default:'TradeHub' }}
+                    {% endif %}
+                </h1>
+                <p class="text-[10px] text-slate-500 hidden sm:block">
+                    {% if request.resolver_match.url_name == 'dashboard' %}
+                    Overview of your trading performance
+                    {% elif request.resolver_match.url_name == 'watchlist' %}
+                    Track your favorite stocks in real-time
+                    {% elif request.resolver_match.url_name == 'portfolio' %}
+                    Monitor your investment portfolio
+                    {% elif request.resolver_match.url_name == 'orders' %}
+                    View your order history and status
+                    {% elif request.resolver_match.url_name == 'wallet' %}
+                    Manage your funds and transactions
+                    {% elif request.resolver_match.url_name == 'profile' %}
+                    Your account settings and preferences
+                    {% else %}
+                    Welcome back, {{ user.username|default:'Trader' }}
+                    {% endif %}
+                </p>
+            </div>
         </div>
-        {% endif %}
-        <div>
-            <h1 class="text-xl font-bold text-white tracking-wide">
-                {{ site_settings.site_name|default:'Dashboard' }}
-            </h1>
-            {% if site_settings and site_settings.tagline %}
-            <p class="text-xs text-orange-100/90">{{ site_settings.tagline }}</p>
+        
+        <!-- Right Section: Actions -->
+        <div class="flex items-center gap-2">
+            <!-- Live Indicator -->
+            <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-xl">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <span class="text-xs font-medium text-green-400">Live</span>
+            </div>
+            
+            
+            <!-- Notifications -->
+            <button class="relative p-2 rounded-xl hover:bg-white/5 text-slate-400 transition-colors" title="Notifications">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+                <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            
+            <!-- User Avatar (Desktop) -->
+            {% if user.is_authenticated %}
+            <a href="{% url 'profile' %}" class="hidden sm:flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/5 transition-colors">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">
+                    {{ user.username|first|upper }}
+                </div>
+            </a>
             {% endif %}
         </div>
-    </div>
-
-    <div class="hidden md:flex items-center space-x-4 text-sm text-orange-50">
-        <div class="px-3 py-1 rounded-full bg-white/10 border border-white/20">
-            <span class="font-semibold">Live</span>
-        </div>
-        <button class="text-white hover:text-orange-200 transition-colors duration-200" title="Quick action">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-        </button>
     </div>
 </header>

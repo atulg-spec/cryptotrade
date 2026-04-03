@@ -1,75 +1,76 @@
-<!-- Bottom Navbar -->
-<nav class="fixed bottom-0 left-0 right-0 z-40 bg-gray-900 border-t border-gray-800 shadow-lg md:hidden">
-    <ul class="flex justify-around items-center h-16 text-gray-400 text-sm">
-
-        <!-- Home -->
+{% load humanize %}
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 right-0 z-40 bg-dark-900/95 backdrop-blur-xl border-t border-white/5 md:hidden safe-area-bottom">
+    <ul class="flex justify-around items-center h-16">
+        <!-- Dashboard -->
         <li>
             <a href="{% url 'dashboard' %}"
-                class="flex flex-col items-center {% if request.path == '/dashboard/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M3 9.75L12 4l9 5.75M4.5 10.5V20h15V10.5" />
+                class="flex flex-col items-center justify-center gap-1 py-2 px-3 {% if request.resolver_match.url_name == 'dashboard' %}text-blue-400{% else %}text-slate-500{% endif %} transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
                 </svg>
-                <span>Home</span>
+                <span class="text-[10px] font-medium">Home</span>
             </a>
         </li>
 
         <!-- Watchlist -->
         <li>
             <a href="{% url 'watchlist' %}"
-                class="flex flex-col items-center {% if request.path == '/stock/watchlist/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="m12 3 8 4.5 0 9 -8 4.5 -8 -4.5 0 -9L12 3" stroke-width="2"></path>
-                    <path d="m12 12 8 -4.5" stroke-width="2"></path>
-                    <path d="m12 12 0 9" stroke-width="2"></path>
-                    <path d="M12 12 4 7.5" stroke-width="2"></path>
+                class="flex flex-col items-center justify-center gap-1 py-2 px-3 {% if request.resolver_match.url_name == 'watchlist' %}text-blue-400{% else %}text-slate-500{% endif %} transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
                 </svg>
-                <span>Watchlist</span>
+                <span class="text-[10px] font-medium">Watchlist</span>
+            </a>
+        </li>
+
+        <!-- Quick Trade Button (Center) -->
+        <li>
+            <a href="#"
+                class="flex flex-col items-center justify-center -mt-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                </div>
+                <span class="text-[10px] font-medium text-slate-400 mt-1">Trade</span>
             </a>
         </li>
 
         <!-- Orders -->
         <li>
             <a href="{% url 'orders' %}"
-                class="flex flex-col items-center {% if request.path == '/assets/orders/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mb-1" fill="none" viewBox="0 0 14 14">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                        d="M7 5.5c3.5899 0 6.5 -1.11929 6.5 -2.5S10.5899 0.5 7 0.5C3.41015 0.5 0.5 1.61929 0.5 3S3.41015 5.5 7 5.5Z"
-                        stroke-width="1.2"></path>
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                        d="M0.5 3v8c0 1.38 2.91 2.5 6.5 2.5s6.5 -1.12 6.5 -2.5V3" stroke-width="1.2"></path>
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                        d="M13.5 7c0 1.38 -2.91 2.5 -6.5 2.5S0.5 8.38 0.5 7" stroke-width="1.2"></path>
+                class="flex flex-col items-center justify-center gap-1 py-2 px-3 {% if request.resolver_match.url_name == 'orders' %}text-blue-400{% else %}text-slate-500{% endif %} transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
-                <span>Orders</span>
-            </a>
-        </li>
-
-        <!-- Portfolio -->
-        <li>
-            <a href="{% url 'portfolio' %}"
-                class="flex flex-col items-center {% if request.path == '/assets/portfolio/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" height="24" width="24">
-                    <path fill="currentColor"
-                        d="M5 19h16v2H4c-0.55228 0 -1 -0.4477 -1 -1V3h2zM21 8.91406l-5.5 5.50004 -4-4 -4.5 4.5v-2.8282l4.5 -4.49996 4 3.99996L21 6.08594z" />
-                </svg>
-                <span>Portfolio</span>
+                <span class="text-[10px] font-medium">Orders</span>
             </a>
         </li>
 
         <!-- Profile -->
         <li>
             <a href="{% url 'profile' %}"
-                class="flex flex-col items-center {% if request.path == '/accounts/profile/' %}text-indigo-400{% else %}hover:text-indigo-400{% endif %} transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M5.121 17.804A10.97 10.97 0 0112 15c2.485 0 4.774.83 6.879 2.804M12 12a4 4 0 100-8 4 4 0 000 8z" />
+                class="flex flex-col items-center justify-center gap-1 py-2 px-3 {% if request.resolver_match.url_name == 'profile' %}text-blue-400{% else %}text-slate-500{% endif %} transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
-                <span>Profile</span>
+                <span class="text-[10px] font-medium">Profile</span>
             </a>
         </li>
     </ul>
 </nav>
+
+<!-- Add padding at bottom of pages to account for bottom nav -->
+<style>
+    .safe-area-bottom {
+        padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    
+    /* Add bottom padding to main content on mobile */
+    @media (max-width: 767px) {
+        main {
+            padding-bottom: 5rem;
+        }
+    }
+</style>

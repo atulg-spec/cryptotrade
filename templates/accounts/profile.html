@@ -1,236 +1,162 @@
 {% extends 'dashboard/base.html' %}
 {% load humanize %}
 
+{% block title %}Profile - TradeHub{% endblock %}
+
 {% block body %}
-<section class="w-full max-w-6xl mx-auto md:px-8 py-4">
+<div class="p-3 sm:p-4 md:p-6 max-w-7xl mx-auto pb-20 md:pb-6">
     <!-- Header Section -->
-    <div class="mb-2">
-        <div class="flex items-center gap-3 sm:gap-4 mb-6">
-            <div class="p-3 bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30 rounded-2xl shadow-lg">
-                <svg class="w-6 h-6 sm:w-7 sm:h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+    <div class="mb-4 sm:mb-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="p-2 bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30 rounded-xl">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
             </div>
             <div class="flex-1 min-w-0">
-                <h1 class="text-2xl sm:text-3xl font-bold text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                    Profile Settings
-                </h1>
-                <p class="text-gray-400 text-sm sm:text-base mt-1 flex items-center gap-2">
-                    <span class="flex h-2 w-2 relative">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                    Member since {{ user.date_joined|date:"M d, Y" }} • {{ account_age_days }} days
-                </p>
-            </div>
-            
-            <!-- Logout Button -->
-            <div class="flex items-center justify-between ">
-                <a href="{% url 'logout' %}"
-                    class="w-10 h-10 bg-red-500/20 border border-red-500/30 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                </a>
+                <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-white">Profile Settings</h1>
+                <p class="text-xs text-slate-400 mt-0.5">Member since {{ user.date_joined|date:"M d, Y" }}</p>
             </div>
         </div>
 
-        <!-- Quick Stats Cards - Mobile Horizontal Scroll -->
-        <div class="flex space-x-4 pb-4 overflow-x-auto scrollbar-hide -mx-2 px-2">
-            <div class="flex-shrink-0 w-48 bg-gray-800/40 border border-gray-700/30 rounded-2xl p-4 backdrop-blur-xl">
-                <p class="text-gray-400 text-sm mb-1">Wallet Balance</p>
-                <p class="text-green-400 font-bold text-2xl">₹{{ user.wallet|floatformat:2|intcomma }}</p>
+        <!-- Quick Stats - Horizontal Scroll on Mobile -->
+        <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1">
+            <div class="flex-shrink-0 w-36 sm:w-44 bg-dark-800/50 border border-white/5 rounded-xl p-3">
+                <p class="text-[10px] sm:text-xs text-slate-400 mb-1">Wallet Balance</p>
+                <p class="text-sm sm:text-lg font-bold text-emerald-400 font-mono">₹{{ user.wallet|floatformat:2|intcomma }}</p>
             </div>
-            <div class="flex-shrink-0 w-48 bg-gray-800/40 border border-gray-700/30 rounded-2xl p-4 backdrop-blur-xl">
-                <p class="text-gray-400 text-sm mb-1">Total Orders</p>
-                <p class="text-white font-bold text-2xl">{{ total_orders }}</p>
+            <div class="flex-shrink-0 w-36 sm:w-44 bg-dark-800/50 border border-white/5 rounded-xl p-3">
+                <p class="text-[10px] sm:text-xs text-slate-400 mb-1">Total Orders</p>
+                <p class="text-sm sm:text-lg font-bold text-white font-mono">{{ total_orders }}</p>
             </div>
-            <div class="flex-shrink-0 w-48 bg-gray-800/40 border border-gray-700/30 rounded-2xl p-4 backdrop-blur-xl">
-                <p class="text-gray-400 text-sm mb-1">Completed</p>
-                <p class="text-blue-400 font-bold text-2xl">{{ completed_orders }}</p>
+            <div class="flex-shrink-0 w-36 sm:w-44 bg-dark-800/50 border border-white/5 rounded-xl p-3">
+                <p class="text-[10px] sm:text-xs text-slate-400 mb-1">Completed</p>
+                <p class="text-sm sm:text-lg font-bold text-blue-400 font-mono">{{ completed_orders }}</p>
             </div>
-            <div class="flex-shrink-0 w-48 bg-gray-800/40 border border-gray-700/30 rounded-2xl p-4 backdrop-blur-xl">
-                <p class="text-gray-400 text-sm mb-1">Total Invested</p>
-                <p class="text-purple-400 font-bold text-2xl">₹{{ total_investment|floatformat:2|intcomma }}</p>
+            <div class="flex-shrink-0 w-36 sm:w-44 bg-dark-800/50 border border-white/5 rounded-xl p-3">
+                <p class="text-[10px] sm:text-xs text-slate-400 mb-1">Invested</p>
+                <p class="text-sm sm:text-lg font-bold text-purple-400 font-mono">₹{{ total_investment|floatformat:2|intcomma }}</p>
             </div>
         </div>
     </div>
-    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mt-3 mb-6">
-        <a href="{% url 'add-amount' %}"
-           class="w-full py-2 rounded-md font-semibold text-white text-center bg-green-600 
-                  hover:bg-green-700 transition">
+
+    <!-- Quick Action Buttons -->
+    <div class="grid grid-cols-3 gap-2 mb-4 sm:mb-6">
+        <a href="{% url 'add-amount' %}" class="py-2.5 sm:py-3 rounded-xl font-semibold text-white text-xs sm:text-sm text-center bg-emerald-500 hover:bg-emerald-600 transition-colors">
             Add Amount
         </a>
-        <a href="{% url 'withdraw-amount' %}"
-           class="w-full py-2 rounded-md font-semibold text-white text-center bg-red-600 
-                  hover:bg-red-700 transition">
+        <a href="{% url 'withdraw-amount' %}" class="py-2.5 sm:py-3 rounded-xl font-semibold text-white text-xs sm:text-sm text-center bg-red-500 hover:bg-red-600 transition-colors">
             Withdraw
         </a>
-        <a href="{% url 'my-transactions' %}"
-           class="col-span-2 lg:col-span-1 w-full py-2 rounded-md font-semibold text-white 
-                  text-center bg-blue-600 hover:bg-blue-700 transition">
-            View Transactions
+        <a href="{% url 'my-transactions' %}" class="py-2.5 sm:py-3 rounded-xl font-semibold text-white text-xs sm:text-sm text-center bg-blue-500 hover:bg-blue-600 transition-colors">
+            Transactions
         </a>
     </div>
 
-
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         <!-- Left Column - Profile Information -->
-        <div class="lg:col-span-2 space-y-6">
+        <div class="xl:col-span-2 space-y-4 sm:space-y-6">
             <!-- Personal Information Card -->
-            <div class="bg-gray-900/40 backdrop-blur-xl border border-gray-700/30 rounded-2xl shadow-2xl overflow-hidden">
-                <div class="px-4 sm:px-6 py-4 border-b border-gray-700/30 bg-gray-800/20">
-                    <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            <div class="bg-dark-800/50 border border-white/5 rounded-2xl overflow-hidden">
+                <div class="px-4 sm:px-5 py-3 sm:py-4 border-b border-white/5">
+                    <h2 class="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                         </svg>
                         Personal Information
                     </h2>
                 </div>
-                <div class="p-4 sm:p-6">
+                <div class="p-4 sm:p-5">
                     <form id="profileForm" method="POST" action="{% url 'update_profile' %}">
                         {% csrf_token %}
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <!-- Username -->
                             <div class="sm:col-span-2">
-                                <label class="block text-gray-400 text-sm font-medium mb-2">Username</label>
+                                <label class="block text-xs text-slate-400 mb-1.5">Username</label>
                                 <div class="relative">
-                                    <input type="text" 
-                                           value="{{ user.username }}" 
-                                           class="w-full bg-gray-800/50 border border-gray-600/30 rounded-xl px-4 py-3 text-white cursor-not-allowed"
-                                           disabled>
-                                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                        <span class="text-xs bg-gray-700 text-gray-400 px-2 py-1 rounded">Immutable</span>
+                                    <input type="text" value="{{ user.username }}" class="w-full bg-dark-900/50 border border-white/10 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-slate-400 cursor-not-allowed" disabled>
+                                    <div class="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2">
+                                        <span class="text-[9px] sm:text-xs bg-dark-800 text-slate-500 px-2 py-1 rounded">Immutable</span>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Email -->
                             <div class="sm:col-span-2">
-                                <label class="block text-gray-400 text-sm font-medium mb-2">Email Address</label>
+                                <label class="block text-xs text-slate-400 mb-1.5">Email Address</label>
                                 <div class="relative">
-                                    <input type="email" 
-                                           value="{{ user.email }}" 
-                                           class="w-full bg-gray-800/50 border border-gray-600/30 rounded-xl px-4 py-3 text-white cursor-not-allowed"
-                                           disabled>
-                                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                        <span class="text-xs bg-gray-700 text-gray-400 px-2 py-1 rounded">Verified</span>
+                                    <input type="email" value="{{ user.email }}" class="w-full bg-dark-900/50 border border-white/10 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-slate-400 cursor-not-allowed" disabled>
+                                    <div class="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2">
+                                        <span class="text-[9px] sm:text-xs bg-dark-800 text-slate-500 px-2 py-1 rounded">Verified</span>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Phone Number -->
                             <div>
-                                <label for="phone_number" class="block text-gray-400 text-sm font-medium mb-2">Phone Number</label>
-                                <input type="tel" 
-                                       id="phone_number"
-                                       name="phone_number"
-                                       value="{{ user.phone_number|default:'' }}"
-                                       placeholder="Enter phone number"
-                                       class="w-full bg-gray-800/50 border border-gray-600/30 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                <label for="phone_number" class="block text-xs text-slate-400 mb-1.5">Phone Number</label>
+                                <input type="tel" id="phone_number" name="phone_number" value="{{ user.phone_number|default:'' }}" placeholder="Enter phone number" class="w-full bg-dark-900/50 border border-white/10 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-colors">
                             </div>
 
                             <!-- Region -->
                             <div>
-                                <label for="region_name" class="block text-gray-400 text-sm font-medium mb-2">Region</label>
-                                <input type="text" 
-                                       id="region_name"
-                                       name="region_name"
-                                       value="{{ user.region_name|default:'' }}"
-                                       placeholder="Enter region"
-                                       class="w-full bg-gray-800/50 border border-gray-600/30 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                <label for="region_name" class="block text-xs text-slate-400 mb-1.5">Region</label>
+                                <input type="text" id="region_name" name="region_name" value="{{ user.region_name|default:'' }}" placeholder="Enter region" class="w-full bg-dark-900/50 border border-white/10 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-colors">
                             </div>
 
                             <!-- City -->
                             <div>
-                                <label for="city" class="block text-gray-400 text-sm font-medium mb-2">City</label>
-                                <input type="text" 
-                                       id="city"
-                                       name="city"
-                                       value="{{ user.city|default:'' }}"
-                                       placeholder="Enter city"
-                                       class="w-full bg-gray-800/50 border border-gray-600/30 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                <label for="city" class="block text-xs text-slate-400 mb-1.5">City</label>
+                                <input type="text" id="city" name="city" value="{{ user.city|default:'' }}" placeholder="Enter city" class="w-full bg-dark-900/50 border border-white/10 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-colors">
                             </div>
 
                             <!-- ZIP Code -->
                             <div>
-                                <label for="zip_code" class="block text-gray-400 text-sm font-medium mb-2">ZIP Code</label>
-                                <input type="text" 
-                                       id="zip_code"
-                                       name="zip_code"
-                                       value="{{ user.zip_code|default:'' }}"
-                                       placeholder="Enter ZIP code"
-                                       class="w-full bg-gray-800/50 border border-gray-600/30 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                <label for="zip_code" class="block text-xs text-slate-400 mb-1.5">ZIP Code</label>
+                                <input type="text" id="zip_code" name="zip_code" value="{{ user.zip_code|default:'' }}" placeholder="Enter ZIP code" class="w-full bg-dark-900/50 border border-white/10 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-colors">
                             </div>
 
-
+                            <!-- Bank Account Name -->
                             <div>
-                                <label for="bank_account_name" class="block text-gray-400 text-sm font-medium mb-2">Bank Account Name</label>
-                                <input type="text" 
-                                       id="bank_account_name"
-                                       name="bank_account_name"
-                                       value="{{ user.bank_account_name|default:'' }}"
-                                       placeholder="Enter Bank Account Name"
-                                       class="w-full bg-gray-800/50 border border-gray-600/30 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                <label for="bank_account_name" class="block text-xs text-slate-400 mb-1.5">Bank Account Name</label>
+                                <input type="text" id="bank_account_name" name="bank_account_name" value="{{ user.bank_account_name|default:'' }}" placeholder="Enter name" class="w-full bg-dark-900/50 border border-white/10 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-colors">
                             </div>
 
                             <!-- Bank Account Number -->
                             <div>
-                                <label for="bank_account_number" class="block text-gray-400 text-sm font-medium mb-2">Bank Account Number</label>
-                                <input type="text" 
-                                       id="bank_account_number"
-                                       name="bank_account_number"
-                                       value="{{ user.bank_account_number|default:'' }}"
-                                       placeholder="Enter Bank Account Number"
-                                       class="w-full bg-gray-800/50 border border-gray-600/30 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                <label for="bank_account_number" class="block text-xs text-slate-400 mb-1.5">Bank Account Number</label>
+                                <input type="text" id="bank_account_number" name="bank_account_number" value="{{ user.bank_account_number|default:'' }}" placeholder="Enter number" class="w-full bg-dark-900/50 border border-white/10 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-colors">
                             </div>
 
+                            <!-- UPI ID -->
                             <div>
-                                <label for="upi_id" class="block text-gray-400 text-sm font-medium mb-2">UPI Id</label>
-                                <input type="text" 
-                                       id="upi_id"
-                                       name="upi_id"
-                                       value="{{ user.upi_id|default:'' }}"
-                                       placeholder="Enter UPI Id"
-                                       class="w-full bg-gray-800/50 border border-gray-600/30 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                <label for="upi_id" class="block text-xs text-slate-400 mb-1.5">UPI ID</label>
+                                <input type="text" id="upi_id" name="upi_id" value="{{ user.upi_id|default:'' }}" placeholder="Enter UPI ID" class="w-full bg-dark-900/50 border border-white/10 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-colors">
                             </div>
 
-                            <!-- Ifsc Code -->
+                            <!-- IFSC Code -->
                             <div>
-                                <label for="ifsc_code" class="block text-gray-400 text-sm font-medium mb-2">IFSC Code</label>
-                                <input type="text" 
-                                       id="ifsc_code"
-                                       name="ifsc_code"
-                                       value="{{ user.ifsc_code|default:'' }}"
-                                       placeholder="Enter Ifsc Code"
-                                       class="w-full bg-gray-800/50 border border-gray-600/30 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                <label for="ifsc_code" class="block text-xs text-slate-400 mb-1.5">IFSC Code</label>
+                                <input type="text" id="ifsc_code" name="ifsc_code" value="{{ user.ifsc_code|default:'' }}" placeholder="Enter IFSC" class="w-full bg-dark-900/50 border border-white/10 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-colors">
                             </div>
 
-
-                            <!-- Location Data (Read-only) -->
+                            <!-- Location Data -->
                             <div class="sm:col-span-2">
-                                <label class="block text-gray-400 text-sm font-medium mb-2">Location Data</label>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <div class="bg-gray-800/30 border border-gray-700/30 rounded-xl p-3">
-                                        <p class="text-gray-400 text-xs">Timezone</p>
-                                        <p class="text-white text-sm font-medium">{{ user.timezone|default:"Not detected" }}</p>
+                                <label class="block text-xs text-slate-400 mb-2">Location Data</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div class="bg-dark-900/50 border border-white/5 rounded-lg p-2 sm:p-3">
+                                        <p class="text-[9px] sm:text-xs text-slate-500">Timezone</p>
+                                        <p class="text-xs sm:text-sm text-white font-medium truncate">{{ user.timezone|default:"N/A" }}</p>
                                     </div>
-                                    <div class="bg-gray-800/30 border border-gray-700/30 rounded-xl p-3">
-                                        <p class="text-gray-400 text-xs">ISP</p>
-                                        <p class="text-white text-sm font-medium">{{ user.isp|default:"Not detected" }}</p>
+                                    <div class="bg-dark-900/50 border border-white/5 rounded-lg p-2 sm:p-3">
+                                        <p class="text-[9px] sm:text-xs text-slate-500">ISP</p>
+                                        <p class="text-xs sm:text-sm text-white font-medium truncate">{{ user.isp|default:"N/A" }}</p>
                                     </div>
-                                    <div class="bg-gray-800/30 border border-gray-700/30 rounded-xl p-3">
-                                        <p class="text-gray-400 text-xs">Coordinates</p>
-                                        <p class="text-white text-sm font-medium">
-                                            {% if user.lat and user.lon %}
-                                            {{ user.lat }}, {{ user.lon }}
-                                            {% else %}
-                                            Not available
-                                            {% endif %}
+                                    <div class="bg-dark-900/50 border border-white/5 rounded-lg p-2 sm:p-3">
+                                        <p class="text-[9px] sm:text-xs text-slate-500">Coords</p>
+                                        <p class="text-xs sm:text-sm text-white font-medium truncate">
+                                            {% if user.lat and user.lon %}{{ user.lat|floatformat:2 }}, {{ user.lon|floatformat:2 }}{% else %}N/A{% endif %}
                                         </p>
                                     </div>
                                 </div>
@@ -238,14 +164,13 @@
                         </div>
 
                         <!-- Save Button -->
-                        <div class="flex justify-end mt-6 pt-4 border-t border-gray-700/30">
-                            <button type="submit"
-                                    class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 border border-blue-500/40 text-white font-semibold rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 flex items-center gap-2">
+                        <div class="flex justify-end mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-white/5">
+                            <button type="submit" class="px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-xl transition-colors flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                          d="M5 13l4 4L19 7"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                Save Changes
+                                <span class="hidden sm:inline">Save Changes</span>
+                                <span class="sm:hidden">Save</span>
                             </button>
                         </div>
                     </form>
@@ -253,24 +178,23 @@
             </div>
 
             <!-- Recent Activity Card -->
-            <div class="bg-gray-900/40 backdrop-blur-xl border border-gray-700/30 rounded-2xl shadow-2xl overflow-hidden">
-                <div class="px-4 sm:px-6 py-4 border-b border-gray-700/30 bg-gray-800/20">
-                    <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-                        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            <div class="bg-dark-800/50 border border-white/5 rounded-2xl overflow-hidden">
+                <div class="px-4 sm:px-5 py-3 sm:py-4 border-b border-white/5">
+                    <h2 class="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                         </svg>
                         Recent Activity
                     </h2>
                 </div>
-                <div class="p-4 sm:p-6">
+                <div class="p-4 sm:p-5">
                     {% if recent_orders %}
-                    <div class="space-y-4">
+                    <div class="space-y-3">
                         {% for order in recent_orders %}
-                        <div class="flex items-center justify-between p-3 bg-gray-800/30 border border-gray-700/30 rounded-xl">
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 rounded-lg {% if order.order_type == 'BUY' %}bg-green-500/20 border border-green-500/30{% else %}bg-red-500/20 border border-red-500/30{% endif %}">
-                                    <svg class="w-4 h-4 {% if order.order_type == 'BUY' %}text-green-400{% else %}text-red-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="flex items-center justify-between p-3 bg-dark-900/50 border border-white/5 rounded-xl">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center flex-shrink-0 {% if order.order_type == 'BUY' %}bg-green-500/10 border border-green-500/20{% else %}bg-red-500/10 border border-red-500/20{% endif %}">
+                                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 {% if order.order_type == 'BUY' %}text-green-400{% else %}text-red-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         {% if order.order_type == 'BUY' %}
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                         {% else %}
@@ -278,16 +202,14 @@
                                         {% endif %}
                                     </svg>
                                 </div>
-                                <div>
-                                    <p class="text-white font-medium text-sm">
-                                        {{ order.order_type }} {{ order.stock.symbol }}
-                                    </p>
-                                    <p class="text-gray-400 text-xs">{{ order.created_at|timesince }} ago</p>
+                                <div class="min-w-0">
+                                    <p class="text-white font-medium text-sm truncate">{{ order.order_type }} {{ order.stock.symbol }}</p>
+                                    <p class="text-slate-500 text-xs">{{ order.created_at|timesince }} ago</p>
                                 </div>
                             </div>
-                            <div class="text-right">
+                            <div class="text-right flex-shrink-0 ml-2">
                                 <p class="text-white font-semibold text-sm">₹{{ order.amount|floatformat:2 }}</p>
-                                <span class="text-xs px-2 py-1 rounded-full {% if order.status == 'completed' %}bg-green-500/20 text-green-400{% elif order.status == 'pending' %}bg-yellow-500/20 text-yellow-400{% else %}bg-gray-500/20 text-gray-400{% endif %}">
+                                <span class="text-[9px] sm:text-xs px-2 py-0.5 rounded-full {% if order.status == 'completed' %}bg-green-500/10 text-green-400{% elif order.status == 'pending' %}bg-amber-500/10 text-amber-400{% else %}bg-slate-500/10 text-slate-400{% endif %}">
                                     {{ order.status|title }}
                                 </span>
                             </div>
@@ -296,99 +218,63 @@
                     </div>
                     {% else %}
                     <div class="text-center py-8">
-                        <svg class="w-12 h-12 text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
-                                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        <svg class="w-10 h-10 sm:w-12 sm:h-12 text-slate-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                         </svg>
-                        <p class="text-gray-400 text-sm">No recent activity found.</p>
-                        <p class="text-gray-500 text-xs mt-1">Your trading activity will appear here.</p>
+                        <p class="text-slate-400 text-sm">No recent activity</p>
+                        <p class="text-slate-500 text-xs mt-1">Your trading activity will appear here</p>
                     </div>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Right Column - Referral & Account Info -->
-        <div class="space-y-6">
+        <!-- Right Column -->
+        <div class="space-y-4 sm:space-y-6">
             <!-- Referral Program Card -->
-            <div class="bg-gray-900/40 backdrop-blur-xl border border-gray-700/30 rounded-2xl shadow-2xl overflow-hidden">
-                <div class="px-4 sm:px-6 py-4 border-b border-gray-700/30 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
-                    <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-                        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+            <div class="bg-dark-800/50 border border-white/5 rounded-2xl overflow-hidden">
+                <div class="px-4 sm:px-5 py-3 sm:py-4 border-b border-white/5 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+                    <h2 class="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
                         </svg>
                         Referral Program
                     </h2>
                 </div>
-                <div class="p-4 sm:p-6">
+                <div class="p-4 sm:p-5">
                     {% if referral %}
-                    <div class="text-center mb-6">
-                        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-2xl mb-4">
-                            <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                      d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    <div class="text-center mb-4 sm:mb-6">
+                        <div class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl sm:rounded-2xl mb-3 sm:mb-4">
+                            <svg class="w-6 h-6 sm:w-8 sm:h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                             </svg>
                         </div>
-                        <h3 class="text-white font-bold text-xl mb-2">{{ referral_count }} Referrals</h3>
-                        <p class="text-gray-400 text-sm">You've helped friends start trading</p>
+                        <h3 class="text-white font-bold text-lg sm:text-xl mb-1">{{ referral_count }} Referrals</h3>
+                        <p class="text-slate-400 text-xs sm:text-sm">You've helped friends start trading</p>
                     </div>
 
                     <!-- Referral Code -->
-                    <div class="mb-6">
-                        <label class="block text-gray-400 text-sm font-medium mb-3">Your Referral Code</label>
+                    <div class="mb-4 sm:mb-6">
+                        <label class="block text-xs text-slate-400 mb-2">Your Referral Code</label>
                         <div class="flex gap-2">
-                            <input type="text" 
-                                   value="{{ referral.referral_code }}" 
-                                   id="referralCode"
-                                   class="flex-1 bg-gray-800/50 border border-gray-600/30 rounded-xl px-4 py-3 text-white font-mono text-center cursor-pointer"
-                                   readonly
-                                   onclick="copyReferralCode()">
-                            <button onclick="copyReferralCode()"
-                                    class="px-4 py-3 bg-purple-600 hover:bg-purple-500 border border-purple-500/30 text-white rounded-xl transition-all duration-200 hover:scale-105 active:scale-95">
+                            <input type="text" value="{{ referral.referral_code }}" id="referralCode" class="flex-1 bg-dark-900/50 border border-white/10 rounded-xl px-3 py-2.5 text-white font-mono text-sm text-center cursor-pointer" readonly onclick="copyReferralCode()">
+                            <button onclick="copyReferralCode()" class="px-3 sm:px-4 py-2.5 bg-purple-500 hover:bg-purple-600 text-white rounded-xl transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                 </svg>
                             </button>
                         </div>
                     </div>
-
-                    <!-- Recent Referrals -->
-                    {% if recent_referrals %}
-                    <div>
-                        <h4 class="text-gray-400 text-sm font-medium mb-3">Recent Referrals</h4>
-                        <div class="space-y-3">
-                            {% for ref in recent_referrals %}
-                            <div class="flex items-center justify-between p-3 bg-gray-800/30 border border-gray-700/30 rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 bg-gradient-to-br from-green-500/20 to-blue-500/20 border border-green-500/30 rounded-full flex items-center justify-center">
-                                        <span class="text-green-400 text-xs font-bold">{{ forloop.counter }}</span>
-                                    </div>
-                                    <div>
-                                        <p class="text-white text-sm font-medium">{{ ref.referred.username }}</p>
-                                        <p class="text-gray-400 text-xs">{{ ref.created_at|date:"M d, Y" }}</p>
-                                    </div>
-                                </div>
-                                <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">Joined</span>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-
                     {% else %}
-                    <div class="text-center py-6">
-                        <div class="w-16 h-16 bg-gray-800/50 border border-gray-700/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    <div class="text-center py-4 sm:py-6">
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-dark-900/50 border border-white/5 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                            <svg class="w-6 h-6 sm:w-8 sm:h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                             </svg>
                         </div>
-                        <h3 class="text-white font-bold text-lg mb-2">Referral Program</h3>
-                        <p class="text-gray-400 text-sm mb-4">Share your referral code and earn rewards when friends join</p>
-                        <button onclick="generateReferralCode()"
-                                class="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 border border-purple-500/30 text-white font-semibold rounded-xl transition-all duration-200 hover:scale-105 active:scale-95">
+                        <h3 class="text-white font-bold text-base sm:text-lg mb-2">Referral Program</h3>
+                        <p class="text-slate-400 text-xs sm:text-sm mb-4">Share your code and earn rewards</p>
+                        <button onclick="generateReferralCode()" class="w-full px-4 py-2.5 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-sm font-semibold rounded-xl transition-colors">
                             Generate Referral Code
                         </button>
                     </div>
@@ -397,62 +283,57 @@
             </div>
 
             <!-- Account Status Card -->
-            <div class="bg-gray-900/40 backdrop-blur-xl border border-gray-700/30 rounded-2xl shadow-2xl overflow-hidden pb-24">
-                <div class="px-4 sm:px-6 py-4 border-b border-gray-700/30 bg-gray-800/20">
-                    <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-                        <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            <div class="bg-dark-800/50 border border-white/5 rounded-2xl overflow-hidden">
+                <div class="px-4 sm:px-5 py-3 sm:py-4 border-b border-white/5">
+                    <h2 class="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                         </svg>
                         Account Status
                     </h2>
                 </div>
-                <div class="p-4 sm:p-6">
-                    <div class="space-y-4">
-                        <!-- Verification Status -->
-                        <div class="flex items-center justify-between p-3 bg-gray-800/30 border border-green-500/20 rounded-xl">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-green-500/20 border border-green-500/30 rounded-xl flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-white font-medium text-sm">Email Verified</p>
-                                    <p class="text-green-400 text-xs">Verified</p>
-                                </div>
+                <div class="p-4 sm:p-5 space-y-3">
+                    <!-- Email Verified -->
+                    <div class="flex items-center justify-between p-3 bg-dark-900/50 border border-green-500/20 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 sm:w-9 sm:h-9 bg-green-500/10 border border-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-white font-medium text-sm">Email Verified</p>
+                                <p class="text-green-400 text-xs">Verified</p>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Account Status -->
-                        <div class="flex items-center justify-between p-3 bg-gray-800/30 border border-blue-500/20 rounded-xl">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-white font-medium text-sm">Account Status</p>
-                                    <p class="text-blue-400 text-xs">Active</p>
-                                </div>
+                    <!-- Account Status -->
+                    <div class="flex items-center justify-between p-3 bg-dark-900/50 border border-blue-500/20 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 sm:w-9 sm:h-9 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-white font-medium text-sm">Account Status</p>
+                                <p class="text-blue-400 text-xs">Active</p>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Member Since -->
-                        <div class="flex items-center justify-between p-3 bg-gray-800/30 border border-purple-500/20 rounded-xl">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-white font-medium text-sm">Member Since</p>
-                                    <p class="text-purple-400 text-xs">{{ user.date_joined|date:"M d, Y" }}</p>
-                                </div>
+                    <!-- Member Since -->
+                    <div class="flex items-center justify-between p-3 bg-dark-900/50 border border-purple-500/20 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 sm:w-9 sm:h-9 bg-purple-500/10 border border-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-white font-medium text-sm">Member Since</p>
+                                <p class="text-purple-400 text-xs">{{ user.date_joined|date:"M d, Y" }}</p>
                             </div>
                         </div>
                     </div>
@@ -460,422 +341,65 @@
             </div>
         </div>
     </div>
-</section>
-
-<!-- Toast Notification -->
-<div id="toast" class="fixed top-4 right-4 z-50 hidden animate-slide-in-right">
-    <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-400/30">
-        <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-            </svg>
-        </div>
-        <span id="toastMessage" class="font-semibold">Operation completed successfully!</span>
-    </div>
 </div>
 
 <script>
-    // Deposit amount management
-    let depositAmount = 0;
-    let withdrawAmount = 0;
-
-    // Deposit functions
-    function setDepositAmount(amount) {
-        depositAmount = amount;
-        document.getElementById('depositAmount').value = amount;
-        updateDepositButtonState();
-        
-        // Add visual feedback for active button
-        document.querySelectorAll('.deposit-amount-btn').forEach(btn => {
-            btn.classList.remove('active', 'bg-green-500/20', 'border-green-500/30');
-        });
-        event.target.classList.add('active', 'bg-green-500/20', 'border-green-500/30');
-    }
-
-    function validateDepositAmount(input) {
-        let value = parseFloat(input.value) || 0;
-        
-        // Validate min and max
-        if (value < 1) {
-            input.value = '';
-            depositAmount = 0;
-        } else if (value > 1000000) {
-            input.value = 1000000;
-            depositAmount = 1000000;
-        } else {
-            depositAmount = value;
-        }
-        
-        // Remove active state from quick amount buttons when typing
-        document.querySelectorAll('.deposit-amount-btn').forEach(btn => {
-            btn.classList.remove('active', 'bg-green-500/20', 'border-green-500/30');
-        });
-        
-        updateDepositButtonState();
-    }
-
-    function updateDepositButtonState() {
-        const addButton = document.getElementById('addFundsBtn');
-        if (depositAmount > 0) {
-            addButton.disabled = false;
-        } else {
-            addButton.disabled = true;
-        }
-    }
-
-    function addToWallet() {
-        if (depositAmount <= 0) {
-            showToast('Please enter a valid amount', 'error');
-            return;
-        }
-        
-        // Update modal with current amount
-        document.getElementById('confirmDepositAmount').textContent = `₹${depositAmount.toLocaleString('en-IN')}`;
-        document.getElementById('modalDepositAmount').textContent = `₹${depositAmount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-        
-        // Calculate new balance
-        const currentBalance = parseFloat('{{ user.wallet }}') || 0;
-        const newBalance = currentBalance + depositAmount;
-        document.getElementById('newDepositBalance').textContent = `₹${newBalance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-        
-        // Show modal
-        document.getElementById('depositModal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeDepositModal() {
-        document.getElementById('depositModal').classList.add('hidden');
-        document.body.style.overflow = 'auto';
-    }
-
-    function confirmAddToWallet() {
-        document.getElementById('depositForm').submit();
-    }
-
-    // Withdraw functions
-    function setWithdrawAmount(amount) {
-        withdrawAmount = amount;
-        document.getElementById('withdrawAmount').value = amount;
-        updateWithdrawButtonState();
-        
-        // Add visual feedback for active button
-        document.querySelectorAll('.withdraw-amount-btn').forEach(btn => {
-            btn.classList.remove('active', 'bg-orange-500/20', 'border-orange-500/30');
-        });
-        event.target.classList.add('active', 'bg-orange-500/20', 'border-orange-500/30');
-    }
-
-    function validateWithdrawAmount(input) {
-        const currentBalance = parseFloat('{{ user.wallet }}') || 0;
-        let value = parseFloat(input.value) || 0;
-        
-        // Validate min and max
-        if (value < 1) {
-            input.value = '';
-            withdrawAmount = 0;
-        } else if (value > currentBalance) {
-            input.value = currentBalance;
-            withdrawAmount = currentBalance;
-        } else {
-            withdrawAmount = value;
-        }
-        
-        // Remove active state from quick amount buttons when typing
-        document.querySelectorAll('.withdraw-amount-btn').forEach(btn => {
-            btn.classList.remove('active', 'bg-orange-500/20', 'border-orange-500/30');
-        });
-        
-        updateWithdrawButtonState();
-    }
-
-    function updateWithdrawButtonState() {
-        const withdrawButton = document.getElementById('withdrawFundsBtn');
-        const currentBalance = parseFloat('{{ user.wallet }}') || 0;
-        
-        if (withdrawAmount > 0 && withdrawAmount <= currentBalance) {
-            withdrawButton.disabled = false;
-        } else {
-            withdrawButton.disabled = true;
-        }
-    }
-
-    function withdrawFromWallet() {
-        const currentBalance = parseFloat('{{ user.wallet }}') || 0;
-        
-        if (withdrawAmount <= 0) {
-            showToast('Please enter a valid amount', 'error');
-            return;
-        }
-        
-        if (withdrawAmount > currentBalance) {
-            showToast('Insufficient balance for withdrawal', 'error');
-            return;
-        }
-        
-        // Update modal with current amount
-        document.getElementById('confirmWithdrawAmount').textContent = `₹${withdrawAmount.toLocaleString('en-IN')}`;
-        document.getElementById('modalWithdrawAmount').textContent = `₹${withdrawAmount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-        
-        // Calculate new balance
-        const newBalance = currentBalance - withdrawAmount;
-        document.getElementById('newWithdrawBalance').textContent = `₹${newBalance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-        
-        // Show modal
-        document.getElementById('withdrawModal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeWithdrawModal() {
-        document.getElementById('withdrawModal').classList.add('hidden');
-        document.body.style.overflow = 'auto';
-    }
-
-    function confirmWithdrawFromWallet() {
-        document.getElementById('withdrawForm').submit();
-    }
-
     // Copy Referral Code
     function copyReferralCode() {
         const referralCode = document.getElementById('referralCode');
         referralCode.select();
         referralCode.setSelectionRange(0, 99999);
         navigator.clipboard.writeText(referralCode.value);
-        
-        showToast('Referral code copied to clipboard!');
+        showToast('Referral code copied to clipboard!', 'success');
     }
 
-    // Generate Referral Code (placeholder)
+    // Generate Referral Code
     function generateReferralCode() {
-        showToast('Referral code generation feature coming soon!', 'info');
+        showToast('Referral code generation coming soon!', 'info');
     }
 
     // Show Toast Notification
     function showToast(message, type = 'success') {
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toastMessage');
-
-        if (type === 'error') {
-            toast.innerHTML = `
-                <div class="bg-gradient-to-r from-rose-500 to-rose-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-rose-400/30">
-                    <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </div>
-                    <span class="font-semibold">${message}</span>
-                </div>
-            `;
-        } else if (type === 'info') {
-            toast.innerHTML = `
-                <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-blue-400/30">
-                    <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <span class="font-semibold">${message}</span>
-                </div>
-            `;
-        } else {
-            toast.innerHTML = `
-                <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-400/30">
-                    <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                        </svg>
-                    </div>
-                    <span class="font-semibold">${message}</span>
-                </div>
-            `;
-        }
-
-        toast.classList.remove('hidden');
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        
+        const colors = {
+            success: 'bg-green-500/90 border-green-400/30',
+            error: 'bg-red-500/90 border-red-400/30',
+            warning: 'bg-yellow-500/90 border-yellow-400/30',
+            info: 'bg-blue-500/90 border-blue-400/30'
+        };
+        
+        const icons = {
+            success: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+            error: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
+            warning: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01"/></svg>',
+            info: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+        };
+        
+        toast.className = `${colors[type]} backdrop-blur-sm border rounded-xl px-4 py-3 text-white text-sm flex items-center gap-3 animate-fade-in shadow-lg`;
+        toast.innerHTML = `${icons[type]}<span>${message}</span>`;
+        
+        container.appendChild(toast);
+        
         setTimeout(() => {
-            toast.classList.add('hidden');
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            toast.style.transition = 'all 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
 
     // Form submission feedback
-    document.getElementById('profileForm').addEventListener('submit', function(e) {
+    document.getElementById('profileForm')?.addEventListener('submit', function(e) {
         const submitBtn = this.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
-        
-        submitBtn.innerHTML = `
-            <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-            </svg>
-            Saving...
-        `;
+        submitBtn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Saving...';
         submitBtn.disabled = true;
-        
         setTimeout(() => {
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         }, 2000);
     });
-
-    // Close modals when clicking outside
-    document.getElementById('depositModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeDepositModal();
-        }
-    });
-
-    document.getElementById('withdrawModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeWithdrawModal();
-        }
-    });
-
-    // Keyboard support
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeDepositModal();
-            closeWithdrawModal();
-        }
-    });
-
-    // Auto-hide toast when scrolling
-    let scrollTimer;
-    window.addEventListener('scroll', function() {
-        const toast = document.getElementById('toast');
-        if (!toast.classList.contains('hidden')) {
-            clearTimeout(scrollTimer);
-            toast.classList.add('opacity-0');
-            scrollTimer = setTimeout(() => {
-                toast.classList.add('hidden');
-                toast.classList.remove('opacity-0');
-            }, 300);
-        }
-    });
-
-    // Initialize button states
-    document.addEventListener('DOMContentLoaded', function() {
-        updateDepositButtonState();
-        updateWithdrawButtonState();
-        
-        // Set max attribute for withdraw input
-        const withdrawInput = document.getElementById('withdrawAmount');
-        const currentBalance = parseFloat('{{ user.wallet }}') || 0;
-        withdrawInput.max = currentBalance;
-    });
 </script>
-
-<style>
-    /* Custom Animations */
-    @keyframes slide-in-right {
-        from { 
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to { 
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-
-    @keyframes fade-in {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    @keyframes scale-in {
-        from { 
-            transform: scale(0.9);
-            opacity: 0;
-        }
-        to { 
-            transform: scale(1);
-            opacity: 1;
-        }
-    }
-
-    .animate-slide-in-right {
-        animation: slide-in-right 0.3s ease-out;
-    }
-
-    .animate-fade-in {
-        animation: fade-in 0.3s ease-out;
-    }
-
-    .animate-scale-in {
-        animation: scale-in 0.3s ease-out;
-    }
-
-    /* Scrollbar hiding for mobile */
-    .scrollbar-hide {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
-    
-    .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-    }
-
-    /* Enhanced focus states */
-    input:focus-visible,
-    button:focus-visible {
-        outline: 2px solid #3B82F6;
-        outline-offset: 2px;
-    }
-
-    /* Smooth transitions */
-    .transition-all {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* Mobile optimizations */
-    @media (max-width: 640px) {
-        .stats-grid {
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        }
-        
-        .deposit-amount-btn,
-        .withdraw-amount-btn {
-            padding: 0.75rem 0.5rem;
-            font-size: 0.8rem;
-        }
-        
-        #depositAmount,
-        #withdrawAmount {
-            font-size: 1rem;
-            padding: 0.75rem 2.5rem 0.75rem 2.5rem;
-        }
-    }
-
-    /* Loading animation */
-    .animate-spin {
-        animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-
-    /* Amount button active states */
-    .deposit-amount-btn.active {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2)) !important;
-        border-color: rgba(16, 185, 129, 0.3) !important;
-        transform: scale(1.05);
-    }
-
-    .withdraw-amount-btn.active {
-        background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(239, 68, 68, 0.2)) !important;
-        border-color: rgba(249, 115, 22, 0.3) !important;
-        transform: scale(1.05);
-    }
-
-    /* Custom scrollbar for amount input */
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    input[type="number"] {
-        -moz-appearance: textfield;
-    }
-</style>
 {% endblock %}

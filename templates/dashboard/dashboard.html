@@ -1,353 +1,709 @@
 {% extends 'dashboard/base.html' %}
 {% load humanize static %}
 {% block body %}
-<!-- Top Header Stats Bar -->
-<div class="flex items-center justify-between px-4 py-2 bg-slate-800/80 border-b border-white/5 text-sm sticky top-0 z-10 w-full overflow-x-auto">
-    <div class="flex gap-4 md:gap-8 items-center shrink-0">
-        <div class="flex gap-1 items-center">
-            <span class="text-slate-400 text-xs">Total Assets:</span>
-            <span class="font-mono font-bold" data-dashboard-total-assets>₹{{ total_equity|floatformat:2 }}</span>
-        </div>
-        <div class="flex gap-1 items-center">
-            <span class="text-slate-400 text-xs">Unrealized PnL:</span>
-            <span id="dashboard-unrealised-pnl" class="font-mono font-bold {% if unrealised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %}" data-dashboard-unrealised-pnl>
-                ₹{{ unrealised_pnl|floatformat:2 }}
-            </span>
-        </div>
-    </div>
-</div>
-<!-- Main Grid Layout -->
-<div class="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-64px)] w-full overflow-hidden pb-16 lg:pb-0">
+<!-- Professional Trading Dashboard -->
+<div class="min-h-screen bg-[#0b0e14] text-slate-200 font-sans">
     
-    <!-- LEFT SIDEBAR: Watchlist (Mobile: Scrollable vertically, Desktop: Fixed sidebar) -->
-    <div class="w-full lg:w-[320px] flex-shrink-0 flex flex-col border-r border-white/5 bg-[#0d1321] lg:overflow-hidden order-2 lg:order-1 h-[400px] lg:h-full">
-        <!-- Watchlist Tabs -->
-        <div class="flex p-2 bg-slate-800/30 gap-1 shrink-0">
-            <button onclick="switchTab('fav')" id="tab-fav" class="flex-1 py-1.5 rounded text-xs font-semibold tab-active transition-all bg-blue-500/20 text-blue-400">Favs</button>
-            <button onclick="switchTab('pos')" id="tab-pos" class="flex-1 py-1.5 rounded text-xs font-semibold text-slate-400 transition-all hover:bg-white/5">Positions</button>
-        </div>
-        <!-- Search Bar -->
-        <div class="px-3 py-2 border-b border-white/5 relative">
-            <div class="relative">
-                <input type="text" id="watchlist-search-input" placeholder="Search tokens..." 
-                    class="w-full bg-slate-900/50 border border-white/10 rounded-md py-1.5 pl-8 pr-3 text-xs text-white focus:outline-none focus:border-blue-500/50 transition-colors">
-                <svg class="w-3.5 h-3.5 absolute left-2.5 top-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-            </div>
-            <!-- Search Results Dropdown -->
-            <div id="watchlist-search-results" class="absolute left-0 right-0 top-full mt-1 bg-[#161c2d] border border-white/10 rounded-md shadow-xl z-50 hidden max-h-[300px] overflow-y-auto">
-                <!-- Results will be injected here -->
-            </div>
-        </div>
-        <!-- Favorites List -->
-        <div id="fav-content" class="flex-1 overflow-y-auto tab-content">
-            {% if favorites %}
-                {% for fav in favorites %}
-                <div class="watchlist-item flex items-center justify-between px-3 py-2.5 cursor-pointer border-b border-white/[0.02] hover:bg-white/[0.05] transition-colors group" data-symbol="{{ fav.symbol }}">
-                    <div class="flex items-center gap-2">
-                        <svg onclick="WatchlistManager.toggleFavorite('{{ fav.symbol }}', event)" 
-                            class="w-3.5 h-3.5 favorite-star {% if fav.is_favorite %}text-amber-400{% else %}text-slate-600{% endif %} hover:text-amber-400 transition-colors"
-                            fill="{% if fav.is_favorite %}currentColor{% else %}none{% endif %}" stroke="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
+    <!-- Top Stats Bar - Sticky Header -->
+    <div class="sticky top-0 z-30 bg-[#111827]/95 backdrop-blur-md border-b border-white/5">
+        <div class="px-4 py-3 overflow-x-auto scrollbar-hide">
+            <div class="flex items-center justify-between gap-4 min-w-max">
+                <!-- Portfolio Stats Cards -->
+                <div class="flex items-center gap-3">
+                    <!-- Total Equity Card -->
+                    <div class="flex items-center gap-3 bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl px-4 py-2.5">
+                        <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-500/20">
+                            <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
                         <div>
-                            <div class="text-sm font-semibold text-white">{{ fav.symbol }}</div>
-                            <div class="text-[10px] text-slate-500">{{ fav.exchange|default:"BINANCE" }}</div>
+                            <div class="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Total Equity</div>
+                            <div class="font-mono font-bold text-white text-sm" data-dashboard-total-assets>₹{{ total_equity|floatformat:2 }}</div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
-                            <div class="font-mono text-sm font-semibold price-display" data-symbol="{{ fav.symbol }}">--</div>
-                            <div class="font-mono text-[10px] change-display" data-symbol="{{ fav.symbol }}">--</div>
-                        </div>
-                        <button onclick="WatchlistManager.removeFromWatchlist('{{ fav.symbol }}', event)" 
-                            class="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 transition-all text-slate-600">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    
+                    <!-- Wallet Balance Card -->
+                    <div class="flex items-center gap-3 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 rounded-xl px-4 py-2.5">
+                        <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-500/20">
+                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
                             </svg>
-                        </button>
+                        </div>
+                        <div>
+                            <div class="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Available</div>
+                            <div class="font-mono font-bold text-white text-sm">₹{{ wallet|floatformat:2 }}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Unrealized P&L Card -->
+                    <div class="flex items-center gap-3 bg-gradient-to-br {% if unrealised_pnl >= 0 %}from-green-500/10 to-green-600/5 border-green-500/20{% else %}from-red-500/10 to-red-600/5 border-red-500/20{% endif %} border rounded-xl px-4 py-2.5">
+                        <div class="flex items-center justify-center w-9 h-9 rounded-lg {% if unrealised_pnl >= 0 %}bg-green-500/20{% else %}bg-red-500/20{% endif %}">
+                            {% if unrealised_pnl >= 0 %}
+                            <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                            {% else %}
+                            <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                            </svg>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Unrealized P&L</div>
+                            <div id="dashboard-unrealised-pnl" class="font-mono font-bold {% if unrealised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %} text-sm" data-dashboard-unrealised-pnl>
+                                {% if unrealised_pnl >= 0 %}+{% endif %}₹{{ unrealised_pnl|floatformat:2 }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Today's P&L Card -->
+                    <div class="flex items-center gap-3 bg-gradient-to-br {% if today_pnl >= 0 %}from-green-500/10 to-green-600/5 border-green-500/20{% else %}from-red-500/10 to-red-600/5 border-red-500/20{% endif %} border rounded-xl px-4 py-2.5">
+                        <div class="flex items-center justify-center w-9 h-9 rounded-lg {% if today_pnl >= 0 %}bg-green-500/20{% else %}bg-red-500/20{% endif %}">
+                            {% if today_pnl >= 0 %}
+                            <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                            </svg>
+                            {% else %}
+                            <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Today's P&L</div>
+                            <div class="font-mono font-bold {% if today_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %} text-sm">
+                                {% if today_pnl >= 0 %}+{% endif %}₹{{ today_pnl|floatformat:2 }}
+                            </div>
+                        </div>
                     </div>
                 </div>
-                {% endfor %}
-            {% else %}
-                <div class="text-center py-8 text-slate-500 text-sm">No favorites added.</div>
-            {% endif %}
-        </div>
-        <!-- Positions List -->
-        <div id="pos-content" class="flex-1 overflow-y-auto tab-content hidden">
-            {% if open_positions %}
-                {% for pos in open_positions %}
-                <div class="watchlist-item flex items-center justify-between px-3 py-2.5 cursor-pointer border-b border-white/[0.02] hover:bg-white/[0.05] transition-colors" data-symbol="{{ pos.stock.symbol }}">
+                
+                <!-- Quick Stats -->
+                <div class="flex items-center gap-4 text-xs">
                     <div class="flex items-center gap-2">
-                        <div>
-                            <div class="text-sm font-semibold {% if pos.is_closed %}text-slate-500{% else %}text-white{% endif %}">{{ pos.stock.symbol }}</div>
-                            <div class="text-[10px] {% if pos.is_closed %}text-slate-600{% else %}text-green-500/80{% endif %}">Qty: <span class="sidebar-pos-qty" data-symbol="{{ pos.stock.symbol }}">{{ pos.quantity|floatformat:4 }}</span></div>
+                        <span class="text-slate-500">Positions:</span>
+                        <span class="font-bold text-blue-400">{{ open_positions|length }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-500">Orders:</span>
+                        <span class="font-bold text-amber-400">{{ recent_orders|length }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Grid Layout -->
+    <div class="flex flex-col lg:flex-row h-[calc(100vh-72px)] w-full overflow-hidden">
+        
+        <!-- LEFT SIDEBAR: Watchlist -->
+        <div class="w-full lg:w-[280px] flex-shrink-0 flex flex-col border-r border-white/5 bg-[#0d1321] lg:overflow-hidden order-2 lg:order-1 h-[350px] lg:h-full">
+            <!-- Watchlist Tabs -->
+            <div class="flex p-2 bg-[#111827] gap-1 shrink-0 border-b border-white/5">
+                <button onclick="switchTab('fav')" id="tab-fav" class="flex-1 py-2 rounded-lg text-xs font-semibold transition-all bg-blue-500/20 text-blue-400">
+                    <span class="flex items-center justify-center gap-1">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        Favs
+                    </span>
+                </button>
+                <button onclick="switchTab('pos')" id="tab-pos" class="flex-1 py-2 rounded-lg text-xs font-semibold text-slate-400 transition-all hover:bg-white/5">
+                    <span class="flex items-center justify-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        Positions
+                    </span>
+                </button>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="px-3 py-2.5 border-b border-white/5 relative">
+                <div class="relative">
+                    <input type="text" id="watchlist-search-input" placeholder="Search symbol..." 
+                        class="w-full bg-[#1a2035] border border-white/10 rounded-lg py-2 pl-9 pr-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all">
+                    <svg class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <div id="watchlist-search-results" class="absolute left-3 right-3 top-full mt-1 bg-[#161c2d] border border-white/10 rounded-lg shadow-xl z-50 hidden max-h-[280px] overflow-y-auto"></div>
+            </div>
+            
+            <!-- Favorites List -->
+            <div id="fav-content" class="flex-1 overflow-y-auto tab-content">
+                {% if favorites %}
+                    {% for fav in favorites %}
+                    <div class="watchlist-item flex items-center justify-between px-3 py-2.5 cursor-pointer border-b border-white/[0.03] hover:bg-white/[0.04] transition-colors group" data-symbol="{{ fav.symbol }}">
+                        <div class="flex items-center gap-2.5">
+                            <button onclick="WatchlistManager.toggleFavorite('{{ fav.symbol }}', event)" class="p-1 hover:scale-110 transition-transform">
+                                <svg class="w-3.5 h-3.5 {% if fav.is_favorite %}text-amber-400{% else %}text-slate-600{% endif %} hover:text-amber-400 transition-colors"
+                                    fill="{% if fav.is_favorite %}currentColor{% else %}none{% endif %}" stroke="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                            </button>
+                            <div>
+                                <div class="text-xs font-semibold text-white">{{ fav.symbol }}</div>
+                                <div class="text-[10px] text-slate-500">{{ fav.exchange|default:"BINANCE" }}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="text-right">
+                                <div class="font-mono text-xs font-semibold price-display" data-symbol="{{ fav.symbol }}">--</div>
+                                <div class="font-mono text-[10px] change-display" data-symbol="{{ fav.symbol }}">--</div>
+                            </div>
+                            <button onclick="WatchlistManager.removeFromWatchlist('{{ fav.symbol }}', event)" 
+                                class="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-500/10 rounded transition-all text-slate-600 hover:text-red-400">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <div class="font-mono text-sm font-semibold price-display" data-symbol="{{ pos.stock.symbol }}">--</div>
-                        {% if pos.realised_pnl != 0 %}
-                        <div class="font-mono text-[10px] {% if pos.realised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
-                            ₹{{ pos.realised_pnl|floatformat:2 }} PnL
+                    {% endfor %}
+                {% else %}
+                    <div class="flex flex-col items-center justify-center h-full text-slate-500">
+                        <svg class="w-10 h-10 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                        </svg>
+                        <span class="text-xs">No favorites yet</span>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Positions List -->
+            <div id="pos-content" class="flex-1 overflow-y-auto tab-content hidden">
+                {% if open_positions %}
+                    {% for pos in open_positions %}
+                    <div class="watchlist-item flex items-center justify-between px-3 py-2.5 cursor-pointer border-b border-white/[0.03] hover:bg-white/[0.04] transition-colors" data-symbol="{{ pos.stock.symbol }}">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                            <div>
+                                <div class="text-xs font-semibold text-white">{{ pos.stock.symbol }}</div>
+                                <div class="text-[10px] text-slate-500">Qty: <span class="sidebar-pos-qty text-slate-400" data-symbol="{{ pos.stock.symbol }}">{{ pos.quantity|floatformat:4 }}</span></div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-mono text-xs font-semibold price-display" data-symbol="{{ pos.stock.symbol }}">--</div>
+                            {% if pos.realised_pnl != 0 %}
+                            <div class="font-mono text-[10px] {% if pos.realised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %}">
+                                {% if pos.realised_pnl >= 0 %}+{% endif %}₹{{ pos.realised_pnl|floatformat:2 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="flex flex-col items-center justify-center h-full text-slate-500">
+                        <svg class="w-10 h-10 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 12H4"></path>
+                        </svg>
+                        <span class="text-xs">No open positions</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- CENTER: Chart & Bottom Panels -->
+        <div class="flex-1 flex flex-col min-w-0 bg-[#0b0e14] order-1 lg:order-2">
+            <!-- Chart Header -->
+            <div class="h-12 border-b border-white/5 flex items-center px-4 justify-between bg-[#111827]/50 shrink-0">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                        <h2 class="text-sm font-bold font-mono text-white" id="active-symbol-header">Select Symbol</h2>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span id="active-symbol-price" class="font-mono font-bold text-sm">--</span>
+                        <span id="active-symbol-change" class="font-mono text-xs px-2 py-0.5 rounded">--</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chart Container -->
+            <div class="flex-1 relative min-h-[280px]" id="tv-chart-container"></div>
+            
+            <!-- Bottom Panel: Tabs -->
+            <div class="h-[320px] border-t border-white/5 flex flex-col bg-[#0d1117] shrink-0">
+                <!-- Tabs Header -->
+                <div class="flex bg-[#111827] border-b border-white/5 shrink-0">
+                    <button onclick="switchBottomTab('positions')" id="btn-tab-positions" class="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-all border-b-2 border-blue-500 text-white bg-white/5 flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        Positions
+                        {% if open_positions %}
+                        <span class="bg-blue-500/20 text-blue-400 text-[9px] px-1.5 py-0.5 rounded-full">{{ open_positions|length }}</span>
+                        {% endif %}
+                    </button>
+                    <button onclick="switchBottomTab('orderbook')" id="btn-tab-orderbook" class="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-all border-b-2 border-transparent text-slate-400 hover:text-white flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                        Order Book
+                    </button>
+                    <button onclick="switchBottomTab('trades')" id="btn-tab-trades" class="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-all border-b-2 border-transparent text-slate-400 hover:text-white flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                        Trades
+                    </button>
+                    <button onclick="switchBottomTab('orders')" id="btn-tab-orders" class="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-all border-b-2 border-transparent text-slate-400 hover:text-white flex items-center gap-2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        Orders
+                    </button>
+                </div>
+                
+                <!-- Tab Content -->
+                <div class="flex-1 overflow-hidden relative">
+                    <!-- Positions Tab - Enhanced Professional Table -->
+                    <div id="pane-positions" class="absolute inset-0 flex flex-col overflow-hidden">
+                        <!-- Table Controls -->
+                        <div class="flex items-center justify-between px-4 py-2 bg-[#0f172a] border-b border-white/5 shrink-0">
+                            <div class="flex items-center gap-2">
+                                <div class="relative">
+                                    <input type="text" id="position-filter" placeholder="Filter positions..." 
+                                        class="bg-[#1a2035] border border-white/10 rounded-lg py-1.5 pl-8 pr-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 w-40">
+                                    <svg class="w-3 h-3 absolute left-2.5 top-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </div>
+                                <select id="pnl-sort" class="bg-[#1a2035] border border-white/10 rounded-lg py-1.5 px-3 text-xs text-slate-400 focus:outline-none focus:border-blue-500/50 cursor-pointer">
+                                    <option value="">Sort by P&L</option>
+                                    <option value="high">Highest P&L</option>
+                                    <option value="low">Lowest P&L</option>
+                                    <option value="pct-high">Best %</option>
+                                    <option value="pct-low">Worst %</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="text-slate-500">Total P&L:</span>
+                                <span id="total-positions-pnl" class="font-mono font-bold text-green-400">₹0.00</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Positions Table -->
+                        <div class="flex-1 overflow-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead class="sticky top-0 bg-[#0f172a] z-10">
+                                    <tr class="border-b border-white/5">
+                                        <th class="px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wider text-[10px] cursor-pointer hover:text-white transition-colors" onclick="sortPositions('symbol')">
+                                            <div class="flex items-center gap-1">Asset <svg class="w-3 h-3 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></div>
+                                        </th>
+                                        <th class="px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wider text-[10px] text-right cursor-pointer hover:text-white transition-colors" onclick="sortPositions('qty')">
+                                            <div class="flex items-center justify-end gap-1">Quantity <svg class="w-3 h-3 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></div>
+                                        </th>
+                                        <th class="px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wider text-[10px] text-right cursor-pointer hover:text-white transition-colors" onclick="sortPositions('entry')">
+                                            <div class="flex items-center justify-end gap-1">Entry Price <svg class="w-3 h-3 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></div>
+                                        </th>
+                                        <th class="px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wider text-[10px] text-right">
+                                            <div class="flex items-center justify-end gap-1">Market Price</div>
+                                        </th>
+                                        <th class="px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wider text-[10px] text-right cursor-pointer hover:text-white transition-colors" onclick="sortPositions('pnl')">
+                                            <div class="flex items-center justify-end gap-1">P&L <svg class="w-3 h-3 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></div>
+                                        </th>
+                                        <th class="px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wider text-[10px] text-right cursor-pointer hover:text-white transition-colors" onclick="sortPositions('pct')">
+                                            <div class="flex items-center justify-end gap-1">Return % <svg class="w-3 h-3 sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></div>
+                                        </th>
+                                        <th class="px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wider text-[10px] text-center">
+                                            <div class="flex items-center justify-center gap-1">Action</div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="positions-table-body" class="divide-y divide-white/[0.03]">
+                                    {% for pos in open_positions %}
+                                    <tr class="hover:bg-white/[0.03] transition-colors group position-row" 
+                                        data-pos-symbol="{{ pos.stock.symbol }}"
+                                        data-pos-qty="{{ pos.quantity }}"
+                                        data-pos-entry="{{ pos.buy_price }}"
+                                        data-pos-pnl="0"
+                                        data-pos-pct="0">
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-white/10">
+                                                    <span class="text-[10px] font-bold text-blue-400">{{ pos.stock.symbol|slice:":2" }}</span>
+                                                </div>
+                                                <div>
+                                                    <div class="font-bold text-white text-xs">{{ pos.stock.symbol }}</div>
+                                                    <div class="text-[9px] text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                                        Long
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 font-mono text-right text-slate-300 text-xs">{{ pos.quantity|floatformat:4 }}</td>
+                                        <td class="px-4 py-3 font-mono text-right text-slate-300 text-xs">₹{{ pos.buy_price|floatformat:2 }}</td>
+                                        <td class="px-4 py-3 font-mono text-right text-white text-xs market-price" data-symbol="{{ pos.stock.symbol }}">₹{{ pos.stock.current_price|floatformat:2 }}</td>
+                                        <td class="px-4 py-3 font-mono text-right pnl-value font-bold text-xs" data-symbol="{{ pos.stock.symbol }}" data-avg="{{ pos.buy_price }}" data-qty="{{ pos.quantity }}">
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-800/50">--</span>
+                                        </td>
+                                        <td class="px-4 py-3 font-mono text-right pnl-percent font-bold text-xs" data-symbol="{{ pos.stock.symbol }}">
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-800/50">--</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <button onclick="TradingPanel.closePosition('{{ pos.stock.symbol }}', '{{ pos.quantity }}', this)" 
+                                                class="px-3 py-1.5 bg-red-500/10 text-red-400 rounded-lg border border-red-500/20 text-[10px] font-bold uppercase tracking-wider hover:bg-red-500 hover:text-white hover:border-red-500 transition-all opacity-0 group-hover:opacity-100">
+                                                Close
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            
+                            <!-- Empty State -->
+                            {% if not open_positions %}
+                            <div class="flex flex-col items-center justify-center h-full text-slate-500">
+                                <svg class="w-16 h-16 mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                <p class="text-sm font-medium">No open positions</p>
+                                <p class="text-xs mt-1">Start trading to see your positions here</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Order Book Tab -->
+                    <div id="pane-orderbook" class="absolute inset-0 hidden flex lg:flex-row">
+                        <div class="flex-1 border-r border-white/5 flex flex-col overflow-hidden">
+                            <div class="text-[10px] py-2 text-slate-400 border-b border-white/5 uppercase tracking-wider bg-[#111827] shrink-0 flex justify-between px-4 font-semibold">
+                                <span>Bid Price</span><span>Amount</span><span>Total</span>
+                            </div>
+                            <div class="flex-1 overflow-y-auto p-1 flex flex-col space-y-0.5" id="bids-container"></div>
+                        </div>
+                        <div class="flex-1 border-r border-white/5 flex flex-col overflow-hidden">
+                            <div class="text-[10px] py-2 text-slate-400 border-b border-white/5 uppercase tracking-wider bg-[#111827] shrink-0 flex justify-between px-4 font-semibold">
+                                <span>Ask Price</span><span>Amount</span><span>Total</span>
+                            </div>
+                            <div class="flex-1 overflow-y-auto p-1 flex flex-col space-y-0.5" id="asks-container"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Trades Tab -->
+                    <div id="pane-trades" class="absolute inset-0 hidden flex flex-col">
+                        <div class="text-[10px] py-2 text-slate-400 border-b border-white/5 uppercase tracking-wider bg-[#111827] shrink-0 flex justify-between px-4 font-semibold">
+                            <span>Price</span><span>Amount</span><span>Time</span>
+                        </div>
+                        <div class="flex-1 overflow-y-auto p-1 flex flex-col space-y-0.5" id="recent-trades-container"></div>
+                    </div>
+                    
+                    <!-- Orders Tab -->
+                    <div id="pane-orders" class="absolute inset-0 hidden flex flex-col overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="sticky top-0 bg-[#0f172a] z-10">
+                                <tr class="border-b border-white/5">
+                                    <th class="px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wider text-[10px]">Time</th>
+                                    <th class="px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wider text-[10px]">Asset</th>
+                                    <th class="px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wider text-[10px]">Type</th>
+                                    <th class="px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wider text-[10px] text-right">Price</th>
+                                    <th class="px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wider text-[10px] text-right">Qty</th>
+                                    <th class="px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wider text-[10px] text-right">Amount</th>
+                                    <th class="px-4 py-2.5 font-semibold text-slate-400 uppercase tracking-wider text-[10px] text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-table-body" class="divide-y divide-white/[0.03]">
+                                {% for order in recent_orders %}
+                                <tr class="hover:bg-white/[0.03] transition-colors">
+                                    <td class="px-4 py-2.5 text-slate-500 font-mono text-xs">{{ order.created_at|date:"H:i:s" }}</td>
+                                    <td class="px-4 py-2.5 font-bold text-white text-xs">{{ order.stock.symbol }}</td>
+                                    <td class="px-4 py-2.5">
+                                        <span class="{% if order.order_type == 'BUY' %}text-green-400{% else %}text-red-400{% endif %} font-bold text-xs flex items-center gap-1">
+                                            {% if order.order_type == 'BUY' %}
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                                            {% else %}
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                                            {% endif %}
+                                            {{ order.order_type }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-2.5 font-mono text-right text-slate-300 text-xs">₹{{ order.price|floatformat:2 }}</td>
+                                    <td class="px-4 py-2.5 font-mono text-right text-slate-300 text-xs">{{ order.quantity|floatformat:4 }}</td>
+                                    <td class="px-4 py-2.5 font-mono text-right text-slate-300 text-xs">₹{{ order.amount|floatformat:2 }}</td>
+                                    <td class="px-4 py-2.5 text-center">
+                                        <span class="px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider inline-flex items-center gap-1
+                                            {% if order.status == 'completed' %}bg-green-500/10 text-green-400 border border-green-500/20
+                                            {% elif order.status == 'pending' %}bg-amber-500/10 text-amber-400 border border-amber-500/20
+                                            {% else %}bg-red-500/10 text-red-400 border border-red-500/20{% endif %}">
+                                            {% if order.status == 'completed' %}
+                                            <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                            {% elif order.status == 'pending' %}
+                                            <svg class="w-2.5 h-2.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            {% endif %}
+                                            {{ order.status }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        
+                        {% if not recent_orders %}
+                        <div class="flex flex-col items-center justify-center h-full text-slate-500">
+                            <svg class="w-16 h-16 mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            <p class="text-sm font-medium">No orders yet</p>
+                            <p class="text-xs mt-1">Your order history will appear here</p>
                         </div>
                         {% endif %}
                     </div>
                 </div>
-                {% endfor %}
-            {% else %}
-                <div class="text-center py-8 text-slate-500 text-sm">No open positions.</div>
-            {% endif %}
-        </div>
-    </div>
-    <!-- CENTER COL: Performance & Chart -->
-    <div class="flex-1 flex flex-col min-w-0 bg-[#0b0e14] order-1 lg:order-2">
-        <!-- Chart Header -->
-        <div class="h-14 border-b border-white/5 flex items-center px-4 justify-between bg-slate-800/20 shrink-0">
-            <div class="flex items-center gap-3">
-                <h2 class="text-xl font-bold font-mono text-blue-100" id="active-symbol-header">Select Symbol</h2>
-                <span id="active-symbol-price" class="font-mono font-bold text-lg">--</span>
-                <span id="active-symbol-change" class="font-mono text-xs">--</span>
             </div>
         </div>
-        
-        <!-- Chart Container -->
-        <div class="flex-1 relative min-h-[300px] lg:min-h-0" id="tv-chart-container">
-            <!-- Lightweight chart will be mounted here -->
-        </div>
-        <!-- Bottom Panel: Tabs for Orderbook, Trades, Positions, Orders -->
-        <div class="h-[300px] lg:h-[35%] border-t border-white/5 flex flex-col bg-[#0b101e] shrink-0">
-            <!-- Tabs Header -->
-            <div class="flex bg-slate-900/80 border-b border-white/5 shrink-0">
-                <button onclick="switchBottomTab('positions')" id="btn-tab-positions" class="px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all border-b-2 border-blue-500 text-white bg-white/5">Active Positions</button>
-                <button onclick="switchBottomTab('orderbook')" id="btn-tab-orderbook" class="px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all border-b-2 border-transparent text-slate-400 hover:text-white">Order Book</button>
-                <button onclick="switchBottomTab('trades')" id="btn-tab-trades" class="px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all border-b-2 border-transparent text-slate-400 hover:text-white">Recent Trades</button>
-                <button onclick="switchBottomTab('orders')" id="btn-tab-orders" class="px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all border-b-2 border-transparent text-slate-400 hover:text-white">Open Orders</button>
-            </div>
-            <!-- Tab Content Area -->
-            <div class="flex-1 overflow-hidden relative">
-                <!-- Orderbook Tab -->
-                <div id="pane-orderbook" class="absolute inset-0 hidden flex lg:flex-row">
-                    <div class="flex-1 border-r border-white/5 flex flex-col overflow-hidden">
-                        <div class="text-[10px] py-1 text-slate-400 border-b border-white/5 uppercase tracking-wider bg-slate-900/50 shrink-0 flex justify-between px-4">
-                            <span>Bid Price</span><span>Amount</span><span>Total</span>
-                        </div>
-                        <div class="flex-1 overflow-y-auto p-1 flex flex-col space-y-0.5" id="bids-container"></div>
-                    </div>
-                    <div class="flex-1 border-r border-white/5 flex flex-col overflow-hidden">
-                        <div class="text-[10px] py-1 text-slate-400 border-b border-white/5 uppercase tracking-wider bg-slate-900/50 shrink-0 flex justify-between px-4">
-                            <span>Ask Price</span><span>Amount</span><span>Total</span>
-                        </div>
-                        <div class="flex-1 overflow-y-auto p-1 flex flex-col space-y-0.5" id="asks-container"></div>
-                    </div>
-                </div>
-                <!-- Trades Tab -->
-                <div id="pane-trades" class="absolute inset-0 hidden flex flex-col">
-                    <div class="text-[10px] py-1 text-slate-400 border-b border-white/5 uppercase tracking-wider bg-slate-900/50 shrink-0 flex justify-between px-4">
-                        <span>Price</span><span>Amount</span><span>Time</span>
-                    </div>
-                    <div class="flex-1 overflow-y-auto p-1 flex flex-col space-y-0.5" id="recent-trades-container"></div>
-                </div>
-                <!-- Positions Tab -->
-                <div id="pane-positions" class="absolute inset-0 flex flex-col overflow-x-auto">
-                    <table class="w-full text-left text-[11px] border-collapse">
-                        <thead class="sticky top-0 bg-[#0f172a] text-slate-500 uppercase tracking-wider border-b border-white/5 z-10">
-                            <tr>
-                                <th class="px-4 py-3 font-bold">Asset</th>
-                                <th class="px-4 py-3 font-bold text-right">Quantity</th>
-                                <th class="px-4 py-3 font-bold text-right">Avg Price</th>
-                                <th class="px-4 py-3 font-bold text-right">Market Price</th>
-                                <th class="px-4 py-3 font-bold text-right">PnL (Unrealised)</th>
-                                <th class="px-4 py-3 font-bold text-right">Return %</th>
-                                <th class="px-4 py-3 font-bold text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="positions-table-body" class="divide-y divide-white/[0.03]">
-                            {% for pos in open_positions %}
-                            <tr class="hover:bg-white/[0.02] transition-colors group border-b border-white/[0.02]" data-pos-symbol="{{ pos.stock.symbol }}">
-                                <td class="px-4 py-3">
-                                    <div class="flex flex-col">
-                                        <span class="font-bold text-blue-400">{{ pos.stock.symbol }}</span>
-                                        <span class="text-[9px] text-slate-500 uppercase">Binance • Long</span>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 font-mono text-right text-slate-300">{{ pos.quantity|floatformat:4 }}</td>
-                                <td class="px-4 py-3 font-mono text-right text-slate-300">₹{{ pos.buy_price|floatformat:2 }}</td>
-                                <td class="px-4 py-3 font-mono text-right market-price text-white" data-symbol="{{ pos.stock.symbol }}">₹{{ pos.stock.current_price|floatformat:2 }}</td>
-                                <td class="px-4 py-3 font-mono text-right pnl-value font-bold" data-symbol="{{ pos.stock.symbol }}" data-avg="{{ pos.buy_price }}" data-qty="{{ pos.quantity }}">--</td>
-                                <td class="px-4 py-3 font-mono text-right pnl-percent font-bold" data-symbol="{{ pos.stock.symbol }}">--</td>
-                                <td class="px-4 py-3 text-center">
-                                    <button onclick="TradingPanel.closePosition('{{ pos.stock.symbol }}', '{{ pos.quantity }}', this)" 
-                                        class="px-3 py-1 bg-red-500/10 text-red-500 rounded border border-red-500/20 text-[10px] hover:bg-red-500 hover:text-white transition-all font-bold uppercase tracking-tighter">
-                                        Close
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <!-- Orders Tab -->
-                <div id="pane-orders" class="absolute inset-0 hidden flex flex-col overflow-x-auto">
-                    <table class="w-full text-left text-[11px] border-collapse">
-                        <thead class="sticky top-0 bg-[#0f172a] text-slate-500 uppercase tracking-wider border-b border-white/5 z-10">
-                            <tr>
-                                <th class="px-4 py-3 font-bold">Time</th>
-                                <th class="px-4 py-3 font-bold">Asset</th>
-                                <th class="px-4 py-3 font-bold">Type</th>
-                                <th class="px-4 py-3 font-bold text-right">Price</th>
-                                <th class="px-4 py-3 font-bold text-right">Qty</th>
-                                <th class="px-4 py-3 font-bold text-right">Amount</th>
-                                <th class="px-4 py-3 font-bold text-center">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="orders-table-body" class="divide-y divide-white/[0.03]">
-                            {% for order in recent_orders %}
-                            <tr class="hover:bg-white/[0.02] transition-colors border-b border-white/[0.02]">
-                                <td class="px-4 py-3 text-slate-500 font-mono">{{ order.created_at|date:"H:i:s" }}</td>
-                                <td class="px-4 py-3 font-bold text-white">{{ order.stock.symbol }}</td>
-                                <td class="px-4 py-3"><span class="{% if order.order_type == 'BUY' %}text-green-400{% else %}text-red-400{% endif %} font-bold">{{ order.order_type }}</span></td>
-                                <td class="px-4 py-3 font-mono text-right text-slate-300">₹{{ order.price|floatformat:2 }}</td>
-                                <td class="px-4 py-3 font-mono text-right text-slate-300">{{ order.quantity|floatformat:4 }}</td>
-                                <td class="px-4 py-3 font-mono text-right text-slate-300">₹{{ order.amount|floatformat:2 }}</td>
-                                <td class="px-4 py-3 text-center">
-                                    <span class="px-2 py-0.5 rounded-[4px] text-[9px] uppercase font-bold tracking-tighter
-                                        {% if order.status == 'completed' %}bg-green-500/10 text-green-400 border border-green-500/20
-                                        {% elif order.status == 'pending' %}bg-amber-500/10 text-amber-400 border border-amber-500/20
-                                        {% else %}bg-red-500/10 text-red-400 border border-red-500/20{% endif %}">
-                                        {{ order.status }}
-                                    </span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- RIGHT SIDEBAR: Order Panel -->
-    <div class="w-full lg:w-[320px] flex-shrink-0 flex flex-col border-l border-white/5 bg-[#0d1321] order-3 lg:order-3">
-        <!-- Order Panel Header -->
-        <div class="p-4 border-b border-white/5 shrink-0">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    Trade
-                </h3>
-                <span id="trade-panel-symbol" class="text-sm font-bold text-blue-400 bg-blue-500/10 px-2 py-1 rounded">BTC/USD</span>
-            </div>
-            <!-- Action Buttons -->
-            <div class="flex gap-2 mb-4 bg-slate-800/50 p-1 rounded-lg">
-                <button type="button" onclick="TradingPanel.side = 'buy'; document.getElementById('submit-order-btn').className='w-full py-3 rounded-lg font-bold text-white shadow-lg transition-all shadow-green-500/20 bg-green-500 hover:bg-green-600'; document.getElementById('btn-buy').classList.add('bg-slate-700', 'text-white'); document.getElementById('btn-buy').classList.remove('text-slate-400'); document.getElementById('btn-sell').classList.remove('bg-slate-700', 'text-white'); document.getElementById('btn-sell').classList.add('text-slate-400');" id="btn-buy" class="flex-1 py-1.5 rounded text-sm font-bold bg-slate-700 text-white transition-colors">Buy</button>
-                <button type="button" onclick="TradingPanel.side = 'sell'; document.getElementById('submit-order-btn').className='w-full py-3 rounded-lg font-bold text-white shadow-lg transition-all shadow-red-500/20 bg-red-500 hover:bg-red-600'; document.getElementById('btn-sell').classList.add('bg-slate-700', 'text-white'); document.getElementById('btn-sell').classList.remove('text-slate-400'); document.getElementById('btn-buy').classList.remove('bg-slate-700', 'text-white'); document.getElementById('btn-buy').classList.add('text-slate-400');" id="btn-sell" class="flex-1 py-1.5 rounded text-sm font-bold text-slate-400 transition-colors hover:text-white">Sell</button>
-            </div>
 
-            <!-- Amount / Quantity Toggle -->
-            <div class="flex bg-slate-800/50 p-1 rounded-lg mb-4 text-[10px] font-bold uppercase">
-                <button type="button" id="toggle-qty" class="flex-1 py-1 rounded transition-all bg-blue-500/20 text-blue-400">Quantity</button>
-                <button type="button" id="toggle-amt" class="flex-1 py-1 rounded transition-all text-slate-400 hover:text-white">Amount</button>
-            </div>
-            <!-- Amount Input -->
-            <div class="mb-6">
-                <label class="block text-xs text-slate-400 mb-1" id="order-input-label">Quantity</label>
-                <div class="relative">
-                    <input type="number" id="order-qty" step="0.0001" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="0.00">
-                    <div class="absolute right-3 top-2.5 text-xs font-bold text-slate-500" id="order-currency-display">QTY</div>
+        <!-- RIGHT SIDEBAR: Order Panel -->
+        <div class="w-full lg:w-[300px] flex-shrink-0 flex flex-col border-l border-white/5 bg-[#0d1321] order-3">
+            <!-- Order Panel Header -->
+            <div class="p-4 border-b border-white/5 shrink-0 bg-[#111827]">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-white uppercase tracking-wider text-xs flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        New Order
+                    </h3>
+                    <span id="trade-panel-symbol" class="text-xs font-bold text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-md border border-blue-500/20">BTC/USD</span>
                 </div>
                 
-                <!-- Estimate Display -->
-                <div id="order-estimate-container" class="mt-2 px-2 py-1.5 bg-blue-500/5 border border-blue-500/10 rounded-md hidden">
-                    <div class="flex justify-between items-center text-[10px]">
-                        <span class="text-slate-500" id="estimate-label">Est. Amount:</span>
-                        <span class="font-mono font-bold text-blue-400" id="estimate-value">--</span>
+                <!-- Buy/Sell Toggle -->
+                <div class="flex gap-1.5 mb-4 bg-[#1a2035] p-1 rounded-lg">
+                    <button type="button" id="btn-buy" 
+                        onclick="setTradeSide('buy')" 
+                        class="flex-1 py-2 rounded-md text-xs font-bold transition-all bg-green-500 text-white shadow-lg shadow-green-500/20">
+                        Buy / Long
+                    </button>
+                    <button type="button" id="btn-sell" 
+                        onclick="setTradeSide('sell')" 
+                        class="flex-1 py-2 rounded-md text-xs font-bold transition-all text-slate-400 hover:text-white">
+                        Sell / Short
+                    </button>
+                </div>
+
+                <!-- Quantity/Amount Toggle -->
+                <div class="flex bg-[#1a2035] p-1 rounded-lg mb-4 text-[10px] font-bold uppercase">
+                    <button type="button" id="toggle-qty" class="flex-1 py-1.5 rounded-md transition-all bg-blue-500/20 text-blue-400">Quantity</button>
+                    <button type="button" id="toggle-amt" class="flex-1 py-1.5 rounded-md transition-all text-slate-400 hover:text-white">Amount (₹)</button>
+                </div>
+                
+                <!-- Amount Input -->
+                <div class="mb-4">
+                    <label class="block text-[10px] text-slate-400 mb-1.5 font-semibold uppercase tracking-wider" id="order-input-label">Quantity</label>
+                    <div class="relative">
+                        <input type="number" id="order-qty" step="0.0001" 
+                            class="w-full bg-[#1a2035] border border-white/10 rounded-lg px-3 py-2.5 text-white font-mono text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" 
+                            placeholder="0.00">
+                        <div class="absolute right-3 top-3 text-[10px] font-bold text-slate-500 uppercase" id="order-currency-display">QTY</div>
+                    </div>
+                    
+                    <!-- Estimate Display -->
+                    <div id="order-estimate-container" class="mt-2 px-3 py-2 bg-blue-500/5 border border-blue-500/10 rounded-lg hidden">
+                        <div class="flex justify-between items-center text-[10px]">
+                            <span class="text-slate-500 font-semibold uppercase" id="estimate-label">Est. Amount:</span>
+                            <span class="font-mono font-bold text-blue-400" id="estimate-value">--</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Percentage Buttons -->
+                    <div class="grid grid-cols-4 gap-1.5 mt-3">
+                        <button class="py-2 bg-[#1a2035] text-[10px] font-bold text-slate-400 rounded-lg hover:bg-blue-500/10 hover:text-blue-400 transition-all border border-white/5" onclick="setQtyPercent(25)">25%</button>
+                        <button class="py-2 bg-[#1a2035] text-[10px] font-bold text-slate-400 rounded-lg hover:bg-blue-500/10 hover:text-blue-400 transition-all border border-white/5" onclick="setQtyPercent(50)">50%</button>
+                        <button class="py-2 bg-[#1a2035] text-[10px] font-bold text-slate-400 rounded-lg hover:bg-blue-500/10 hover:text-blue-400 transition-all border border-white/5" onclick="setQtyPercent(75)">75%</button>
+                        <button class="py-2 bg-[#1a2035] text-[10px] font-bold text-slate-400 rounded-lg hover:bg-blue-500/10 hover:text-blue-400 transition-all border border-white/5" onclick="setQtyPercent(100)">100%</button>
                     </div>
                 </div>
-                <!-- Percentage Buttons -->
-                <div class="flex justify-between gap-1 mt-2">
-                    <button class="flex-1 py-1 bg-slate-800 text-xs text-slate-400 rounded hover:bg-slate-700 transition" onclick="setQtyPercent(25)">25%</button>
-                    <button class="flex-1 py-1 bg-slate-800 text-xs text-slate-400 rounded hover:bg-slate-700 transition" onclick="setQtyPercent(50)">50%</button>
-                    <button class="flex-1 py-1 bg-slate-800 text-xs text-slate-400 rounded hover:bg-slate-700 transition" onclick="setQtyPercent(75)">75%</button>
-                    <button class="flex-1 py-1 bg-slate-800 text-xs text-slate-400 rounded hover:bg-slate-700 transition" onclick="setQtyPercent(100)">100%</button>
+                
+                <!-- Submit Button -->
+                <button id="submit-order-btn" 
+                    class="w-full py-3 rounded-lg font-bold text-white text-sm uppercase tracking-wider transition-all shadow-lg shadow-green-500/20 bg-green-500 hover:bg-green-600 hover:shadow-green-500/30">
+                    Buy / Long
+                </button>
+            </div>
+            
+            <!-- Balance & Info -->
+            <div class="flex-1 p-4 overflow-y-auto">
+                <div class="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-xl p-4 border border-slate-700/50 mb-3">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Available Balance</span>
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="font-mono font-bold text-white text-xl" id="wallet-balance">₹{{ wallet|floatformat:2 }}</div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-slate-800/30 to-slate-900/30 rounded-xl p-4 border border-slate-700/30">
+                    <div class="flex items-center gap-2 mb-3">
+                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase">Quick Tips</span>
+                    </div>
+                    <ul class="text-[10px] text-slate-500 space-y-1.5">
+                        <li class="flex items-start gap-1.5">
+                            <span class="text-blue-400 mt-0.5">•</span>
+                            <span>Use percentage buttons for quick position sizing</span>
+                        </li>
+                        <li class="flex items-start gap-1.5">
+                            <span class="text-blue-400 mt-0.5">•</span>
+                            <span>Market orders execute instantly at current price</span>
+                        </li>
+                        <li class="flex items-start gap-1.5">
+                            <span class="text-blue-400 mt-0.5">•</span>
+                            <span>Always check your balance before placing orders</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
-            <!-- Submit Button -->
-            <button id="submit-order-btn" class="w-full py-3 rounded-lg font-bold text-white shadow-lg transition-all shadow-green-500/20 bg-green-500 hover:bg-green-600">
-                Buy / Long
-            </button>
-        </div>
-        
-        <!-- Info boxes below order panel -->
-        <div class="flex-1 p-4 overflow-y-auto">
-             <div class="bg-slate-800/30 rounded-lg p-3 border border-slate-700/50 mb-3">
-                 <div class="text-xs text-slate-400 mb-1 flex justify-between"><span>Available Balance</span></div>
-                 <div class="font-mono font-bold text-white text-lg"><span id="wallet-balance">₹{{ wallet|floatformat:2 }}</span></div>
-             </div>
-             
-             <div class="text-xs text-slate-500 text-center px-4 py-8">
-                Provide quantity or amount to execute market orders instantly.
-             </div>
         </div>
     </div>
 </div>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <style>
-        .summary-card { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(8px); }
-        .metric-value { font-family: 'Inter', 'Roboto Mono', monospace; font-weight: 700; }
-        .pnl-pos { color: #10b981; }
-        .pnl-neg { color: #ef4444; }
-        .chart-container { min-height: 120px; }
-    </style>
-</head>
-<body class="bg-[#0b0e14] text-slate-200 overflow-hidden font-sans selection:bg-blue-500/30">
-</body>
+
+<!-- Styles -->
+<style>
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Sort indicator styles */
+    .sort-asc .sort-icon { transform: rotate(180deg); }
+    .sort-desc .sort-icon { transform: rotate(0deg); }
+    
+    /* PnL color animations */
+    @keyframes pnl-flash-green {
+        0% { background-color: rgba(16, 185, 129, 0.2); }
+        100% { background-color: transparent; }
+    }
+    @keyframes pnl-flash-red {
+        0% { background-color: rgba(239, 68, 68, 0.2); }
+        100% { background-color: transparent; }
+    }
+    .pnl-flash-up { animation: pnl-flash-green 0.5s ease-out; }
+    .pnl-flash-down { animation: pnl-flash-red 0.5s ease-out; }
+    
+    /* Smooth transitions for table rows */
+    .position-row { transition: all 0.2s ease; }
+    .position-row:hover { transform: translateX(2px); }
+    
+    /* Custom scrollbar for tables */
+    .overflow-auto::-webkit-scrollbar { width: 4px; height: 4px; }
+    .overflow-auto::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    .overflow-auto::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    .overflow-auto::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>
+
 <script>
-// ApexCharts Initialization
+// Position sorting and filtering
+let currentSort = { field: null, direction: 'asc' };
+
+function sortPositions(field) {
+    const tbody = document.getElementById('positions-table-body');
+    const rows = Array.from(tbody.querySelectorAll('.position-row'));
+    
+    // Toggle direction if same field
+    if (currentSort.field === field) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.field = field;
+        currentSort.direction = 'desc'; // Default to descending for P&L
+    }
+    
+    rows.sort((a, b) => {
+        let valA, valB;
+        
+        switch(field) {
+            case 'symbol':
+                valA = a.dataset.posSymbol;
+                valB = b.dataset.posSymbol;
+                return currentSort.direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            case 'qty':
+                valA = parseFloat(a.dataset.posQty);
+                valB = parseFloat(b.dataset.posQty);
+                break;
+            case 'entry':
+                valA = parseFloat(a.dataset.posEntry);
+                valB = parseFloat(b.dataset.posEntry);
+                break;
+            case 'pnl':
+                valA = parseFloat(a.dataset.posPnl) || 0;
+                valB = parseFloat(b.dataset.posPnl) || 0;
+                break;
+            case 'pct':
+                valA = parseFloat(a.dataset.posPct) || 0;
+                valB = parseFloat(b.dataset.posPct) || 0;
+                break;
+            default:
+                return 0;
+        }
+        
+        return currentSort.direction === 'asc' ? valA - valB : valB - valA;
+    });
+    
+    // Re-append sorted rows
+    rows.forEach(row => tbody.appendChild(row));
+    
+    // Update sort indicators
+    document.querySelectorAll('th').forEach(th => th.classList.remove('sort-asc', 'sort-desc'));
+    const activeTh = event?.target?.closest('th');
+    if (activeTh) {
+        activeTh.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+    }
+}
+
+// Filter positions
 document.addEventListener('DOMContentLoaded', () => {
-    const pnlOptions = {
-        series: [{
-            name: 'Equity',
-            data: JSON.parse('{{ pnl_history_data|escapejs }}' || '[]')
-        }],
-        chart: {
-            type: 'area',
-            height: 120,
-            sparkline: { enabled: true },
-            toolbar: { show: false },
-            animations: { enabled: true, easing: 'easeinout', speed: 800 }
-        },
-        stroke: { curve: 'smooth', width: 2 },
-        fill: {
-            type: 'gradient',
-            gradient: {
-                shadeIntensity: 1,
-                opacityFrom: 0.45,
-                opacityTo: 0.05,
-                stops: [20, 100, 100, 100]
-            }
-        },
-        colors: ['#3b82f6'],
-        tooltip: {
-            theme: 'dark',
-            x: { show: false },
-            y: { title: { formatter: () => 'Equity: ₹' } }
-        },
-        xaxis: {
-            categories: JSON.parse('{{ pnl_history_labels|escapejs }}' || '[]'),
-            labels: { show: false },
-            axisBorder: { show: false },
-            axisTicks: { show: false }
-        },
-        yaxis: { show: false }
-    };
-    const chartEl = document.querySelector("#pnl-chart");
-    if (chartEl) {
-        const chart = new ApexCharts(chartEl, pnlOptions);
-        chart.render();
-        window.portfolioChart = chart;
+    const filterInput = document.getElementById('position-filter');
+    if (filterInput) {
+        filterInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            document.querySelectorAll('.position-row').forEach(row => {
+                const symbol = row.dataset.posSymbol.toLowerCase();
+                row.style.display = symbol.includes(query) ? '' : 'none';
+            });
+        });
+    }
+    
+    // PnL sort dropdown
+    const pnlSort = document.getElementById('pnl-sort');
+    if (pnlSort) {
+        pnlSort.addEventListener('change', (e) => {
+            const tbody = document.getElementById('positions-table-body');
+            const rows = Array.from(tbody.querySelectorAll('.position-row'));
+            
+            rows.sort((a, b) => {
+                let valA, valB;
+                const sortType = e.target.value;
+                
+                if (sortType === 'high' || sortType === 'pct-high') {
+                    valA = sortType === 'high' ? parseFloat(a.dataset.posPnl) || 0 : parseFloat(a.dataset.posPct) || 0;
+                    valB = sortType === 'high' ? parseFloat(b.dataset.posPnl) || 0 : parseFloat(b.dataset.posPct) || 0;
+                    return valB - valA;
+                } else if (sortType === 'low' || sortType === 'pct-low') {
+                    valA = sortType === 'low' ? parseFloat(a.dataset.posPnl) || 0 : parseFloat(a.dataset.posPct) || 0;
+                    valB = sortType === 'low' ? parseFloat(b.dataset.posPnl) || 0 : parseFloat(b.dataset.posPct) || 0;
+                    return valA - valB;
+                }
+                return 0;
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        });
     }
 });
-// Tab View Switching
+
+// Trade side toggle
+function setTradeSide(side) {
+    if (window.TradingPanel) {
+        TradingPanel.side = side;
+    }
+    
+    const buyBtn = document.getElementById('btn-buy');
+    const sellBtn = document.getElementById('btn-sell');
+    const submitBtn = document.getElementById('submit-order-btn');
+    
+    if (side === 'buy') {
+        buyBtn.className = 'flex-1 py-2 rounded-md text-xs font-bold transition-all bg-green-500 text-white shadow-lg shadow-green-500/20';
+        sellBtn.className = 'flex-1 py-2 rounded-md text-xs font-bold transition-all text-slate-400 hover:text-white';
+        submitBtn.className = 'w-full py-3 rounded-lg font-bold text-white text-sm uppercase tracking-wider transition-all shadow-lg shadow-green-500/20 bg-green-500 hover:bg-green-600 hover:shadow-green-500/30';
+        submitBtn.textContent = 'Buy / Long';
+    } else {
+        sellBtn.className = 'flex-1 py-2 rounded-md text-xs font-bold transition-all bg-red-500 text-white shadow-lg shadow-red-500/20';
+        buyBtn.className = 'flex-1 py-2 rounded-md text-xs font-bold transition-all text-slate-400 hover:text-white';
+        submitBtn.className = 'w-full py-3 rounded-lg font-bold text-white text-sm uppercase tracking-wider transition-all shadow-lg shadow-red-500/20 bg-red-500 hover:bg-red-600 hover:shadow-red-500/30';
+        submitBtn.textContent = 'Sell / Short';
+    }
+}
+
+// Tab switching
 function switchBottomTab(tab) {
     ['orderbook', 'trades', 'positions', 'orders'].forEach(p => {
         const pane = document.getElementById(`pane-${p}`);
@@ -359,14 +715,17 @@ function switchBottomTab(tab) {
             btn.classList.add('border-transparent', 'text-slate-400');
         }
     });
+    
     const activePane = document.getElementById(`pane-${tab}`);
     if(activePane) activePane.classList.remove('hidden');
+    
     const activeBtn = document.getElementById(`btn-tab-${tab}`);
     if(activeBtn) {
         activeBtn.classList.remove('border-transparent', 'text-slate-400');
         activeBtn.classList.add('border-blue-500', 'text-white', 'bg-white/5');
     }
 }
+
 function switchTab(tab) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
     const content = document.getElementById(`${tab}-content`);
@@ -376,17 +735,39 @@ function switchTab(tab) {
     const posTab = document.getElementById('tab-pos');
     
     if (favTab && posTab) {
-        favTab.className = 'flex-1 py-1.5 rounded text-xs font-semibold text-slate-400 transition-all hover:bg-white/5';
-        posTab.className = 'flex-1 py-1.5 rounded text-xs font-semibold text-slate-400 transition-all hover:bg-white/5';
+        favTab.className = 'flex-1 py-2 rounded-lg text-xs font-semibold text-slate-400 transition-all hover:bg-white/5';
+        posTab.className = 'flex-1 py-2 rounded-lg text-xs font-semibold text-slate-400 transition-all hover:bg-white/5';
         
         const activeTab = document.getElementById(`tab-${tab}`);
-        if (activeTab) activeTab.className = 'flex-1 py-1.5 rounded text-xs font-semibold tab-active transition-all bg-blue-500/20 text-blue-400';
+        if (activeTab) activeTab.className = 'flex-1 py-2 rounded-lg text-xs font-semibold transition-all bg-blue-500/20 text-blue-400';
     }
 }
+
+// Update total P&L display
+function updateTotalPnL() {
+    let totalPnL = 0;
+    document.querySelectorAll('.pnl-value').forEach(el => {
+        const pnl = parseFloat(el.dataset.posPnl) || 0;
+        totalPnL += pnl;
+    });
+    
+    const totalEl = document.getElementById('total-positions-pnl');
+    if (totalEl) {
+        totalEl.textContent = `₹${totalPnL.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        totalEl.className = `font-mono font-bold text-xs ${totalPnL >= 0 ? 'text-green-400' : 'text-red-400'}`;
+    }
+}
+
+// Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-    WatchlistManager.init();
-    TradingChart.init();
-    WSManager.init();
+    if (window.WatchlistManager?.init) WatchlistManager.init();
+    if (window.TradingChart?.init) TradingChart.init();
+    if (window.WSManager?.init) WSManager.init();
+    
+    // Set initial trade side
+    setTradeSide('buy');
+    
+    // Symbol change handler
     document.addEventListener('symbol_change', (e) => {
         const symbol = e.detail.symbol;
         const header = document.getElementById('active-symbol-header');
@@ -397,8 +778,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const pe = document.getElementById('active-symbol-price');
         const ce = document.getElementById('active-symbol-change');
         if (pe) pe.textContent = "--";
-        if (ce) ce.textContent = "--";
+        if (ce) {
+            ce.textContent = "--";
+            ce.className = "font-mono text-xs px-2 py-0.5 rounded";
+        }
     });
+    
+    // Price update handler
     document.addEventListener('price_update', (e) => {
         const updates = e.detail;
         if (!Array.isArray(updates)) return;
@@ -406,27 +792,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const activeSymbolEl = document.getElementById('active-symbol-header');
         const activePriceEl = document.getElementById('active-symbol-price');
         const activeChangeEl = document.getElementById('active-symbol-change');
+        
         if (activeSymbolEl) {
             const activeSymbol = activeSymbolEl.textContent;
             const activeUpdate = updates.find(u => u.symbol === activeSymbol);
             if (activeUpdate && activePriceEl && activeChangeEl) {
                 activePriceEl.textContent = `₹${activeUpdate.current_price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                activePriceEl.className = `font-mono font-bold text-lg ${activeUpdate.percentage_change >= 0 ? 'text-green-400' : 'text-red-400'}`;
+                activePriceEl.className = `font-mono font-bold text-sm ${activeUpdate.percentage_change >= 0 ? 'text-green-400' : 'text-red-400'}`;
                 const pctSign = activeUpdate.percentage_change >= 0 ? '+' : '';
                 activeChangeEl.textContent = `${pctSign}${activeUpdate.percentage_change.toFixed(2)}%`;
-                activeChangeEl.className = `font-mono text-xs ${activeUpdate.percentage_change >= 0 ? 'text-green-400' : 'text-red-400'}`;
+                activeChangeEl.className = `font-mono text-xs px-2 py-0.5 rounded ${activeUpdate.percentage_change >= 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`;
             }
         }
         
-        // Current wallet and starting equity for live summary updates
         let wallet = parseFloat("{{ wallet }}");
         let startDayEquity = parseFloat("{{ total_equity }}") - parseFloat("{{ today_pnl }}");
         let currentHoldingsValue = 0;
         let totalUnrealisedPnL = 0;
-        // 1. Update individual position rows and collect total holdings value
-        // We first need to know the CURRENT prices of ALL positions, not just the ones in this update
-        // So we scan the DOM for all position rows
-        document.querySelectorAll('tr[data-pos-symbol]').forEach(row => {
+        
+        document.querySelectorAll('.position-row').forEach(row => {
             const symbol = row.dataset.posSymbol;
             const update = updates.find(u => u.symbol === symbol);
             
@@ -446,12 +830,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const runningPnL = (current - avg) * qty;
                 const pnlPct = avg > 0 ? ((current - avg) / avg) * 100 : 0;
                 
-                pnlEl.textContent = `${runningPnL >= 0 ? '+' : ''}₹${runningPnL.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                const pnlPctEl = row.querySelector('.pnl-percent');
-                pnlPctEl.textContent = `${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%`;
+                // Update data attributes for sorting
+                row.dataset.posPnl = runningPnL;
+                row.dataset.posPct = pnlPct;
                 
-                pnlEl.className = `px-4 py-3 font-mono text-right pnl-value font-bold ${runningPnL >= 0 ? 'text-green-400' : 'text-red-400'}`;
-                pnlPctEl.className = `px-4 py-3 font-mono text-right pnl-percent font-bold ${pnlPct >= 0 ? 'text-green-400' : 'text-red-400'}`;
+                const pnlSign = runningPnL >= 0 ? '+' : '';
+                const pnlColor = runningPnL >= 0 ? 'text-green-400' : 'text-red-400';
+                const bgColor = runningPnL >= 0 ? 'bg-green-500/10' : 'bg-red-500/10';
+                
+                pnlEl.innerHTML = `<span class="inline-flex items-center gap-1 px-2 py-1 rounded ${bgColor} ${pnlColor}">${pnlSign}₹${runningPnL.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`;
+                
+                const pnlPctEl = row.querySelector('.pnl-percent');
+                pnlPctEl.innerHTML = `<span class="inline-flex items-center gap-1 px-2 py-1 rounded ${bgColor} ${pnlColor}">${pnlSign}${pnlPct.toFixed(2)}%</span>`;
                 
                 totalUnrealisedPnL += runningPnL;
                 currentHoldingsValue += (current * qty);
@@ -461,46 +851,40 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update Unrealized PnL Display
         const unrealisedPnLEl = document.getElementById('dashboard-unrealised-pnl');
         if (unrealisedPnLEl) {
-            unrealisedPnLEl.textContent = `₹${totalUnrealisedPnL.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            unrealisedPnLEl.className = `font-mono font-bold ${totalUnrealisedPnL >= 0 ? 'text-green-400' : 'text-red-400'}`;
+            const sign = totalUnrealisedPnL >= 0 ? '+' : '';
+            unrealisedPnLEl.textContent = `${sign}₹${totalUnrealisedPnL.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            unrealisedPnLEl.className = `font-mono font-bold text-sm ${totalUnrealisedPnL >= 0 ? 'text-green-400' : 'text-red-400'}`;
         }
+        
+        // Update total positions P&L
+        updateTotalPnL();
 
-        // 2. Update Top Summary Bar (Total Portfolio & Today's PnL)
+        // Update Top Summary
         const totalEquity = wallet + currentHoldingsValue;
         const todayPnL = totalEquity - startDayEquity;
-        const dailyReturnPct = (todayPnL / startDayEquity) * 100;
-        const totalEquityEl = document.getElementById('stat-total-portfolio');
-        const todayPnLEl = document.getElementById('stat-today-pnl');
-        if (totalEquityEl) {
-            totalEquityEl.textContent = `₹${totalEquity.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        }
-        if (todayPnLEl) {
-            todayPnLEl.textContent = `${todayPnL.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${dailyReturnPct.toFixed(2)}%)`;
-            todayPnLEl.className = `metric-value text-sm ${todayPnL >= 0 ? 'pnl-pos' : 'pnl-neg'}`;
-        }
     });
+    
+    // Order update handler
     document.addEventListener('order_update', (e) => {
         const update = e.detail;
-        Notifications.info(`Order Status: ${update.status} for ${update.symbol || 'your order'}`);
-        // Refresh positions if order completed without full page reload
+        if (window.Notifications?.info) {
+            Notifications.info(`Order Status: ${update.status} for ${update.symbol || 'your order'}`);
+        }
         if (update.status === 'completed') {
             fetch(window.location.href)
                 .then(res => res.text())
                 .then(html => {
                     const doc = new DOMParser().parseFromString(html, 'text/html');
-                    const refreshIds = ['pos-content', 'positions-table-body', 'orders-table-body', 'stat-wallet', 'wallet-balance', 'stat-total-portfolio', 'stat-invested', 'dashboard-unrealised-pnl'];
-                    
+                    const refreshIds = ['pos-content', 'positions-table-body', 'orders-table-body', 'wallet-balance', 'stat-total-portfolio', 'stat-invested', 'dashboard-unrealised-pnl'];
                     refreshIds.forEach(id => {
                         const newEl = doc.getElementById(id);
                         const oldEl = document.getElementById(id);
-                        if (newEl && oldEl) {
-                            oldEl.innerHTML = newEl.innerHTML;
-                        }
+                        if (newEl && oldEl) oldEl.innerHTML = newEl.innerHTML;
                     });
                 })
-                .catch(err => console.error('Failed to perform background update', err));
+                .catch(err => console.error('Background update failed', err));
         }
     });
 });
-</script> 
+</script>
 {% endblock %}

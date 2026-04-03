@@ -9,6 +9,41 @@ from .models import PromoCode
 from assets.models import Position, order as Order, Watchlist
 from stockmanagement.models import Stock
 from django.core.serializers.json import DjangoJSONEncoder
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.utils import timezone
+import datetime
+
+
+@login_required(login_url='login')
+def wallet(request):
+    """Wallet page view with balance and transaction information."""
+    # Get user's wallet balance
+    wallet_balance = float(request.user.wallet)
+    
+    # Get open positions and invested amount
+    open_positions = Position.objects.filter(user=request.user, is_closed=False)
+    invested_amount = sum(
+        float(pos.buy_price) * float(pos.quantity) for pos in open_positions
+    )
+    
+    # Calculate total equity
+    current_value = sum(
+        float(pos.stock.current_price) * float(pos.quantity) for pos in open_positions
+    )
+    total_equity = wallet_balance + current_value
+    
+    # Calculate total P&L
+    total_pnl = current_value - invested_amount if invested_amount > 0 else 0
+    
+    context = {
+        'wallet_balance': wallet_balance,
+        'invested_amount': invested_amount,
+        'open_positions_count': open_positions.count(),
+        'total_equity': total_equity,
+        'total_pnl': total_pnl,
+    }
+    
+    return render(request, 'dashboard/wallet.html', context)
 
 @login_required(login_url='login')
 def dashboard(request):
@@ -95,3 +130,5 @@ def validate_promo_code(request, promo_code):
             "success": False,
             "message": "Invalid promo code.",
         }, status=404)
+
+

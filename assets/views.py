@@ -181,14 +181,12 @@ def portfolio_view(request):
     # Calculate total portfolio value and P&L
     total_investment = sum(position.quantity * position.buy_price for position in open_positions)
     current_value = 0
-    total_unrealised_pnl = current_value - total_investment
     total_realised_pnl = sum(position.realised_pnl for position in closed_positions)
     
     # Calculate today's P&L (positions traded today)
     today = timezone.now().date()
     today_positions = positions.filter(last_traded_datetime__date=today)
     today_pnl = sum(position.realised_pnl for position in today_positions)
-    current_value = 0
 
     # Group positions by stock for summary
     position_summary = {}
@@ -209,6 +207,8 @@ def portfolio_view(request):
     for symbol, summary in position_summary.items():
         summary['pnl_percentage'] = (Decimal(summary['unrealised_pnl']) / Decimal(summary['total_investment']) * 100) if summary['total_investment'] > 0 else 0
         current_value += summary['current_value']
+    
+    total_unrealised_pnl = current_value - total_investment
     
     context = {
         'positions': positions,
