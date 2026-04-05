@@ -141,6 +141,86 @@
     border-top: 1px solid var(--border);
     height: 56px;
     flex-shrink: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* FIXED TRADING BAR - always visible on mobile */
+  .trading-bar {
+    display: none;
+    position: fixed;
+    bottom: 56px;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    z-index: 45;
+    padding: 0 12px;
+    gap: 10px;
+    align-items: center;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .trading-bar.active {
+    display: flex;
+  }
+  .trading-bar .tb-symbol {
+    font-family: var(--fmono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 70px;
+  }
+  .trading-bar .tb-price {
+    font-family: var(--fmono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--t1);
+    flex: 1;
+    text-align: right;
+    margin-right: 8px;
+  }
+  .trading-bar .tb-btn {
+    flex: 1;
+    padding: 10px 0;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--fui);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-width: 0;
+  }
+  .trading-bar .tb-btn.buy {
+    background: var(--green);
+    color: #000;
+    box-shadow: 0 2px 12px rgba(0, 214, 143, 0.3);
+  }
+  .trading-bar .tb-btn.buy:active {
+    transform: scale(0.96);
+    box-shadow: 0 1px 6px rgba(0, 214, 143, 0.3);
+  }
+  .trading-bar .tb-btn.sell {
+    background: var(--red);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(255, 77, 109, 0.3);
+  }
+  .trading-bar .tb-btn.sell:active {
+    transform: scale(0.96);
+    box-shadow: 0 1px 6px rgba(255, 77, 109, 0.3);
+  }
+
+  /* Adjust panel padding for trading bar */
+  @media (max-width: 1023px) {
+    .root {
+      padding-bottom: 112px;
+    }
+    .panel {
+      padding-bottom: 112px;
+    }
   }
   .mob-nav-btn {
     flex: 1;
@@ -971,14 +1051,6 @@
     .mobile-chart-controls,
     .quick-trade-bar {
       display: none !important;
-    }
-    /* Hide full trade form on mobile - quick buttons are sufficient */
-    .sheet-trade-body .bs-toggle,
-    .sheet-trade-body .qa-toggle,
-    .sheet-trade-body .inp-grp,
-    .sheet-trade-body .pct-btns,
-    .sheet-trade-body .submit-btn {
-      display: none;
     }
     .sheet-trade-body {
       padding: 10px;
@@ -2378,6 +2450,14 @@
   </button>
 </nav>
 
+<!-- FIXED TRADING BAR - Quick access to Buy/Sell on mobile -->
+<div class="trading-bar" id="trading-bar">
+  <span class="tb-symbol" id="tb-symbol">--</span>
+  <span class="tb-price" id="tb-price">--</span>
+  <button class="tb-btn buy" onclick="quickTradeFromBar('buy')">Buy</button>
+  <button class="tb-btn sell" onclick="quickTradeFromBar('sell')">Sell</button>
+</div>
+
 <!-- STOCK SHEET -->
 <div id="stock-sheet">
   <div class="handle-row">
@@ -2407,20 +2487,6 @@
     <!-- Compact Chart Toolbar - at top of chart area on mobile -->
     <div class="chart-toolbar" id="chart-toolbar">
       <span class="ct-price" id="ct-price">--</span>
-      <div class="ct-actions">
-        <button type="button" class="ct-btn buy" onclick="quickTrade('buy')">
-          <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:4px;vertical-align:-2px;">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/>
-          </svg>
-          Buy
-        </button>
-        <button type="button" class="ct-btn sell" onclick="quickTrade('sell')">
-          <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:4px;vertical-align:-2px;">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
-          </svg>
-          Sell
-        </button>
-      </div>
     </div>
     <div class="sheet-chart-area" id="sheet-chart-area">
       <div id="sheet-tv-chart" style="width: 100%; height: 100%"></div>
@@ -2640,6 +2706,16 @@
       sheetPriceEl.textContent = priceEl.textContent;
     }
 
+    // Show and update the fixed trading bar
+    const tradingBar = document.getElementById('trading-bar');
+    const tbSymbol = document.getElementById('tb-symbol');
+    const tbPrice = document.getElementById('tb-price');
+    if (tradingBar) tradingBar.classList.add('active');
+    if (tbSymbol) tbSymbol.textContent = symbol;
+    if (tbPrice && priceEl && priceEl.textContent !== '--') {
+      tbPrice.textContent = priceEl.textContent;
+    }
+
     renderSheetPosition(symbol);
 
     if (!sheet) return;
@@ -2665,6 +2741,10 @@
     setTimeout(() => {
       sheet.style.display = 'none';
     }, 320);
+
+    // Hide the fixed trading bar
+    const tradingBar = document.getElementById('trading-bar');
+    if (tradingBar) tradingBar.classList.remove('active');
 
     sheetSymbol = null;
   }
@@ -2786,18 +2866,58 @@
 
   /* SHEET SUBMIT */
   function submitSheetOrder() {
+    if (!sheetSymbol || sheetSymbol === '--') {
+      if (window.Notifications?.warn) {
+        Notifications.warn('Please select a symbol first');
+      }
+      return;
+    }
+
     const sq = document.getElementById('sheet-order-qty');
     const mq = document.getElementById('order-qty');
 
-    if (sq && mq) mq.value = sq.value;
+    if (!sq || !mq) return;
 
-    if (sheetSymbol) {
-      document.dispatchEvent(new CustomEvent('symbol_change', {
-        detail: { symbol: sheetSymbol }
-      }));
+    const qtyValue = sq.value;
+    if (!qtyValue || parseFloat(qtyValue) <= 0) {
+      if (window.Notifications?.warn) {
+        Notifications.warn('Please enter a valid quantity');
+      }
+      return;
     }
 
-    document.getElementById('submit-order-btn')?.click();
+    // Copy quantity to main form
+    mq.value = sq.value;
+
+    // Update TradingPanel state
+    if (window.TradingPanel) {
+      TradingPanel.currentSymbol = sheetSymbol;
+      TradingPanel.side = sheetSide;
+
+      // Update the symbol badge
+      const ts = document.getElementById('trade-panel-symbol');
+      if (ts) ts.textContent = sheetSymbol;
+    }
+
+    // Update the submit button text and class based on side
+    const submitBtn = document.getElementById('submit-order-btn');
+    if (submitBtn) {
+      if (sheetSide === 'buy') {
+        submitBtn.className = 'submit-btn buy';
+        submitBtn.textContent = 'Buy / Long';
+      } else {
+        submitBtn.className = 'submit-btn sell';
+        submitBtn.textContent = 'Sell / Short';
+      }
+    }
+
+    // Dispatch symbol change event for any other listeners
+    document.dispatchEvent(new CustomEvent('symbol_change', {
+      detail: { symbol: sheetSymbol }
+    }));
+
+    // Trigger the order submission
+    if (submitBtn) submitBtn.click();
   }
 
   /* SHEET QTY/AMT TOGGLE */
@@ -2906,6 +3026,64 @@
       }));
     });
   })();
+
+  /* QUICK TRADE FROM FIXED BAR */
+  function quickTradeFromBar(side) {
+    if (!sheetSymbol) {
+      if (window.Notifications?.warn) {
+        Notifications.warn('Select a symbol first');
+      }
+      return;
+    }
+
+    // Set the trade side
+    sheetSide = side;
+    if (window.TradingPanel) {
+      TradingPanel.side = side;
+    }
+
+    // Get current price
+    const priceEl = document.querySelector(`.price-display[data-symbol="${sheetSymbol}"]`);
+    const currentPrice = priceEl ? parseFloat(priceEl.textContent.replace(/[^\d.-]/g, '')) : 0;
+
+    if (!currentPrice || isNaN(currentPrice)) {
+      if (window.Notifications?.warn) {
+        Notifications.warn('Price not available');
+      }
+      return;
+    }
+
+    // Calculate quantity based on 10% of wallet balance (default quick trade)
+    const walletBalance = parseFloat("{{ wallet }}") || 0;
+    const quickAmount = walletBalance * 0.1;
+    const quantity = quickAmount / currentPrice;
+
+    // Update order form
+    const qtyInput = document.getElementById('order-qty');
+    const sheetQtyInput = document.getElementById('sheet-order-qty');
+
+    if (qtyInput) qtyInput.value = quantity.toFixed(4);
+    if (sheetQtyInput) sheetQtyInput.value = quantity.toFixed(4);
+
+    // Update TradingPanel state
+    if (window.TradingPanel) {
+      TradingPanel.currentSymbol = sheetSymbol;
+    }
+
+    // Dispatch event
+    document.dispatchEvent(new CustomEvent('symbol_change', {
+      detail: { symbol: sheetSymbol }
+    }));
+
+    // Trigger order submission
+    document.getElementById('submit-order-btn')?.click();
+
+    // Show confirmation
+    if (window.Notifications?.info) {
+      const sideLabel = side === 'buy' ? 'Buying' : 'Selling';
+      Notifications.info(`${sideLabel} ${quantity.toFixed(4)} ${sheetSymbol} @ ₹${currentPrice.toLocaleString()}`);
+    }
+  }
 
   /* QUICK TRADE - for mobile compact toolbar buy/sell buttons */
   function quickTrade(side) {

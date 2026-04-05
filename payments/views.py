@@ -17,7 +17,22 @@ from dashboard.models import PromoCode
 
 @login_required
 def add_amount(request):
-    upi_id = payment_settings.objects.all().first().upi_id
+    # Get payment settings safely - handle case where no settings exist
+    payment_setting = payment_settings.objects.all().first()
+    
+    if not payment_setting or not payment_setting.upi_id:
+        # No payment settings configured
+        if request.method == "POST":
+            from django.contrib import messages
+            messages.error(request, "Payment settings are not configured. Please contact support.")
+            return redirect('add-amount')
+        
+        return render(request, 'payments/add-amount.html', {
+            'error': 'payment_settings_not_configured',
+            'message': 'No payment settings available. Please try again later or contact support.'
+        })
+    
+    upi_id = payment_setting.upi_id
     payee_name = request.user.first_name
 
     if request.method == "POST":

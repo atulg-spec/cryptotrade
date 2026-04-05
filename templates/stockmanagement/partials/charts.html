@@ -279,15 +279,15 @@
         </div>
         
         <!-- ==================== STICKY BOTTOM TRADE PANEL ==================== -->
-        <div id="trade-panel" class="flex-shrink-0 bg-dark-900 border-t border-white/5">
+        <div id="trade-panel" class="flex-shrink-0 bg-dark-900 border-t border-white/5 relative" style="z-index: 10000;">
             <!-- Collapsed View: Just Buy/Sell Buttons -->
-            <div id="trade-panel-collapsed" class="p-3">
-                <div class="flex gap-2">
-                    <button onclick="expandTradePanel('buy')" class="flex-1 h-12 rounded-xl font-bold text-sm bg-green-500 hover:bg-green-600 text-white active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+            <div id="trade-panel-collapsed" class="p-3 relative" style="z-index: 10001;">
+                <div class="flex gap-2 relative" style="z-index: 10002;">
+                    <button onclick="expandTradePanel('buy')" class="buy-btn flex-1 h-12 rounded-xl font-bold text-sm bg-green-500 hover:bg-green-600 text-white active:scale-[0.98] transition-all flex items-center justify-center gap-2 relative" style="z-index: 10003; touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                         Buy
                     </button>
-                    <button onclick="expandTradePanel('sell')" class="flex-1 h-12 rounded-xl font-bold text-sm bg-red-500 hover:bg-red-600 text-white active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                    <button onclick="expandTradePanel('sell')" class="sell-btn flex-1 h-12 rounded-xl font-bold text-sm bg-red-500 hover:bg-red-600 text-white active:scale-[0.98] transition-all flex items-center justify-center gap-2 relative" style="z-index: 10003; touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
                         Sell
                     </button>
@@ -384,14 +384,377 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
     }
+    
+    /* CRITICAL: Ensure trade panel and buttons are always on top and clickable */
+    #trade-panel,
+    #trade-panel-collapsed,
+    #trade-panel-expanded,
+    .buy-btn,
+    .sell-btn {
+        pointer-events: auto !important;
+    }
+    
+    /* Ensure TradingView chart doesn't overlap trade panel */
+    #tradingview_chart {
+        pointer-events: auto;
+        max-height: calc(100vh - 200px); /* Prevent chart from extending into trade panel area */
+    }
+    
+    /* Mobile-specific fixes for button clickability */
+    @media (max-width: 768px) {
+        #trade-panel {
+            position: relative;
+            z-index: 10000 !important;
+        }
+        
+        #trade-panel-collapsed {
+            z-index: 10001 !important;
+        }
+        
+        .buy-btn, .sell-btn {
+            z-index: 10003 !important;
+            position: relative;
+        }
+        
+        /* Ensure buttons have proper touch targets */
+        .buy-btn, .sell-btn {
+            min-height: 48px; /* Apple HIG recommends 44pt minimum, we use 48px for better accessibility */
+            min-width: 48px;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        /* Prevent chart container from overlapping */
+        #tab-chart {
+            z-index: 1 !important;
+        }
+        
+        /* Ensure the main content area doesn't overlap trade panel */
+        .flex-1.min-h-0.relative {
+            z-index: 1 !important;
+        }
+    }
+    
+    /* Ensure buttons are clickable even when chart is loading */
+    .buy-btn:active, .sell-btn:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+    
+    /* Fix for iOS Safari to prevent zoom on double tap */
+    .buy-btn, .sell-btn {
+        touch-action: manipulation;
+    }
 </style>
 
 <script>
-let chartTradingViewWidget = null;
-let currentChartSymbol = null;
-let chartTradeSide = 'buy';
-let currentChartInterval = '15';
-let isTradePanelExpanded = false;
+// Declare all variables and functions in global scope for onclick handlers
+var chartTradingViewWidget = null;
+var currentChartSymbol = null;
+var chartTradeSide = 'buy';
+var currentChartInterval = '15';
+var isTradePanelExpanded = false;
+
+// ==================== TRADE PANEL FUNCTIONS (Must be global for onclick) ====================
+
+function expandTradePanel(side) {
+    // Log for debugging (check browser console if needed)
+    console.log('expandTradePanel called with:', side);
+    
+    isTradePanelExpanded = true;
+    var collapsed = document.getElementById('trade-panel-collapsed');
+    var expanded = document.getElementById('trade-panel-expanded');
+    if (collapsed) collapsed.classList.add('hidden');
+    if (expanded) expanded.classList.remove('hidden');
+    setChartTradeSide(side);
+}
+
+function collapseTradePanel() {
+    isTradePanelExpanded = false;
+    var collapsed = document.getElementById('trade-panel-collapsed');
+    var expanded = document.getElementById('trade-panel-expanded');
+    if (collapsed) collapsed.classList.remove('hidden');
+    if (expanded) expanded.classList.add('hidden');
+}
+
+function setChartTradeSide(side) {
+    chartTradeSide = side;
+    var buyBtn = document.getElementById('chart-btn-buy');
+    var sellBtn = document.getElementById('chart-btn-sell');
+    var submitBtn = document.getElementById('chart-submit-btn');
+    var title = document.getElementById('trade-panel-title');
+    
+    if (side === 'buy') {
+        if (buyBtn) buyBtn.className = 'flex-1 h-11 rounded-lg text-sm font-bold transition-all bg-green-500 text-white';
+        if (sellBtn) sellBtn.className = 'flex-1 h-11 rounded-lg text-sm font-bold transition-all text-slate-400';
+        if (submitBtn) {
+            submitBtn.className = 'w-full h-12 rounded-xl font-bold text-white text-sm uppercase tracking-wider transition-all shadow-lg shadow-green-500/20 bg-green-500 hover:bg-green-600 active:scale-[0.98]';
+            submitBtn.textContent = 'Buy / Long';
+        }
+        if (title) title.textContent = 'Buy / Long';
+    } else {
+        if (sellBtn) sellBtn.className = 'flex-1 h-11 rounded-lg text-sm font-bold transition-all bg-red-500 text-white';
+        if (buyBtn) buyBtn.className = 'flex-1 h-11 rounded-lg text-sm font-bold transition-all text-slate-400';
+        if (submitBtn) {
+            submitBtn.className = 'w-full h-12 rounded-xl font-bold text-white text-sm uppercase tracking-wider transition-all shadow-lg shadow-red-500/20 bg-red-500 hover:bg-red-600 active:scale-[0.98]';
+            submitBtn.textContent = 'Sell / Short';
+        }
+        if (title) title.textContent = 'Sell / Short';
+    }
+}
+
+function setChartAmountPercent(percent) {
+    var walletBalance = parseFloat("{{ request.user.wallet|default:0 }}") || 0;
+    var amount = walletBalance * (percent / 100);
+    var input = document.getElementById('chart-order-amount');
+    if (input) input.value = amount.toFixed(2);
+}
+
+async function submitChartOrder() {
+    var amount = document.getElementById('chart-order-amount')?.value;
+        if (!amount || parseFloat(amount) <= 0) {
+            showTradeNotification('Please enter a valid amount', 'error');
+            return;
+        }
+        if (!currentChartSymbol) {
+            showTradeNotification('No symbol selected', 'error');
+            return;
+        }
+    
+    var submitBtn = document.getElementById('chart-submit-btn');
+    var originalText = submitBtn.textContent;
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Processing...';
+    submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+    
+    try {
+        var formData = new FormData();
+        formData.append('stock_symbol', currentChartSymbol);
+        formData.append('amount', amount);
+        formData.append('order_type', chartTradeSide.toUpperCase());
+        
+        var response = await fetch('/dashboard/initiate-order/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: formData
+        });
+        
+        if (response.ok) {
+            showTradeNotification(chartTradeSide.toUpperCase() + ' order placed for ' + currentChartSymbol, 'success');
+            collapseTradePanel();
+            // Reset form
+            document.getElementById('chart-order-amount').value = '';
+        } else {
+            var errorData = await response.json();
+            showTradeNotification(errorData.error || 'Order failed. Please try again.', 'error');
+        }
+    } catch (error) {
+        console.error('Trade error:', error);
+        showTradeNotification('Network error. Please check your connection.', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+    }
+}
+
+// Get CSRF token from cookie
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Global Trade Notification System - Renders inside #stock-sheet overlay
+// This ensures notifications appear in the correct context (stock sheet) not on dashboard
+function showTradeNotification(message, type) {
+    type = type || 'info';
+    
+    // Find the stock sheet container - this is the actual modal-like overlay
+    var stockSheet = document.getElementById('stock-sheet');
+    
+    // If stock-sheet doesn't exist, fall back to chart modal
+    if (!stockSheet) {
+        var chartModal = document.getElementById('chartModal');
+        if (chartModal) {
+            showInlineChartToast(message, type, chartModal);
+            return;
+        }
+        // Last resort: create a fixed notification
+        showFixedFallbackNotification(message, type);
+        return;
+    }
+    
+    // Remove any existing notification container in the stock sheet
+    var existingContainer = stockSheet.querySelector('.stock-sheet-toast-container');
+    if (existingContainer) {
+        existingContainer.remove();
+    }
+    
+    // Create notification container inside the stock sheet
+    var container = document.createElement('div');
+    container.className = 'stock-sheet-toast-container absolute top-4 left-4 right-4 z-[99999] flex flex-col gap-2 pointer-events-none';
+    container.style.cssText = 'position: absolute; top: 16px; left: 16px; right: 16px; z-index: 99999; pointer-events: none;';
+    stockSheet.appendChild(container);
+    
+    // Create the toast element
+    var toast = document.createElement('div');
+    var colors = {
+        success: 'bg-green-500/95 border-green-400/50',
+        error: 'bg-red-500/95 border-red-400/50',
+        warning: 'bg-yellow-500/95 border-yellow-400/50',
+        info: 'bg-blue-500/95 border-blue-400/50'
+    };
+    
+    var icons = {
+        success: '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+        error: '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
+        warning: '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01"/></svg>',
+        info: '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+    };
+    
+    toast.className = (colors[type] || colors.info) + ' backdrop-blur-md border rounded-xl px-4 py-3 text-white text-sm flex items-center gap-3 shadow-2xl pointer-events-auto transform translate-y-[-10px] opacity-0 transition-all duration-300';
+    toast.innerHTML = (icons[type] || icons.info) + '<span class="flex-1 font-medium">' + message + '</span>';
+    
+    container.appendChild(toast);
+    
+    // Animate in
+    requestAnimationFrame(function() {
+        toast.classList.remove('translate-y-[-10px]', 'opacity-0');
+    });
+    
+    // Auto-remove after 3 seconds
+    setTimeout(function() {
+        toast.classList.add('opacity-0', 'translate-y-[-10px]');
+        setTimeout(function() { 
+            toast.remove();
+            // Remove container if no more toasts
+            var container = stockSheet.querySelector('.stock-sheet-toast-container');
+            if (container && container.children.length === 0) {
+                container.remove();
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Fallback notification for when neither stock-sheet nor chartModal exists
+function showFixedFallbackNotification(message, type) {
+    type = type || 'info';
+    
+    // Remove any existing fallback container
+    var existingContainer = document.getElementById('trade-notification-fallback');
+    if (existingContainer) {
+        existingContainer.remove();
+    }
+    
+    // Create a fixed container at bottom-right of viewport
+    var container = document.createElement('div');
+    container.id = 'trade-notification-fallback';
+    container.className = 'fixed bottom-6 right-6 z-[9999999] flex flex-col gap-2 pointer-events-none';
+    document.body.appendChild(container);
+    
+    // Create toast
+    var toast = document.createElement('div');
+    var colors = {
+        success: 'bg-green-500/95 border-green-400/50',
+        error: 'bg-red-500/95 border-red-400/50',
+        warning: 'bg-yellow-500/95 border-yellow-400/50',
+        info: 'bg-blue-500/95 border-blue-400/50'
+    };
+    
+    toast.className = (colors[type] || colors.info) + ' backdrop-blur-md border rounded-xl px-4 py-3 text-white text-sm flex items-center gap-3 shadow-2xl pointer-events-auto';
+    toast.innerHTML = '<span class="flex-1 font-medium">' + message + '</span>';
+    
+    container.appendChild(toast);
+    
+    setTimeout(function() {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(function() {
+            toast.remove();
+            var container = document.getElementById('trade-notification-fallback');
+            if (container && container.children.length === 0) {
+                container.remove();
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Fallback inline toast for when global Notifications is not available
+function showInlineChartToast(message, type) {
+    type = type || 'info';
+    
+    // Get the chart modal element
+    var chartModal = document.getElementById('chartModal');
+    if (!chartModal) {
+        console.error('Chart modal not found');
+        return;
+    }
+    
+    // Remove any existing chart toast container first to prevent duplicates
+    var existingContainer = document.getElementById('chart-toast-container');
+    if (existingContainer) {
+        existingContainer.remove();
+    }
+    
+    // Create a new toast container inside the modal
+    var container = document.createElement('div');
+    container.id = 'chart-toast-container';
+    // Position at the top of the modal content area, below the header but above everything else
+    container.style.cssText = 'position: absolute; top: 130px; left: 16px; right: 16px; z-index: 999999; pointer-events: none;';
+    chartModal.appendChild(container);
+    
+    // Create the toast element
+    var toast = document.createElement('div');
+    var colors = {
+        success: 'bg-green-500/95 border-green-400/50',
+        error: 'bg-red-500/95 border-red-400/50',
+        warning: 'bg-yellow-500/95 border-yellow-400/50',
+        info: 'bg-blue-500/95 border-blue-400/50'
+    };
+    
+    var icons = {
+        success: '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+        error: '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
+        warning: '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01"/></svg>',
+        info: '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+    };
+    
+    toast.className = (colors[type] || colors.info) + ' backdrop-blur-md border rounded-xl px-4 py-3 text-white text-sm flex items-center gap-3 shadow-2xl pointer-events-auto';
+    toast.innerHTML = (icons[type] || icons.info) + '<span class="flex-1">' + message + '</span>';
+    
+    container.appendChild(toast);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(function() {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+        toast.style.transition = 'all 0.3s ease-out';
+        setTimeout(function() { 
+            toast.remove();
+            // Remove container if no more toasts
+            var container = document.getElementById('chart-toast-container');
+            if (container && container.children.length === 0) {
+                container.remove();
+            }
+        }, 300);
+    }, 3000);
+}
 
 // ==================== CHART FUNCTIONS ====================
 
@@ -545,65 +908,6 @@ function switchChartTab(tab) {
     }
 }
 
-// ==================== TRADE PANEL FUNCTIONS ====================
-
-function expandTradePanel(side) {
-    isTradePanelExpanded = true;
-    document.getElementById('trade-panel-collapsed').classList.add('hidden');
-    document.getElementById('trade-panel-expanded').classList.remove('hidden');
-    setChartTradeSide(side);
-}
-
-function collapseTradePanel() {
-    isTradePanelExpanded = false;
-    document.getElementById('trade-panel-collapsed').classList.remove('hidden');
-    document.getElementById('trade-panel-expanded').classList.add('hidden');
-}
-
-function setChartTradeSide(side) {
-    chartTradeSide = side;
-    const buyBtn = document.getElementById('chart-btn-buy');
-    const sellBtn = document.getElementById('chart-btn-sell');
-    const submitBtn = document.getElementById('chart-submit-btn');
-    const title = document.getElementById('trade-panel-title');
-    
-    if (side === 'buy') {
-        buyBtn.className = 'flex-1 h-11 rounded-lg text-sm font-bold transition-all bg-green-500 text-white';
-        sellBtn.className = 'flex-1 h-11 rounded-lg text-sm font-bold transition-all text-slate-400';
-        submitBtn.className = 'w-full h-12 rounded-xl font-bold text-white text-sm uppercase tracking-wider transition-all shadow-lg shadow-green-500/20 bg-green-500 hover:bg-green-600 active:scale-[0.98]';
-        submitBtn.textContent = 'Buy / Long';
-        title.textContent = 'Buy / Long';
-    } else {
-        sellBtn.className = 'flex-1 h-11 rounded-lg text-sm font-bold transition-all bg-red-500 text-white';
-        buyBtn.className = 'flex-1 h-11 rounded-lg text-sm font-bold transition-all text-slate-400';
-        submitBtn.className = 'w-full h-12 rounded-xl font-bold text-white text-sm uppercase tracking-wider transition-all shadow-lg shadow-red-500/20 bg-red-500 hover:bg-red-600 active:scale-[0.98]';
-        submitBtn.textContent = 'Sell / Short';
-        title.textContent = 'Sell / Short';
-    }
-}
-
-function setChartAmountPercent(percent) {
-    const walletBalance = parseFloat("{{ request.user.wallet|default:0 }}") || 0;
-    const amount = walletBalance * (percent / 100);
-    const input = document.getElementById('chart-order-amount');
-    if (input) input.value = amount.toFixed(2);
-}
-
-function submitChartOrder() {
-    const amount = document.getElementById('chart-order-amount')?.value;
-    if (!amount || parseFloat(amount) <= 0) {
-        showToast('Please enter a valid amount', 'error');
-        return;
-    }
-    if (!currentChartSymbol) {
-        showToast('No symbol selected', 'error');
-        return;
-    }
-    
-    showToast(`${chartTradeSide.toUpperCase()} order placed for ${currentChartSymbol}`, 'success');
-    collapseTradePanel();
-}
-
 // ==================== EVENT LISTENERS ====================
 
 // Timeframe buttons
@@ -623,31 +927,4 @@ document.addEventListener('click', function(e) {
 document.addEventListener("keydown", function(e) {
     if (e.key === "Escape") closeChart();
 });
-
-// Toast notification
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toast-container');
-    if (!container) {
-        alert(message);
-        return;
-    }
-    
-    const toast = document.createElement('div');
-    const colors = {
-        success: 'bg-green-500/90 border-green-400/30',
-        error: 'bg-red-500/90 border-red-400/30',
-        warning: 'bg-yellow-500/90 border-yellow-400/30',
-        info: 'bg-blue-500/90 border-blue-400/30'
-    };
-    
-    toast.className = `${colors[type]} backdrop-blur-sm border rounded-xl px-4 py-3 text-white text-sm flex items-center gap-3 shadow-lg`;
-    toast.innerHTML = `<span>${message}</span>`;
-    
-    container.appendChild(toast);
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
 </script>

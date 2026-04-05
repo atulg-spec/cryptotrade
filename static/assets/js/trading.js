@@ -62,17 +62,30 @@ class TradingPanelController {
         const inputEl = document.getElementById('order-qty');
 
         if (mode === 'qty') {
-            toggleQtyBtn.className = 'flex-1 py-1 rounded transition-all bg-blue-500/20 text-blue-400';
-            toggleAmtBtn.className = 'flex-1 py-1 rounded transition-all text-slate-400 hover:text-white';
-            inputLabel.textContent = 'Quantity';
-            currencyDisplay.textContent = 'QTY';
-            inputEl.placeholder = '0.00';
+            // Use the qa-btn class pattern from the mobile UI
+            if (toggleQtyBtn) {
+                toggleQtyBtn.classList.add('active');
+                toggleQtyBtn.classList.remove('text-slate-400');
+            }
+            if (toggleAmtBtn) {
+                toggleAmtBtn.classList.remove('active');
+                toggleAmtBtn.classList.add('text-slate-400');
+            }
+            if (inputLabel) inputLabel.textContent = 'Quantity';
+            if (currencyDisplay) currencyDisplay.textContent = 'QTY';
+            if (inputEl) inputEl.placeholder = '0.00';
         } else {
-            toggleAmtBtn.className = 'flex-1 py-1 rounded transition-all bg-blue-500/20 text-blue-400';
-            toggleQtyBtn.className = 'flex-1 py-1 rounded transition-all text-slate-400 hover:text-white';
-            inputLabel.textContent = 'Amount';
-            currencyDisplay.textContent = 'USD'; // or INR etc., depending on base currency
-            inputEl.placeholder = '0.00';
+            if (toggleAmtBtn) {
+                toggleAmtBtn.classList.add('active');
+                toggleAmtBtn.classList.remove('text-slate-400');
+            }
+            if (toggleQtyBtn) {
+                toggleQtyBtn.classList.remove('active');
+                toggleQtyBtn.classList.add('text-slate-400');
+            }
+            if (inputLabel) inputLabel.textContent = 'Amount (₹)';
+            if (currencyDisplay) currencyDisplay.textContent = '₹';
+            if (inputEl) inputEl.placeholder = '0.00';
         }
         this.updateEstimate();
     }
@@ -118,7 +131,10 @@ class TradingPanelController {
         const price = this.getCurrentPrice();
         
         if (this.side === 'buy') {
-            const balanceEl = document.getElementById('wallet-balance');
+            // Support both old and new balance element IDs
+            const balanceEl = document.getElementById('wallet-balance') || 
+                              document.getElementById('trade-panel-wallet-balance') ||
+                              document.getElementById('topbar-wallet-balance');
             let balance = parseFloat((balanceEl?.textContent || '').replace(/[^0-9.-]+/g,""));
             if (isNaN(balance)) return;
             const targetAmount = (balance * percent) / 100;
@@ -130,10 +146,15 @@ class TradingPanelController {
                 inputEl.value = (targetAmount / price).toFixed(4);
             }
         } else {
-            // Sell
-            const posQtyEl = document.querySelector(`.sidebar-pos-qty[data-symbol="${this.currentSymbol}"]`);
+            // Sell - support both old and new position quantity element selectors
+            const posQtyEl = document.querySelector(`.sidebar-pos-qty[data-symbol="${this.currentSymbol}"]`) ||
+                             document.querySelector(`[data-symbol="${this.currentSymbol}"] .w-ex`);
             if (!posQtyEl) return;
-            let availableQty = parseFloat(posQtyEl.textContent);
+            // Extract quantity from text like "Qty: 0.5432"
+            const qtyText = posQtyEl.textContent;
+            const qtyMatch = qtyText.match(/[\d.]+/);
+            if (!qtyMatch) return;
+            let availableQty = parseFloat(qtyMatch[0]);
             if (isNaN(availableQty)) return;
             
             const targetQty = (availableQty * percent) / 100;
@@ -160,21 +181,135 @@ class TradingPanelController {
         }
     }
 
+    /**
+     * Show notification inside the stock sheet modal if open, otherwise use global notifications
+     */
+    showNotification(message, type) {
+        // Check if stock sheet is open
+        const stockSheet = document.getElementById('stock-sheet');
+        if (stockSheet && stockSheet.classList.contains('open')) {
+            this.showStockSheetNotification(message, type);
+        } else if (window.Notifications) {
+            switch(type) {
+                case 'success': window.Notifications.success(message); break;
+                case 'error': window.Notifications.error(message); break;
+                case 'warning': window.Notifications.warning(message); break;
+                default: window.Notifications.info(message);
+            }
+        }
+    }
+
+    /**
+     * Show notification inside the stock sheet modal
+     */
+    showStockSheetNotification(message, type) {
+        type = type || 'info';
+        const stockSheet = document.getElementById('stock-sheet');
+        if (!stockSheet) return;
+
+        // Remove existing toast container if any
+        let container = stockSheet.querySelector('.sheet-toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'sheet-toast-container';
+            container.style.cssText = 'position: absolute; top: 16px; left: 16px; right: 16px; z-index: 99999; pointer-events: none;';
+            stockSheet.appendChild(container);
+        }
+
+        const colors = {
+            success: 'background: rgba(0, 214, 143, 0.95); border: 1px solid rgba(0, 214, 143, 0.5);',
+            error: 'background: rgba(255, 77, 109, 0.95); border: 1px solid rgba(255, 77, 109, 0.5);',
+            warning: 'background: rgba(245, 166, 35, 0.95); border: 1px solid rgba(245, 166, 35, 0.5);',
+            info: 'background: rgba(79, 140, 255, 0.95); border: 1px solid rgba(79, 140, 255, 0.5);'
+        };
+
+        const toast = document.createElement('div');
+        toast.style.cssText = (colors[type] || colors.info) + 
+            ' backdrop-filter: blur(12px); border-radius: 10px; padding: 12px 16px; color: #e8edf7; font-size: 13px; font-family: var(--fui); display: flex; align-items: center; gap: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); pointer-events: auto; transform: translateY(-10px); opacity: 0; transition: all 0.3s ease;';
+        toast.innerHTML = '<span style="flex: 1; font-weight: 500;">' + message + '</span>';
+
+        container.appendChild(toast);
+
+        requestAnimationFrame(() => {
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+        });
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                toast.remove();
+                if (container.children.length === 0) container.remove();
+            }, 300);
+        }, 3000);
+    }
+
+    /**
+     * Update balance display across all balance elements
+     */
+    updateBalanceDisplay() {
+        // Fetch fresh balance from server
+        fetch(window.location.href, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(r => r.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Update all balance-related elements
+            const balanceIds = [
+                'topbar-wallet-balance',
+                'trade-panel-wallet-balance',
+                'wallet-balance',
+                'stat-wallet',
+                'sheet-wallet-balance'
+            ];
+            
+            balanceIds.forEach(id => {
+                const newEl = doc.getElementById(id);
+                const oldEl = document.getElementById(id);
+                if (newEl && oldEl) {
+                    oldEl.textContent = newEl.textContent;
+                }
+            });
+            
+            // Update total assets
+            const newTotalAssets = doc.querySelector('[data-dashboard-total-assets]');
+            const oldTotalAssets = document.querySelector('[data-dashboard-total-assets]');
+            if (newTotalAssets && oldTotalAssets) {
+                oldTotalAssets.textContent = newTotalAssets.textContent;
+            }
+            
+            // Update unrealized P&L
+            const newPnl = doc.getElementById('dashboard-unrealised-pnl');
+            const oldPnl = document.getElementById('dashboard-unrealised-pnl');
+            if (newPnl && oldPnl) {
+                oldPnl.textContent = newPnl.textContent;
+                oldPnl.className = newPnl.className;
+            }
+        })
+        .catch(err => console.error('Balance update failed:', err));
+    }
+
     async submitOrder() {
         if(!this.currentSymbol) {
-            Notifications.error('Please select a symbol to trade.');
+            this.showNotification('Please select a symbol to trade.', 'error');
             return;
         }
 
         const inputVal = parseFloat(document.getElementById('order-qty')?.value);
         if(isNaN(inputVal) || inputVal <= 0) {
-            Notifications.warning(`Please enter a valid ${this.inputMode === 'qty' ? 'quantity' : 'amount'}.`);
+            this.showNotification(`Please enter a valid ${this.inputMode === 'qty' ? 'quantity' : 'amount'}.`, 'warning');
             return;
         }
 
         const price = this.getCurrentPrice();
         if(!price) {
-            Notifications.error('Missing or invalid price for chosen symbol.');
+            this.showNotification('Missing or invalid price for chosen symbol.', 'error');
             return;
         }
 
@@ -212,25 +347,38 @@ class TradingPanelController {
             const response = await fetch('/assets/initiate-order/', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
                     'X-CSRFToken': this.getCSRFToken(),
                     'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: formData.toString()
+                body: formData
             });
 
             const result = await response.json();
             
             if(response.ok && result.success) {
-                Notifications.success(`Order placed: ${this.side.toUpperCase()} ${qty} ${this.currentSymbol}`);
+                this.showNotification(`Order placed: ${this.side.toUpperCase()} ${this.currentSymbol} - ₹${amount.toFixed(2)}`, 'success');
+                
+                // Update balance display
+                this.updateBalanceDisplay();
+                
+                // Trigger order update event for UI refresh
+                document.dispatchEvent(new CustomEvent('order_update', {
+                    detail: {
+                        status: 'completed',
+                        symbol: this.currentSymbol,
+                        order_type: this.side.toUpperCase(),
+                        amount: amount
+                    }
+                }));
+                
                 if(document.getElementById('order-qty')) document.getElementById('order-qty').value = '';
                 if(document.getElementById('order-price')) document.getElementById('order-price').value = '';
             } else {
-                Notifications.error(result.message || 'Failed to place order.');
+                this.showNotification(result.message || 'Failed to place order.', 'error');
             }
         } catch (e) {
             console.error('Order submission error:', e);
-            Notifications.error('An error occurred while placing your order.');
+            this.showNotification('An error occurred while placing your order.', 'error');
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = this.side === 'buy' ? 'Buy / Long' : 'Sell / Short';
@@ -242,9 +390,9 @@ class TradingPanelController {
         
         const originalText = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = '...';
+        btn.innerHTML = 'Closing...';
 
-        const formData = new URLSearchParams();
+        const formData = new FormData();
         formData.append('symbol', symbol);
         formData.append('order_type', 'SELL');
         formData.append('quantity', quantity.toString());
@@ -253,26 +401,37 @@ class TradingPanelController {
             const response = await fetch('/assets/initiate-order/', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
                     'X-CSRFToken': this.getCSRFToken(),
                     'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: formData.toString()
+                body: formData
             });
 
             const result = await response.json();
             
             if(response.ok && result.success) {
-                Notifications.success(`Position closed: Sold ${quantity} ${symbol}`);
-                // Background update will be triggered by websocket order_update
+                this.showNotification(`Position closed: Sold ${quantity} ${symbol}`, 'success');
+                
+                // Update balance display
+                this.updateBalanceDisplay();
+                
+                // Trigger order update event for UI refresh
+                document.dispatchEvent(new CustomEvent('order_update', {
+                    detail: {
+                        status: 'completed',
+                        symbol: symbol,
+                        order_type: 'SELL',
+                        quantity: quantity
+                    }
+                }));
             } else {
-                Notifications.error(result.message || 'Failed to close position.');
+                this.showNotification(result.message || 'Failed to close position.', 'error');
                 btn.disabled = false;
                 btn.innerHTML = originalText;
             }
         } catch (e) {
             console.error('Close position error:', e);
-            Notifications.error('An error occurred while closing position.');
+            this.showNotification('An error occurred while closing position.', 'error');
             btn.disabled = false;
             btn.innerHTML = originalText;
         }

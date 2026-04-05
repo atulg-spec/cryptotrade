@@ -198,7 +198,8 @@ class WatchlistController {
             const symbol = update.symbol;
 
             // Standard display boxes might be mapped via symbol
-            const elements = document.querySelectorAll(`.watchlist-item[data-symbol="${symbol}"]`);
+            // Support both .watchlist-item (desktop) and .witem (mobile)
+            const elements = document.querySelectorAll(`[data-symbol="${symbol}"]`);
             elements.forEach(item => {
                 const priceEl = item.querySelector('.price-display');
                 const changeEl = item.querySelector('.change-display');
@@ -232,8 +233,9 @@ class WatchlistController {
     async toggleFavorite(symbol, event) {
         if (event) event.stopPropagation();
 
-        const star = event.target.closest('svg');
-        const isFavorite = star.classList.contains('text-amber-400');
+        // Support both desktop (.favorite-star) and mobile (.star-btn) elements
+        const starBtn = event.target.closest('.star-btn, .favorite-star');
+        const isFavorite = starBtn?.classList.contains('fav') || starBtn?.classList.contains('text-amber-400');
         const url = isFavorite ? `/assets/watchlist/remove/${symbol}/` : `/assets/watchlist/add/${symbol}/`;
 
         try {
@@ -246,23 +248,42 @@ class WatchlistController {
             });
             const data = await response.json();
             if (data.success) {
-                if (isFavorite) {
-                    // Updating stars in both search results AND watchlist
-                    document.querySelectorAll(`.favorite-star[onclick*="'${symbol}'"]`).forEach(s => {
-                        s.classList.remove('text-amber-400');
-                        s.classList.add('text-slate-600');
-                        s.setAttribute('fill', 'none');
-                    });
-
-                    // Remove from watchlist container
-                    const items = document.querySelectorAll(`.watchlist-item[data-symbol="${symbol}"]`);
-                    items.forEach(item => {
-                        if (item.closest('#fav-content')) {
-                            item.remove();
+                // Update all star buttons for this symbol (both desktop and mobile)
+                document.querySelectorAll(`.star-btn[onclick*="'${symbol}'"], .favorite-star[onclick*="'${symbol}'"]`).forEach(btn => {
+                    if (isFavorite) {
+                        // Remove favorite
+                        btn.classList.remove('fav');
+                        btn.classList.remove('text-amber-400');
+                        btn.classList.add('text-slate-600');
+                        // Update SVG fill
+                        const svg = btn.querySelector('svg');
+                        if (svg) {
+                            svg.setAttribute('fill', 'none');
                         }
-                    });
-                    this.checkEmptyWatchlist();
-                } else {
+                    } else {
+                        // Add favorite
+                        btn.classList.add('fav');
+                        btn.classList.remove('text-slate-600');
+                        btn.classList.add('text-amber-400');
+                        // Update SVG fill
+                        const svg = btn.querySelector('svg');
+                        if (svg) {
+                            svg.setAttribute('fill', 'currentColor');
+                        }
+                    }
+                });
+
+                // Update watchlist items (both desktop and mobile)
+                const items = document.querySelectorAll(`[data-symbol="${symbol}"]`);
+                items.forEach(item => {
+                    if (item.closest('#fav-content')) {
+                        item.remove();
+                    }
+                });
+                this.checkEmptyWatchlist();
+
+                // If adding favorite, also update search result stars and add to watchlist
+                if (!isFavorite) {
                     document.querySelectorAll(`.favorite-star[onclick*="'${symbol}'"]`).forEach(s => {
                         s.classList.remove('text-slate-600');
                         s.classList.add('text-amber-400');
@@ -273,7 +294,6 @@ class WatchlistController {
                     const favContent = document.getElementById('fav-content');
                     if (favContent && !favContent.querySelector(`.watchlist-item[data-symbol="${symbol}"]`)) {
                         // We need some stock data to render. If we're coming from search, we might have it.
-                        // For now, let's try to find it in search results or just add a placeholder that will be updated by websocket
                         const searchItem = event.target.closest('.flex.items-center.justify-between.p-3');
                         let name = "Stock";
                         if (searchItem) {
@@ -299,6 +319,8 @@ class WatchlistController {
                     }
                 }
                 Notifications.success(data.message);
+            } else {
+                Notifications.error(data.message || 'Failed to update favorite');
             }
         } catch (error) {
             console.error('Toggle favorite failed:', error);

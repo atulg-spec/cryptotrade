@@ -2,7 +2,380 @@
 {% load humanize %}
 
 {% block body %}
-<section class="w-full sm:max-w-7xl mx-3 mt-3 md:px-8 py-6">
+
+<style>
+    /* Portfolio page mobile responsive styles */
+    @media (max-width: 640px) {
+        .portfolio-container {
+            padding-left: 0.625rem;
+            padding-right: 0.625rem;
+        }
+        
+        /* Convert table to cards on mobile */
+        .holdings-table thead {
+            display: none;
+        }
+        
+        .holdings-table tbody tr {
+            display: block;
+            margin-bottom: 0.75rem;
+            border-radius: 12px;
+            background: rgba(31, 41, 55, 0.5);
+            border: 1px solid rgba(55, 65, 81, 0.3);
+            padding: 0;
+        }
+        
+        .holdings-table tbody tr td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(55, 65, 81, 0.2);
+        }
+        
+        .holdings-table tbody tr td:last-child {
+            border-bottom: none;
+        }
+        
+        .holdings-table tbody tr td:first-child {
+            padding-top: 14px;
+        }
+        
+        .holdings-table tbody tr td:last-child {
+            padding-bottom: 14px;
+        }
+        
+        /* Mobile card header for stock info */
+        .mobile-stock-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+        
+        .mobile-stock-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.2));
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .mobile-stock-details {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .mobile-stock-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .mobile-stock-symbol {
+            font-size: 11px;
+            color: #6B7280;
+            margin-top: 2px;
+        }
+        
+        /* Mobile data labels */
+        .mobile-data-label {
+            font-size: 10px;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .mobile-data-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* P&L styling */
+        .mobile-pnl-positive {
+            color: #10B981;
+        }
+        
+        .mobile-pnl-negative {
+            color: #EF4444;
+        }
+        
+        /* Close button mobile */
+        .mobile-close-btn {
+            width: 100%;
+            margin-top: 8px;
+            padding: 10px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            color: #F87171;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        /* Stats cards mobile */
+        .stats-grid-mobile {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .stat-card-mobile {
+            background: rgba(31, 41, 55, 0.6);
+            border: 1px solid rgba(55, 65, 81, 0.3);
+            border-radius: 14px;
+            padding: 14px;
+            backdrop-filter: blur(12px);
+        }
+        
+        .stat-label-mobile {
+            font-size: 11px;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+        
+        .stat-value-mobile {
+            font-size: 16px;
+            font-weight: 700;
+            text-align: center;
+        }
+        
+        /* Section headers mobile */
+        .section-header-mobile {
+            padding: 12px 14px;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title-mobile {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        /* Recent positions mobile cards - Modern glass design */
+        .recent-positions-mobile {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .position-card-mobile {
+            background: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(55, 65, 81, 0.25);
+            border-radius: 16px;
+            padding: 16px;
+            transition: all 0.2s ease;
+        }
+        
+        .position-card-mobile:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            background: rgba(17, 24, 39, 0.8);
+        }
+        
+        .position-header-mobile {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        
+        .position-info-mobile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .position-icon-mobile {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        
+        .position-icon-open {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.2));
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #60A5FA;
+        }
+        
+        .position-icon-closed {
+            background: linear-gradient(135deg, rgba(107, 114, 128, 0.2), rgba(75, 85, 99, 0.2));
+            border: 1px solid rgba(107, 114, 128, 0.3);
+            color: #9CA3AF;
+        }
+        
+        .position-text-mobile {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .position-symbol-mobile {
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .position-name-mobile {
+            font-size: 11px;
+            color: #6B7280;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .position-badge-mobile {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            flex-shrink: 0;
+        }
+        
+        .position-badge-open {
+            background: rgba(16, 185, 129, 0.12);
+            color: #10B981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .position-badge-closed {
+            background: rgba(107, 114, 128, 0.12);
+            color: #9CA3AF;
+            border: 1px solid rgba(107, 114, 128, 0.2);
+        }
+        
+        .position-meta-mobile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(55, 65, 81, 0.15);
+        }
+        
+        .position-time-mobile {
+            font-size: 10px;
+            color: #6B7280;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .position-time-mobile svg {
+            width: 12px;
+            height: 12px;
+        }
+        
+        .position-details-mobile {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        
+        .position-detail-item {
+            background: rgba(31, 41, 55, 0.4);
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+        
+        .position-detail-label {
+            font-size: 9px;
+            font-weight: 600;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 4px;
+        }
+        
+        .position-detail-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .position-pnl-positive {
+            color: #10B981;
+        }
+        
+        .position-pnl-negative {
+            color: #EF4444;
+        }
+        
+        .position-pnl-neutral {
+            color: #6B7280;
+        }
+    }
+    
+    /* Desktop - hide mobile elements */
+    @media (min-width: 641px) {
+        .mobile-only {
+            display: none !important;
+        }
+    }
+    
+    /* Mobile - hide desktop elements */
+    @media (max-width: 640px) {
+        .desktop-only {
+            display: none !important;
+        }
+        
+        .holdings-table {
+            display: block;
+        }
+    }
+    
+    /* Smooth transitions */
+    .transition-colors {
+        transition: background-color 0.2s ease;
+    }
+    
+    .hover\:scale-105:hover {
+        transform: scale(1.05);
+    }
+    
+    .active\:scale-95:active {
+        transform: scale(0.95);
+    }
+</style>
+
+<section class="w-full sm:max-w-7xl mx-3 mt-3 md:px-8 py-6 portfolio-container">
     <!-- Header Section -->
     <div class="mb-8">
         <div class="flex items-center gap-4 mb-6">
@@ -176,7 +549,8 @@
                 </div>
                 <div class="p-6">
                     {% if positions %}
-                    <div class="space-y-4">
+                    <!-- Desktop View -->
+                    <div class="space-y-4 desktop-only">
                         {% for position in positions|slice:":5" %}
                         <div class="flex items-center justify-between p-4 bg-gray-800/30 border border-gray-700/30 rounded-xl hover:bg-gray-800/50 transition-colors">
                             <div class="flex items-center gap-4">
@@ -201,6 +575,65 @@
                                     P&L: ₹{{ position.realised_pnl|floatformat:2 }}
                                 </p>
                                 {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Mobile View -->
+                    <div class="recent-positions-mobile mobile-only">
+                        {% for position in positions|slice:":5" %}
+                        <div class="position-card-mobile">
+                            <div class="position-header-mobile">
+                                <div class="position-info-mobile">
+                                    <div class="position-icon-mobile {% if position.is_closed %}position-icon-closed{% else %}position-icon-open{% endif %}">
+                                        {{ position.stock.symbol|slice:":3" }}
+                                    </div>
+                                    <div class="position-text-mobile">
+                                        <div class="position-symbol-mobile">{{ position.stock.symbol }}</div>
+                                        <div class="position-name-mobile">{{ position.stock.name }}</div>
+                                    </div>
+                                </div>
+                                <span class="position-badge-mobile {% if position.is_closed %}position-badge-closed{% else %}position-badge-open{% endif %}">
+                                    {% if position.is_closed %}Closed{% else %}Open{% endif %}
+                                </span>
+                            </div>
+                            
+                            <div class="position-meta-mobile">
+                                <div class="position-time-mobile">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {{ position.last_traded_datetime }}
+                                </div>
+                            </div>
+                            
+                            <div class="position-details-mobile">
+                                <div class="position-detail-item">
+                                    <div class="position-detail-label">Quantity</div>
+                                    <div class="position-detail-value">{{ position.last_traded_quantity }}</div>
+                                </div>
+                                <div class="position-detail-item">
+                                    <div class="position-detail-label">Buy Price</div>
+                                    <div class="position-detail-value">₹{{ position.buy_price|floatformat:2 }}</div>
+                                </div>
+                                {% if position.realised_pnl != 0 %}
+                                <div class="position-detail-item">
+                                    <div class="position-detail-label">P&L</div>
+                                    <div class="position-detail-value {% if position.realised_pnl >= 0 %}position-pnl-positive{% else %}position-pnl-negative{% endif %}">
+                                        ₹{{ position.realised_pnl|floatformat:2 }}
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="position-detail-item">
+                                    <div class="position-detail-label">P&L</div>
+                                    <div class="position-detail-value position-pnl-neutral">₹0.00</div>
+                                </div>
+                                {% endif %}
+                                <div class="position-detail-item">
+                                    <div class="position-detail-label">Shares</div>
+                                    <div class="position-detail-value">{{ position.last_traded_quantity }}</div>
+                                </div>
                             </div>
                         </div>
                         {% endfor %}
@@ -327,6 +760,137 @@ document.addEventListener('DOMContentLoaded', function () {
             currentValueEl.textContent = `₹ ${totalCurrentValue.toFixed(2)}`;
             currentValueEl.classList.toggle('text-green-500', totalCurrentValue > baseInvestment);
             currentValueEl.classList.toggle('text-red-500', totalCurrentValue <= baseInvestment);
+        }
+    });
+});
+
+// Real-time portfolio updates via WebSocket
+document.addEventListener('DOMContentLoaded', function () {
+    if (!window.TradehubStreams || !window.TradehubStreams.connectUserEvents) return;
+
+    // Elements to update
+    const totalInvestmentEl = document.querySelector('[data-portfolio-total-investment]');
+    const currentValueEl = document.querySelector('[data-portfolio-current-value]');
+    const holdingsTableBody = document.querySelector('tbody');
+    const emptyState = document.querySelector('.text-center.py-12');
+
+    TradehubStreams.connectUserEvents(function (eventData) {
+        if (eventData.event !== 'portfolio_update') return;
+
+        const data = eventData;
+        
+        // Update total investment
+        if (totalInvestmentEl && data.total_investment !== undefined) {
+            totalInvestmentEl.textContent = `₹ ${data.total_investment.toFixed(2)}`;
+            totalInvestmentEl.setAttribute('data-base-value', data.total_investment);
+        }
+
+        // Update current value with color coding
+        if (currentValueEl && data.total_current_value !== undefined) {
+            currentValueEl.textContent = `₹ ${data.total_current_value.toFixed(2)}`;
+            if (data.total_current_value > data.total_investment) {
+                currentValueEl.classList.remove('text-red-500');
+                currentValueEl.classList.add('text-green-500');
+            } else if (data.total_current_value < data.total_investment) {
+                currentValueEl.classList.remove('text-green-500');
+                currentValueEl.classList.add('text-red-500');
+            }
+        }
+
+        // Update holdings table
+        if (holdingsTableBody && data.positions) {
+            // Clear existing rows
+            holdingsTableBody.innerHTML = '';
+
+            if (data.positions.length === 0) {
+                // Show empty state
+                if (emptyState) emptyState.classList.remove('hidden');
+            } else {
+                // Hide empty state
+                if (emptyState) emptyState.classList.add('hidden');
+
+                // Create rows for each position
+                data.positions.forEach(pos => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-700/10 hover:bg-gray-800/20 transition-colors';
+                    row.setAttribute('data-portfolio-row', '');
+                    row.setAttribute('data-symbol', pos.symbol);
+                    row.setAttribute('data-qty', pos.quantity);
+                    row.setAttribute('data-avg-buy', pos.avg_buy_price);
+
+                    const pnlClass = pos.unrealised_pnl >= 0 ? 'text-green-400' : 'text-red-400';
+
+                    row.innerHTML = `
+                        <td class="py-4 px-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
+                                    <span class="text-blue-400 font-bold text-sm">${pos.symbol.slice(0, 3)}</span>
+                                </div>
+                                <div>
+                                    <p class="text-white font-medium text-sm">${pos.name}</p>
+                                    <p class="text-gray-400 text-xs">${pos.symbol}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4 px-4 text-right">
+                            <p class="text-white font-medium">${pos.quantity}</p>
+                        </td>
+                        <td class="py-4 px-4 text-right">
+                            <p class="text-white font-medium">₹${pos.avg_buy_price.toFixed(2)}</p>
+                        </td>
+                        <td class="py-4 px-4 text-right">
+                            <p class="text-white font-medium" data-cell="current_value">₹${pos.current_value.toFixed(2)}</p>
+                        </td>
+                        <td class="py-4 px-4 text-right">
+                            <div class="flex flex-col items-end">
+                                <p class="font-medium ${pnlClass}" data-cell="unrealised_pnl">
+                                    ₹${pos.unrealised_pnl.toFixed(2)}
+                                </p>
+                                <p class="text-xs ${pnlClass}" data-cell="pnl_percentage">
+                                    ${pos.pnl_percentage.toFixed(2)}%
+                                </p>
+                            </div>
+                        </td>
+                        <td class="py-4 px-4 text-right">
+                            <form method="post" action="{% url 'close_position' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="stock_id" value="${pos.symbol}">
+                                <input type="hidden" name="quantity" value="${pos.quantity}">
+                                <button type="submit"
+                                    class="close-position-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border border-red-400/40 text-red-300 hover:bg-red-500/10 transition-colors"
+                                    data-stock="${pos.symbol}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Close
+                                </button>
+                            </form>
+                        </td>
+                    `;
+
+                    holdingsTableBody.appendChild(row);
+                });
+
+                // Re-bind close position buttons
+                document.querySelectorAll('.close-position-btn').forEach((button) => {
+                    button.addEventListener('click', function (event) {
+                        const symbol = this.dataset.stock;
+                        const confirmed = confirm(`Close the open position in ${symbol}?`);
+                        if (!confirmed) {
+                            event.preventDefault();
+                        }
+                    });
+                });
+            }
+        }
+
+        // Flash animation to indicate update
+        if (currentValueEl) {
+            currentValueEl.classList.add('transition-all', 'duration-300');
+            currentValueEl.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                currentValueEl.style.transform = 'scale(1)';
+            }, 300);
         }
     });
 });
