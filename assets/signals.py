@@ -46,6 +46,7 @@ def send_portfolio_update_to_user(user_id):
         pnl_percentage = (unrealised_pnl / investment * 100) if investment > 0 else Decimal('0')
         
         positions_data.append({
+            'stock_id': pos.stock_id,
             'symbol': pos.stock.symbol,
             'name': pos.stock.name,
             'quantity': float(quantity),

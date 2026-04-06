@@ -533,14 +533,15 @@ async function submitChartOrder() {
     
     try {
         var formData = new FormData();
-        formData.append('stock_symbol', currentChartSymbol);
+        formData.append('symbol', currentChartSymbol);
         formData.append('amount', amount);
         formData.append('order_type', chartTradeSide.toUpperCase());
         
-        var response = await fetch('/dashboard/initiate-order/', {
+        var response = await fetch('/assets/initiate-order/', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': getCookie('csrftoken')
+                'X-CSRFToken': getCookie('csrftoken'),
+                'X-Requested-With': 'XMLHttpRequest'
             },
             body: formData
         });

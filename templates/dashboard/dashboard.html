@@ -763,12 +763,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.WatchlistManager?.init) WatchlistManager.init();
     if (window.TradingChart?.init) TradingChart.init();
     if (window.WSManager?.init) WSManager.init();
+    if (window.DashboardUI && !window.DashboardUI.initialized) {
+        const defaultSymbolFromList = document.querySelector('.watchlist-item[data-symbol]')?.dataset.symbol || 'BTCUSDT';
+        window.DashboardUI.init({
+            watchlistItemSelector: '.watchlist-item[data-symbol]',
+            activeItemClass: 'bg-white/[0.1]',
+            activeSymbolHeaderId: 'active-symbol-header',
+            activePriceId: 'active-symbol-price',
+            activeChangeId: 'active-symbol-change',
+            activeChangeResetClass: 'font-mono text-xs px-2 py-0.5 rounded',
+            tradePanelSymbolId: 'trade-panel-symbol',
+            refreshIds: ['pos-content', 'positions-table-body', 'orders-table-body', 'wallet-balance', 'stat-total-portfolio', 'stat-invested', 'dashboard-unrealised-pnl'],
+            defaultSymbol: defaultSymbolFromList
+        });
+    }
     
     // Set initial trade side
     setTradeSide('buy');
     
     // Symbol change handler
-    document.addEventListener('symbol_change', (e) => {
+    if (false) document.addEventListener('symbol_change', (e) => {
         const symbol = e.detail.symbol;
         const header = document.getElementById('active-symbol-header');
         const tradeSymbol = document.getElementById('trade-panel-symbol');
@@ -785,7 +799,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Price update handler
-    document.addEventListener('price_update', (e) => {
+    if (false) document.addEventListener('price_update', (e) => {
         const updates = e.detail;
         if (!Array.isArray(updates)) return;
         
@@ -865,25 +879,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Order update handler
-    document.addEventListener('order_update', (e) => {
+    if (false) document.addEventListener('order_update', (e) => {
         const update = e.detail;
         if (window.Notifications?.info) {
             Notifications.info(`Order Status: ${update.status} for ${update.symbol || 'your order'}`);
         }
-        if (update.status === 'completed') {
-            fetch(window.location.href)
-                .then(res => res.text())
-                .then(html => {
-                    const doc = new DOMParser().parseFromString(html, 'text/html');
-                    const refreshIds = ['pos-content', 'positions-table-body', 'orders-table-body', 'wallet-balance', 'stat-total-portfolio', 'stat-invested', 'dashboard-unrealised-pnl'];
-                    refreshIds.forEach(id => {
-                        const newEl = doc.getElementById(id);
-                        const oldEl = document.getElementById(id);
-                        if (newEl && oldEl) oldEl.innerHTML = newEl.innerHTML;
-                    });
-                })
-                .catch(err => console.error('Background update failed', err));
-        }
+    });
+
+    if (false) document.addEventListener('portfolio_update', () => {
+        fetch(window.location.href)
+            .then(res => res.text())
+            .then(html => {
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const refreshIds = ['pos-content', 'positions-table-body', 'orders-table-body', 'wallet-balance', 'stat-total-portfolio', 'stat-invested', 'dashboard-unrealised-pnl'];
+                refreshIds.forEach(id => {
+                    const newEl = doc.getElementById(id);
+                    const oldEl = document.getElementById(id);
+                    if (newEl && oldEl) oldEl.innerHTML = newEl.innerHTML;
+                });
+            })
+            .catch(err => console.error('Background update failed', err));
     });
 });
 </script>

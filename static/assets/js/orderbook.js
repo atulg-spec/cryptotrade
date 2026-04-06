@@ -1,28 +1,27 @@
 class OrderbookController {
     constructor() {
         this.currentSymbol = null;
-        
-        // Listen to global events
         document.addEventListener('symbol_change', (e) => {
             this.setSymbol(e.detail.symbol);
         });
 
-        document.addEventListener('book_update', (e) => {
-            this.onBookUpdate(e.detail);
-        });
+        if (window.AppRealtime?.subscribe) {
+            window.AppRealtime.subscribe('market:book', data => {
+                this.onBookUpdate(data);
+            });
 
-        document.addEventListener('trade_update', (e) => {
-            this.onTradeUpdate(e.detail);
-        });
+            window.AppRealtime.subscribe('market:trade', data => {
+                this.onTradeUpdate(data);
+            });
 
-        document.addEventListener('price_update', (e) => {
-            const updates = e.detail;
-            if (!this.currentSymbol) return;
-            const update = updates.find(u => u.symbol === this.currentSymbol);
-            if (update) {
-                this.generateMockBookAndTrades(update.current_price);
-            }
-        });
+            window.AppRealtime.subscribePrices(({ updates }) => {
+                if (!this.currentSymbol) return;
+                const update = updates.find(u => u.symbol === this.currentSymbol);
+                if (update) {
+                    this.generateMockBookAndTrades(update.current_price);
+                }
+            });
+        }
     }
 
     setSymbol(symbol) {
@@ -93,9 +92,9 @@ class OrderbookController {
         
         container.innerHTML = displayOrders.map(order => `
             <div class="flex justify-between text-[11px] py-1 hover:bg-white/[0.05] cursor-pointer px-2">
-                <span class="${colorClass}">${order.price.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+                <span class="${colorClass}">${window.FinanceFormatter ? window.FinanceFormatter.formatCurrency(order.price).replace('₹', '') : order.price.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
                 <span class="text-gray-300 font-mono">${order.amount.toFixed(4)}</span>
-                <span class="text-gray-500 font-mono">${(order.price * order.amount).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+                <span class="text-gray-500 font-mono">${window.FinanceFormatter ? window.FinanceFormatter.formatCurrency(order.price * order.amount).replace('₹', '') : (order.price * order.amount).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
             </div>
         `).join('');
     }
@@ -112,7 +111,7 @@ class OrderbookController {
         const row = document.createElement('div');
         row.className = 'flex justify-between text-[11px] py-1 hover:bg-white/[0.05] px-2 font-mono';
         row.innerHTML = `
-            <span class="${colorClass}">${data.price.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+            <span class="${colorClass}">${window.FinanceFormatter ? window.FinanceFormatter.formatCurrency(data.price).replace('₹', '') : data.price.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
             <span class="text-gray-300">${data.amount.toFixed(4)}</span>
             <span class="text-gray-500">${timeStr}</span>
         `;

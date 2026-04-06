@@ -628,7 +628,7 @@
                                 class="tab-active-ui px-4 py-2 rounded-xl text-sm font-semibold transition">
                                 <span class="flex items-center gap-2">
                                     <span>Open Positions</span>
-                                    <span class="px-2 py-0.5 rounded-full bg-white/10 text-[11px] text-slate-300">{{ open_positions|length }}</span>
+                                    <span id="desktop-open-positions-count" class="px-2 py-0.5 rounded-full bg-white/10 text-[11px] text-slate-300">{{ open_positions|length }}</span>
                                 </span>
                             </button>
 
@@ -991,12 +991,20 @@ function switchTab(tab) {
 }
 
 function clearWatchlistActiveStates() {
+    if (window.DashboardUI?.clearActiveStates) {
+        window.DashboardUI.clearActiveStates();
+        return;
+    }
     document.querySelectorAll('.watchlist-item').forEach(item => {
         item.classList.remove('watchlist-item-active');
     });
 }
 
 function setActiveSymbolUI(symbol, el = null) {
+    if (window.DashboardUI?.setActiveSymbolUI) {
+        window.DashboardUI.setActiveSymbolUI(symbol, el);
+        return;
+    }
     clearWatchlistActiveStates();
 
     if (el) {
@@ -1016,12 +1024,14 @@ function setActiveSymbolUI(symbol, el = null) {
 }
 
 function selectWatchlistSymbol(symbol, el) {
+    if (window.DashboardUI?.selectSymbol) {
+        window.DashboardUI.selectSymbol(symbol, el);
+        return;
+    }
     setActiveSymbolUI(symbol, el);
-
     if (isMobileView()) {
         showChartPanelOnMobile();
     }
-
     document.dispatchEvent(new CustomEvent('symbol_change', {
         detail: { symbol: symbol }
     }));
@@ -1137,6 +1147,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof WatchlistManager !== 'undefined' && WatchlistManager.init) WatchlistManager.init();
     if (typeof TradingChart !== 'undefined' && TradingChart.init) TradingChart.init();
     if (typeof WSManager !== 'undefined' && WSManager.init) WSManager.init();
+    if (window.DashboardUI && !window.DashboardUI.initialized) {
+        const defaultSymbolFromList = document.querySelector('#fav-content .watchlist-item[data-symbol]')?.dataset.symbol || 'BTCUSDT';
+        window.DashboardUI.init({
+            watchlistItemSelector: '.watchlist-item[data-symbol]',
+            activeItemClass: 'watchlist-item-active',
+            activeSymbolHeaderId: 'active-symbol-header',
+            activePriceId: 'active-symbol-price',
+            activeChangeId: 'active-symbol-change',
+            activeChangeResetClass: 'font-mono text-xs font-bold px-2 py-1 rounded-lg bg-white/5 text-slate-300',
+            tradePanelSymbolId: 'trade-panel-symbol',
+            avatarId: 'chart-symbol-avatar',
+            refreshIds: [
+                'pos-content',
+                'positions-table-body',
+                'orders-table-body',
+                'stat-wallet',
+                'wallet-balance',
+                'dashboard-unrealised-pnl',
+                'desktop-open-positions-count'
+            ],
+            onSymbolActivated: () => {
+                if (isMobileView()) showChartPanelOnMobile();
+            },
+            defaultSymbol: defaultSymbolFromList
+        });
+    }
 
     const qtyBtn = document.getElementById('toggle-qty');
     const amtBtn = document.getElementById('toggle-amt');
@@ -1189,7 +1225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     validateOrderPanel();
 
-    document.addEventListener('symbol_change', (e) => {
+    if (false) document.addEventListener('symbol_change', (e) => {
         const symbol = e.detail.symbol;
         setActiveSymbolUI(symbol);
 
@@ -1202,7 +1238,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.addEventListener('price_update', (e) => {
+    if (false) document.addEventListener('price_update', (e) => {
         const updates = e.detail;
         if (!Array.isArray(updates)) return;
 
@@ -1301,29 +1337,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.addEventListener('order_update', (e) => {
+    if (false) document.addEventListener('order_update', (e) => {
         const update = e.detail;
         if (typeof Notifications !== 'undefined' && Notifications.info) {
             Notifications.info(`Order Status: ${update.status} for ${update.symbol || 'your order'}`);
         }
+    });
 
-        if (update.status === 'completed') {
-            fetch(window.location.href)
-                .then(res => res.text())
-                .then(html => {
-                    const doc = new DOMParser().parseFromString(html, 'text/html');
-                    const refreshIds = ['pos-content', 'positions-table-body', 'orders-table-body', 'stat-wallet', 'wallet-balance', 'dashboard-unrealised-pnl'];
+    if (false) document.addEventListener('portfolio_update', () => {
+        fetch(window.location.href)
+            .then(res => res.text())
+            .then(html => {
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const refreshIds = [
+                    'pos-content',
+                    'positions-table-body',
+                    'orders-table-body',
+                    'stat-wallet',
+                    'wallet-balance',
+                    'dashboard-unrealised-pnl',
+                    'desktop-open-positions-count'
+                ];
 
-                    refreshIds.forEach(id => {
-                        const newEl = doc.getElementById(id);
-                        const oldEl = document.getElementById(id);
-                        if (newEl && oldEl) {
-                            oldEl.innerHTML = newEl.innerHTML;
-                        }
-                    });
-                })
-                .catch(err => console.error('Failed to perform background update', err));
-        }
+                refreshIds.forEach(id => {
+                    const newEl = doc.getElementById(id);
+                    const oldEl = document.getElementById(id);
+                    if (newEl && oldEl) {
+                        oldEl.innerHTML = newEl.innerHTML;
+                    }
+                });
+            })
+            .catch(err => console.error('Failed to perform background update', err));
     });
 
     const watchlistItems = document.querySelectorAll('#fav-content .watchlist-item');
@@ -1337,11 +1381,15 @@ document.addEventListener('DOMContentLoaded', () => {
             chartPanel.classList.remove('chart-mobile-hidden');
         }
 
-        setActiveSymbolUI(defaultSymbol);
-        document.dispatchEvent(new CustomEvent('symbol_change', { detail: { symbol: defaultSymbol } }));
+        if (!window.DashboardUI?.initialized) {
+            setActiveSymbolUI(defaultSymbol);
+            document.dispatchEvent(new CustomEvent('symbol_change', { detail: { symbol: defaultSymbol } }));
+        }
     } else {
         hideChartPanelOnMobile();
-        setActiveSymbolUI(defaultSymbol);
+        if (!window.DashboardUI?.initialized) {
+            setActiveSymbolUI(defaultSymbol);
+        }
     }
 
     window.addEventListener('resize', () => {

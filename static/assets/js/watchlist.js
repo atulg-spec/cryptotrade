@@ -1,14 +1,16 @@
 class WatchlistController {
     constructor() {
         this.activeSymbol = null;
-
-        // Listen to global price updates
-        document.addEventListener('price_update', (e) => {
-            this.onPriceUpdate(e.detail);
-        });
+        this.unsubscribePrices = null;
     }
 
     init() {
+        if (window.AppRealtime?.subscribePrices && !this.unsubscribePrices) {
+            this.unsubscribePrices = window.AppRealtime.subscribePrices(({ updates }) => {
+                this.onPriceUpdate(updates);
+            });
+        }
+
         this.searchInput = document.getElementById('watchlist-search-input');
         this.searchResults = document.getElementById('watchlist-search-results');
 
@@ -133,6 +135,10 @@ class WatchlistController {
                     // Switch to fav tab to show the new item
                     if (typeof switchTab === 'function') switchTab('fav');
                 }
+                window.AppRealtime?.publishLocal('watchlist:update', {
+                    action: 'added',
+                    symbol
+                });
                 Notifications.success(data.message);
             } else {
                 Notifications.error(data.message);
@@ -155,6 +161,10 @@ class WatchlistController {
             if (data.success) {
                 document.querySelectorAll(`.watchlist-item[data-symbol="${symbol}"]`).forEach(el => el.remove());
                 this.checkEmptyWatchlist();
+                window.AppRealtime?.publishLocal('watchlist:update', {
+                    action: 'removed',
+                    symbol
+                });
 
                 // Also update star in search results if visible
                 document.querySelectorAll(`.favorite-star[onclick*="'${symbol}'"]`).forEach(s => {
@@ -208,7 +218,9 @@ class WatchlistController {
                     const oldPrice = parseFloat(priceEl.textContent.replace(/[^0-9.-]+/g, "")) || update.current_price;
                     const newPrice = update.current_price;
 
-                    priceEl.textContent = newPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    priceEl.textContent = window.FinanceFormatter
+                        ? window.FinanceFormatter.formatCurrency(newPrice)
+                        : `₹${newPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
                     // Color transitions
                     priceEl.classList.remove('text-green-400', 'text-red-400', 'text-white');
@@ -224,7 +236,9 @@ class WatchlistController {
                 if (changeEl && update.percentage_change !== undefined) {
                     const isPositive = update.percentage_change >= 0;
                     changeEl.className = `change-display font-mono text-[10px] ${isPositive ? 'text-green-400' : 'text-red-400'}`;
-                    changeEl.textContent = `${isPositive ? '+' : ''}${update.percentage_change.toFixed(2)}%`;
+                    changeEl.textContent = window.FinanceFormatter
+                        ? window.FinanceFormatter.formatPercentage(update.percentage_change)
+                        : `${isPositive ? '+' : ''}${update.percentage_change.toFixed(2)}%`;
                 }
             });
         });
@@ -318,6 +332,10 @@ class WatchlistController {
                         if (typeof switchTab === 'function') switchTab('fav');
                     }
                 }
+                window.AppRealtime?.publishLocal('watchlist:update', {
+                    action: isFavorite ? 'removed' : 'added',
+                    symbol
+                });
                 Notifications.success(data.message);
             } else {
                 Notifications.error(data.message || 'Failed to update favorite');

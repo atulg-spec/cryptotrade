@@ -22,6 +22,7 @@ def place_order(user, symbol, quantity, order_type, amount=None):
     charges = Decimal("0.00")
     price = Decimal(symbol.current_price)
     quantity = Decimal(str(quantity))
+    wallet_balance = Decimal(str(user.wallet))
 
     if amount is None:
         amount = (quantity * price).quantize(Decimal("0.01"), rounding=ROUND_DOWN)
@@ -34,7 +35,7 @@ def place_order(user, symbol, quantity, order_type, amount=None):
         pos_quantity = Decimal(str(pos.quantity))
 
     if order_type == "BUY":
-        if amount <= user.wallet:
+        if amount <= wallet_balance:
             order = Order.objects.create(
                 user=user,
                 stock=symbol,

@@ -56,15 +56,15 @@
     <!-- Quick Stats -->
     <div class="px-4 py-3">
         <div class="grid grid-cols-3 gap-2 md:gap-3">
-            <div class="bg-gray-800/50 rounded-xl p-2 md:p-3 text-center border border-gray-700/30">
+            <div id="orders-stat-total-card" class="bg-gray-800/50 rounded-xl p-2 md:p-3 text-center border border-gray-700/30">
                 <p class="text-[10px] md:text-xs text-gray-400 mb-1">Total</p>
-                <p class="text-white font-bold text-sm md:text-base">{{ total_orders|default:0 }}</p>
+                <p id="orders-stat-total" class="text-white font-bold text-sm md:text-base">{{ total_orders|default:0 }}</p>
             </div>
-            <div class="bg-gray-800/50 rounded-xl p-2 md:p-3 text-center border border-gray-700/30">
+            <div id="orders-stat-completed-card" class="bg-gray-800/50 rounded-xl p-2 md:p-3 text-center border border-gray-700/30">
                 <p class="text-[10px] md:text-xs text-gray-400 mb-1">Completed</p>
-                <p class="text-green-400 font-bold text-sm md:text-base">{{ orders.paginator.count|default:0 }}</p>
+                <p id="orders-stat-completed" class="text-green-400 font-bold text-sm md:text-base">{{ orders.paginator.count|default:0 }}</p>
             </div>
-            <div class="bg-gray-800/50 rounded-xl p-2 md:p-3 text-center border border-gray-700/30">
+            <div id="orders-stat-invested-card" class="bg-gray-800/50 rounded-xl p-2 md:p-3 text-center border border-gray-700/30">
                 <p class="text-[10px] md:text-xs text-gray-400 mb-1">Invested</p>
                 <p class="text-blue-400 font-bold text-xs md:text-sm">₹{{ total_investment|default:0|floatformat:2|intcomma }}</p>
             </div>
@@ -358,7 +358,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 // WebSocket order updates - Enhanced with dynamic order insertion
 document.addEventListener("DOMContentLoaded", function() {
-    if (window.TradehubStreams && window.TradehubStreams.connectUserEvents) {
+    if (false) {
         const ordersContainer = document.querySelector('.space-y-2.md:space-y-3') || 
                                 document.querySelector('.orders-list') ||
                                 document.querySelector('[class*="orders"]');
@@ -524,7 +524,8 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         // Main WebSocket event handler
-        TradehubStreams.connectUserEvents(function(eventData) {
+        /* legacy realtime path removed */
+        (function(eventData) {
             if (eventData.event === 'order_update') {
                 // Check if this is a new order (created) or just a status update
                 if (eventData.created_at) {
@@ -537,6 +538,170 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    if (!window.AppRealtime?.subscribeOrders) return;
+
+    const ordersContainer = document.querySelector('.space-y-2.md\\:space-y-3');
+    const emptyState = document.querySelector('.flex.flex-col.items-center.justify-center.py-12');
+    const totalEl = document.getElementById('orders-stat-total');
+    const completedEl = document.getElementById('orders-stat-completed');
+    const investedEl = document.querySelector('#orders-stat-invested-card p:last-child');
+
+    const formatMoney = value => `₹${Number(value || 0).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    })}`;
+
+    function flashCard(card) {
+        if (!card) return;
+        card.classList.add('transition-all', 'duration-300');
+        card.style.transform = 'scale(1.02)';
+        setTimeout(() => {
+            card.style.transform = 'scale(1)';
+        }, 300);
+    }
+
+    function applyStatusBadge(badge, statusValue) {
+        if (!badge || !statusValue) return;
+        const status = statusValue.toLowerCase();
+        badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+        badge.className = 'status-badge inline-block px-2 py-0.5 rounded-full text-[10px] md:text-xs font-semibold';
+
+        if (status === 'completed') {
+            badge.classList.add('bg-green-500/20', 'text-green-400');
+        } else if (status === 'pending' || status === 'initiated') {
+            badge.classList.add('bg-yellow-500/20', 'text-yellow-400');
+        } else if (status === 'cancelled') {
+            badge.classList.add('bg-gray-500/20', 'text-gray-400');
+        } else {
+            badge.classList.add('bg-red-500/20', 'text-red-400');
+        }
+    }
+
+    function createOrderCard(orderData) {
+        const typeClasses = orderData.order_type === 'BUY'
+            ? 'bg-green-500/20 text-green-400'
+            : 'bg-red-500/20 text-red-400';
+        const typeIcon = orderData.order_type === 'BUY'
+            ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>'
+            : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>';
+
+        return `
+            <div class="order-card bg-gray-800 rounded-xl p-3 md:p-4 border border-gray-700/30 animate-fade-in"
+                 data-order-id="${orderData.order_id}"
+                 data-status-accounted="${orderData.status === 'completed' ? 'true' : 'false'}"
+                 data-invested-accounted="${orderData.status === 'completed' && orderData.order_type === 'BUY' ? 'true' : 'false'}">
+                <div class="flex items-center justify-between mb-2 md:mb-3">
+                    <div class="flex items-center gap-2 md:gap-3">
+                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center ${typeClasses}">
+                            <svg class="w-4 h-4 md:w-5 md:h-5 ${typeClasses.replace('/20', '')}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                ${typeIcon}
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-white font-semibold text-sm md:text-base">${orderData.symbol}</h3>
+                            <p class="text-gray-400 text-[10px] md:text-xs">${orderData.created_at ? new Date(orderData.created_at).toLocaleString() : 'Just now'}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="status-badge inline-block px-2 py-0.5 rounded-full text-[10px] md:text-xs font-semibold"></span>
+                        <p class="text-gray-500 text-[10px] md:text-xs mt-0.5 md:mt-1">Just now</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2 pt-2 md:pt-3 border-t border-gray-700/30">
+                    <div>
+                        <p class="text-gray-400 text-[10px] md:text-xs mb-0.5">Quantity</p>
+                        <p class="text-white font-medium text-xs md:text-sm">${Number(orderData.quantity || 0).toFixed(4)}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-[10px] md:text-xs mb-0.5">Price</p>
+                        <p class="text-white font-medium text-xs md:text-sm">${formatMoney(orderData.price)}</p>
+                    </div>
+                    <div class="col-span-1">
+                        <p class="text-gray-400 text-[10px] md:text-xs mb-0.5">Total</p>
+                        <p class="text-white font-bold text-sm md:text-base">${formatMoney(orderData.amount)}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function accountCompleted(card, orderData) {
+        if (!card || card.dataset.statusAccounted === 'true' || orderData.status !== 'completed') return;
+        if (completedEl) {
+            completedEl.textContent = String((parseInt(completedEl.textContent, 10) || 0) + 1);
+        }
+        card.dataset.statusAccounted = 'true';
+    }
+
+    function accountInvested(card, orderData) {
+        if (!card || card.dataset.investedAccounted === 'true' || orderData.status !== 'completed' || orderData.order_type !== 'BUY' || !investedEl) {
+            return;
+        }
+
+        const currentInvested = parseFloat((investedEl.textContent || '').replace(/[^\d.-]/g, '')) || 0;
+        investedEl.textContent = formatMoney(currentInvested + Number(orderData.amount || 0));
+        card.dataset.investedAccounted = 'true';
+    }
+
+    function switchToMyPositions() {
+        if (typeof showPanel === 'function') {
+            showPanel('positions');
+            return;
+        }
+
+        const positionsTabBtn = document.getElementById('mnav-positions');
+        if (positionsTabBtn) {
+            positionsTabBtn.click();
+            return;
+        }
+
+        const positionsPanel = document.getElementById('panel-positions');
+        if (positionsPanel) {
+            document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
+            positionsPanel.classList.add('active');
+        }
+    }
+
+    function insertOrUpdateOrder(orderData) {
+        let card = document.querySelector(`[data-order-id="${orderData.order_id}"]`);
+        const isNewCard = !card;
+
+        if (!card) {
+            if (!ordersContainer) return;
+            const temp = document.createElement('div');
+            temp.innerHTML = createOrderCard(orderData);
+            card = temp.firstElementChild;
+            const badge = card.querySelector('.status-badge');
+            applyStatusBadge(badge, orderData.status || 'pending');
+            ordersContainer.insertBefore(card, ordersContainer.firstChild);
+
+            if (totalEl) {
+                totalEl.textContent = String((parseInt(totalEl.textContent, 10) || 0) + 1);
+            }
+            if (emptyState) {
+                emptyState.classList.add('hidden');
+            }
+        } else {
+            const badge = card.querySelector('.status-badge');
+            applyStatusBadge(badge, orderData.status);
+        }
+
+        accountCompleted(card, orderData);
+        accountInvested(card, orderData);
+        flashCard(card);
+
+        // اگر سفارش جدید با موفقیت کامل شد، کاربر را ببر به My Positions
+        if (isNewCard && orderData.status === 'completed') {
+            switchToMyPositions();
+        }
+    }
+
+    const unsubscribe = window.AppRealtime.subscribeOrders(insertOrUpdateOrder);
+    window.addEventListener('pagehide', unsubscribe, { once: true });
 });
 </script>
 {% endblock %}

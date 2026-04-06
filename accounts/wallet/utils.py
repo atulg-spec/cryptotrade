@@ -3,20 +3,19 @@ from decimal import Decimal
 charges = 0
 
 def wallet_checked(user,amount):
-    max = 0
-    max = user.wallet
-    if amount < max:
-        return True
-    else:
-        return False
+    wallet_balance = Decimal(str(user.wallet))
+    amount = Decimal(str(amount))
+    return amount <= wallet_balance
 
 def add_amount(user,amount):
     user.wallet = (Decimal(str(user.wallet))) + amount
     user.save()
 
 def deduct_amount(user,amount):
-    if user.wallet > amount:
-        user.wallet = (Decimal(str(user.wallet))) - amount
+    wallet_balance = Decimal(str(user.wallet))
+    amount = Decimal(str(amount))
+    if wallet_balance >= amount:
+        user.wallet = wallet_balance - amount
         user.save()
     
 

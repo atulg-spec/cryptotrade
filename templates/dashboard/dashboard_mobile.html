@@ -809,23 +809,32 @@
     font-family: var(--fmono);
     font-size: 16px;
     font-weight: 500;
-    color: var(--t1);
+    color: #00d68f;
+    text-shadow: 0 0 8px rgba(0, 214, 143, 0.25);
   }
 
   /* STOCK SHEET */
   #stock-sheet {
     position: fixed;
     inset: 0;
-    z-index: 500;
+    z-index: 9999 !important;
     display: none;
+    visibility: hidden;
+    opacity: 0;
     flex-direction: column;
     background: var(--bg-base);
     transform: translateY(100%);
-    transition: transform 0.32s cubic-bezier(0.32, 1, 0.6, 1);
+    transition:
+      transform 0.35s cubic-bezier(0.32, 1, 0.6, 1),
+      opacity 0.25s ease-out;
+    pointer-events: none;
   }
   #stock-sheet.open {
-    display: flex;
-    transform: translateY(0);
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
   }
   .handle-row {
     padding: 8px 0 0;
@@ -1148,31 +1157,66 @@
 
     /* Sheet position display */
     .spos-card {
-      margin: 8px 10px;
+      border-radius: 14px;
     }
     .spos-top {
-      padding: 10px 12px;
+      padding: 12px;
+    }
+    .spos-tag {
+      font-size: 8px;
+      padding: 4px 8px;
+    }
+    .spos-symbol {
+      font-size: 15px;
+    }
+    .spos-meta {
+      font-size: 8px;
+    }
+    .spos-pnl-label {
+      font-size: 7px;
     }
     .spos-pnl {
       font-size: 16px;
     }
     .spos-pct {
-      font-size: 11px;
+      font-size: 10px;
+    }
+    .spos-strip {
+      padding: 0 12px 10px;
+      gap: 6px;
+    }
+    .spos-pill {
+      padding: 8px 9px;
+    }
+    .spos-pill-label {
+      font-size: 7px;
+    }
+    .spos-pill-value {
+      font-size: 10px;
+    }
+    .spos-grid {
+      padding: 0 12px 12px;
+      gap: 6px;
     }
     .spos-cell {
-      padding: 6px 10px;
+      padding: 8px 9px;
     }
     .spos-cl {
       font-size: 7px;
     }
     .spos-cv {
-      font-size: 11px;
+      font-size: 10px;
     }
-    .spos-close-wrap {
-      padding: 8px;
+    .spos-footer {
+      padding: 0 12px 12px;
+    }
+    .spos-note {
+      margin-bottom: 8px;
+      padding: 8px 9px;
+      font-size: 10px;
     }
     .spos-close-btn {
-      padding: 8px 0;
+      padding: 10px 0;
       font-size: 10px;
     }
 
@@ -1329,54 +1373,164 @@
     flex-direction: column;
     gap: 12px;
   }
+  #sheet-pos-content {
+    padding: 12px;
+  }
   .sheet-pos-none {
-    padding: 32px 16px;
+    margin: 4px 0;
+    padding: 28px 18px;
+    border-radius: 16px;
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    background:
+      radial-gradient(
+        circle at top right,
+        rgba(79, 140, 255, 0.12),
+        transparent 42%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.02),
+        rgba(255, 255, 255, 0.01)
+      );
     text-align: center;
     color: var(--t3);
     font-size: 13px;
+    line-height: 1.6;
+  }
+  .sheet-pos-none strong {
+    display: block;
+    color: var(--t1);
+    font-size: 14px;
+    margin-bottom: 6px;
   }
   .spos-card {
-    margin: 10px;
-    border-radius: 12px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
+    border-radius: 18px;
+    background:
+      radial-gradient(
+        circle at top right,
+        rgba(79, 140, 255, 0.14),
+        transparent 34%
+      ),
+      linear-gradient(180deg, rgba(17, 22, 37, 0.98), rgba(10, 14, 24, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.08);
     overflow: hidden;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
   }
   .spos-top {
-    padding: 14px 16px;
+    padding: 16px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    gap: 12px;
+  }
+  .spos-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(79, 140, 255, 0.12);
+    border: 1px solid rgba(79, 140, 255, 0.2);
+    color: var(--accent);
+    font-family: var(--fmono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .spos-tag::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 10px currentColor;
+  }
+  .spos-symbol {
+    margin-top: 10px;
+    font-family: var(--fmono);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--t1);
+    line-height: 1;
+  }
+  .spos-meta {
+    margin-top: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--t3);
+  }
+  .spos-pnl-block {
+    min-width: 112px;
+    text-align: right;
+  }
+  .spos-pnl-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--t3);
+    margin-bottom: 6px;
   }
   .spos-pnl {
     font-family: var(--fmono);
     font-size: 22px;
     font-weight: 600;
+    line-height: 1.05;
   }
   .spos-pct {
     font-family: var(--fmono);
-    font-size: 13px;
-    margin-top: 3px;
-    opacity: 0.85;
+    font-size: 12px;
+    margin-top: 5px;
+    opacity: 0.9;
+  }
+  .spos-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 0 16px 14px;
+  }
+  .spos-pill {
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .spos-pill-label {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--t3);
+    margin-bottom: 6px;
+  }
+  .spos-pill-value {
+    font-family: var(--fmono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--t1);
+  }
+  .spos-pill-value.green {
+    color: var(--green);
+  }
+  .spos-pill-value.red {
+    color: var(--red);
   }
   .spos-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    background: var(--bg-el);
+    gap: 8px;
+    padding: 0 16px 16px;
   }
   .spos-cell {
-    padding: 10px 14px;
-  }
-  .spos-cell:nth-child(odd) {
-    border-right: 1px solid var(--border);
-  }
-  .spos-cell:nth-child(even) {
-    border-right: none;
-  }
-  .spos-cell:nth-child(3),
-  .spos-cell:nth-child(4) {
-    border-top: 1px solid var(--border);
+    padding: 12px;
+    border-radius: 14px;
+    background: var(--bg-el);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
   }
   .spos-cl {
     font-size: 9px;
@@ -1384,36 +1538,59 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--t3);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
   .spos-cv {
     font-family: var(--fmono);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
+    color: var(--t1);
+    line-height: 1.3;
   }
-  .spos-close-wrap {
-    padding: 12px;
+  .spos-footer {
+    padding: 0 16px 16px;
+  }
+  .spos-note {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(79, 140, 255, 0.06);
+    border: 1px solid rgba(79, 140, 255, 0.12);
+    color: var(--t2);
+    font-size: 11px;
+    line-height: 1.45;
   }
   .spos-close-btn {
     display: block;
     width: 100%;
-    padding: 11px 0;
+    padding: 13px 0;
     border: none;
-    border-radius: var(--rsm);
-    background: var(--red-dim);
-    color: var(--red);
-    border: 1px solid rgba(255, 77, 109, 0.2);
+    border-radius: 12px;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 77, 109, 0.18),
+      rgba(255, 77, 109, 0.08)
+    );
+    color: #ff6d88;
+    border: 1px solid rgba(255, 77, 109, 0.25);
     font-family: var(--fui);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.18s ease;
+    box-shadow: 0 8px 20px rgba(255, 77, 109, 0.08);
   }
   .spos-close-btn:hover {
-    background: var(--red);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 77, 109, 0.92),
+      rgba(230, 57, 80, 0.92)
+    );
     color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(255, 77, 109, 0.18);
   }
 
   /* DESKTOP */
@@ -1755,7 +1932,7 @@
   </div>
   <div class="t-stat">
     <span class="t-lbl">Balance</span>
-    <span class="t-val mono">₹{{ wallet|floatformat:2 }}</span>
+    <span class="t-val mono green">₹{{ wallet|floatformat:2 }}</span>
   </div>
 </div>
 
@@ -1799,13 +1976,10 @@
     </div>
     <div id="fav-content" class="wlist tab-content">
       {% if favorites %} {% for fav in favorites %}
-      <div
-        class="witem"
-        data-symbol="{{ fav.symbol }}"
-        onclick="openStockSheet('{{ fav.symbol }}')"
-      >
+      <div class="witem" data-symbol="{{ fav.symbol }}">
         <div class="witem-left">
           <button
+            type="button"
             onclick="WatchlistManager.toggleFavorite('{{ fav.symbol }}', event)"
             class="star-btn {% if fav.is_favorite %}fav{% endif %}"
           >
@@ -1836,6 +2010,7 @@
             </div>
           </div>
           <button
+            type="button"
             onclick="WatchlistManager.removeFromWatchlist('{{ fav.symbol }}', event)"
             class="rm-btn"
           >
@@ -1858,11 +2033,7 @@
       </div>
       {% endfor %} {% else %}
 
-      <div
-        class="witem"
-        data-symbol="BTCUSDT"
-        onclick="openStockSheet('BTCUSDT')"
-      >
+      <div class="witem" data-symbol="BTCUSDT">
         <div class="witem-left">
           <button type="button" class="star-btn fav">
             <svg
@@ -1888,11 +2059,7 @@
         </div>
       </div>
 
-      <div
-        class="witem"
-        data-symbol="ETHUSDT"
-        onclick="openStockSheet('ETHUSDT')"
-      >
+      <div class="witem" data-symbol="ETHUSDT">
         <div class="witem-left">
           <button type="button" class="star-btn fav">
             <svg
@@ -1918,11 +2085,7 @@
         </div>
       </div>
 
-      <div
-        class="witem"
-        data-symbol="XAUUSD"
-        onclick="openStockSheet('XAUUSD')"
-      >
+      <div class="witem" data-symbol="XAUUSD">
         <div class="witem-left">
           <button type="button" class="star-btn fav">
             <svg
@@ -1948,11 +2111,7 @@
         </div>
       </div>
 
-      <div
-        class="witem"
-        data-symbol="BNBUSDT"
-        onclick="openStockSheet('BNBUSDT')"
-      >
+      <div class="witem" data-symbol="BNBUSDT">
         <div class="witem-left">
           <button type="button" class="star-btn fav">
             <svg
@@ -1978,11 +2137,7 @@
         </div>
       </div>
 
-      <div
-        class="witem"
-        data-symbol="SOLUSDT"
-        onclick="openStockSheet('SOLUSDT')"
-      >
+      <div class="witem" data-symbol="SOLUSDT">
         <div class="witem-left">
           <button type="button" class="star-btn fav">
             <svg
@@ -2015,7 +2170,10 @@
       <div
         class="witem"
         data-symbol="{{ pos.stock.symbol }}"
-        onclick="openStockSheet('{{ pos.stock.symbol }}')"
+        data-position-symbol="{{ pos.stock.symbol }}"
+        data-position-qty="{{ pos.quantity }}"
+        data-position-avg="{{ pos.buy_price }}"
+        data-position-market="{{ pos.stock.current_price }}"
       >
         <div>
           <div class="w-sym">{{ pos.stock.symbol }}</div>
@@ -2117,7 +2275,13 @@
           </thead>
           <tbody id="positions-table-body">
             {% for pos in open_positions %}
-            <tr data-pos-symbol="{{ pos.stock.symbol }}">
+            <tr
+              data-pos-symbol="{{ pos.stock.symbol }}"
+              data-position-symbol="{{ pos.stock.symbol }}"
+              data-position-qty="{{ pos.quantity }}"
+              data-position-avg="{{ pos.buy_price }}"
+              data-position-market="{{ pos.stock.current_price }}"
+            >
               <td>
                 <div style="color: var(--accent); font-weight: 600">
                   {{ pos.stock.symbol }}
@@ -2253,11 +2417,20 @@
   <div id="panel-positions" class="panel pos-panel">
     <div class="pos-header">
       <span class="pos-title">Open Positions</span>
-      <span class="pos-count">{{ open_positions|length }}</span>
+      <span class="pos-count" id="mobile-positions-count"
+        >{{ open_positions|length }}</span
+      >
     </div>
-    <div class="pos-list">
+    <div class="pos-list" id="mobile-positions-list">
       {% for pos in open_positions %}
-      <div class="pos-card">
+      <div
+        class="pos-card"
+        data-symbol="{{ pos.stock.symbol }}"
+        data-position-symbol="{{ pos.stock.symbol }}"
+        data-position-qty="{{ pos.quantity }}"
+        data-position-avg="{{ pos.buy_price }}"
+        data-position-market="{{ pos.stock.current_price }}"
+      >
         <div class="pos-card-top">
           <div>
             <div class="pos-sym">{{ pos.stock.symbol }}</div>
@@ -2396,7 +2569,7 @@
       <button id="submit-order-btn" class="submit-btn buy">Buy / Long</button>
       <div class="bal-card">
         <span class="bal-lbl">Available Balance</span
-        ><span class="bal-val" id="wallet-balance"
+        ><span class="bal-val green" id="wallet-balance"
           >₹{{ wallet|floatformat:2 }}</span
         >
       </div>
@@ -2580,7 +2753,10 @@
           </button>
           <div class="bal-card">
             <span class="bal-lbl">Balance</span
-            ><span class="bal-val" id="sheet-wallet-balance"
+            ><span
+              class="bal-val"
+              id="sheet-wallet-balance"
+              style="color: #00d68f"
               >₹{{ wallet|floatformat:2 }}</span
             >
           </div>
@@ -2598,652 +2774,1008 @@
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
-  /* MOBILE PANEL */
-  const PANELS = ['watch','positions','trade'];
-
-  function showPanel(name) {
-    if (window.innerWidth >= 1024) return;
-    PANELS.forEach(p => {
-      document.getElementById(`panel-${p}`)?.classList.remove('active');
-      document.getElementById(`mnav-${p}`)?.classList.remove('active');
-    });
-    document.getElementById(`panel-${name}`)?.classList.add('active');
-    document.getElementById(`mnav-${name}`)?.classList.add('active');
-  }
-
-  function ensureDesktop() {
-    if (window.innerWidth >= 1024) {
-      ['watch', 'chart-desktop', 'trade'].forEach(p => {
-        document.getElementById(`panel-${p}`)?.classList.add('active');
-      });
-      document.getElementById('panel-positions')?.classList.remove('active');
-    }
-  }
-
-  window.addEventListener('resize', ensureDesktop);
-  ensureDesktop();
-
-  /* WATCHLIST TABS */
-  function switchWTab(tab) {
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-    document.getElementById(`${tab}-content`)?.classList.remove('hidden');
-    document.getElementById('wtab-fav')?.classList.toggle('active', tab === 'fav');
-    document.getElementById('wtab-pos')?.classList.toggle('active', tab === 'pos');
-  }
-
-  function switchTab(tab) {
-    switchWTab(tab);
-  }
-
-  /* DESKTOP BOTTOM TABS */
-  function switchBottomTab(tab) {
-    ['orderbook', 'trades', 'positions', 'orders'].forEach(p => {
-      document.getElementById(`pane-${p}`)?.classList.remove('active');
-      document.getElementById(`btn-tab-${p}`)?.classList.remove('active');
-    });
-
-    document.getElementById(`pane-${tab}`)?.classList.add('active');
-    document.getElementById(`btn-tab-${tab}`)?.classList.add('active');
-  }
-
-  /* TRADE SIDE */
-  function setTradeSide(side) {
-    if (window.TradingPanel) {
-      TradingPanel.side = side;
-    }
-
-    const sb = document.getElementById('submit-order-btn');
-
-    if (side === 'buy') {
-      if (sb) {
-        sb.className = 'submit-btn buy';
-        sb.textContent = 'Buy / Long';
-      }
-      const buyBtn = document.getElementById('btn-buy');
-      const sellBtn = document.getElementById('btn-sell');
-      if (buyBtn) buyBtn.className = 'bs-btn buy-active';
-      if (sellBtn) sellBtn.className = 'bs-btn';
-    } else {
-      if (sb) {
-        sb.className = 'submit-btn sell';
-        sb.textContent = 'Sell / Short';
-      }
-      const sellBtn = document.getElementById('btn-sell');
-      const buyBtn = document.getElementById('btn-buy');
-      if (sellBtn) sellBtn.className = 'bs-btn sell-active';
-      if (buyBtn) buyBtn.className = 'bs-btn';
-    }
-  }
-
-  /* STOCK SHEET */
-  let sheetSymbol = null;
-  let sheetSide = 'buy';
-
-  const openPositions = {
-    {% for pos in open_positions %}
-    "{{ pos.stock.symbol }}": {
-      symbol: "{{ pos.stock.symbol }}",
-      qty: {{ pos.quantity }},
-      avg: {{ pos.buy_price }},
-      market: {{ pos.stock.current_price }}
-    },
-    {% endfor %}
-  };
-
-  function openStockSheet(symbol) {
-    sheetSymbol = symbol;
-
-    const sheet = document.getElementById('stock-sheet');
-    const symbolEl = document.getElementById('sheet-symbol');
-    const sheetPriceEl = document.getElementById('sheet-price');
-    const tradeBadge = document.getElementById('trade-panel-symbol');
-
-    if (symbolEl) symbolEl.textContent = symbol;
-    if (tradeBadge) tradeBadge.textContent = symbol;
-
-    const priceEl = document.querySelector(`.price-display[data-symbol="${symbol}"]`);
-    if (priceEl && sheetPriceEl && priceEl.textContent !== '--') {
-      sheetPriceEl.textContent = priceEl.textContent;
-    }
-
-    // Show and update the fixed trading bar
-    const tradingBar = document.getElementById('trading-bar');
-    const tbSymbol = document.getElementById('tb-symbol');
-    const tbPrice = document.getElementById('tb-price');
-    if (tradingBar) tradingBar.classList.add('active');
-    if (tbSymbol) tbSymbol.textContent = symbol;
-    if (tbPrice && priceEl && priceEl.textContent !== '--') {
-      tbPrice.textContent = priceEl.textContent;
-    }
-
-    renderSheetPosition(symbol);
-
-    if (!sheet) return;
-
-    sheet.style.display = 'flex';
-
-    requestAnimationFrame(() => {
-      sheet.classList.add('open');
-
-      setTimeout(() => {
-        if (window.TradingChart?.loadChart) {
-          window.TradingChart.loadChart(symbol, 'sheet-tv-chart');
-        }
-      }, 300);
-    });
-  }
-
-  function closeStockSheet() {
-    const sheet = document.getElementById('stock-sheet');
-    if (!sheet) return;
-
-    sheet.classList.remove('open');
-    setTimeout(() => {
-      sheet.style.display = 'none';
-    }, 320);
-
-    // Hide the fixed trading bar
-    const tradingBar = document.getElementById('trading-bar');
-    if (tradingBar) tradingBar.classList.remove('active');
-
-    sheetSymbol = null;
-  }
-
-  function renderSheetPosition(symbol) {
-    const container = document.getElementById('sheet-pos-content');
-    if (!container) return;
-
-    const pos = openPositions[symbol];
-    if (!pos) {
-      container.innerHTML = `
-        <div class="sheet-pos-none">
-          No open position for this symbol.<br>
-          <span style="color:var(--t3);font-size:11px;">Use the Trade tab to open one.</span>
-        </div>
-      `;
-      return;
-    }
-
-    const pnl = (pos.market - pos.avg) * pos.qty;
-    const pct = pos.avg > 0 ? ((pos.market - pos.avg) / pos.avg) * 100 : 0;
-    const clr = pnl >= 0 ? 'var(--green)' : 'var(--red)';
-    const sign = pnl >= 0 ? '+' : '';
-    const fmt = n => Math.abs(n).toLocaleString('en-IN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-
-    container.innerHTML = `
-      <div class="spos-card">
-        <div class="spos-top">
-          <div>
-            <div style="font-size:13px;font-weight:600;color:var(--accent);">Long Position</div>
-            <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Binance · ${symbol}</div>
-          </div>
-          <div style="text-align:right;">
-            <div class="spos-pnl" style="color:${clr};">${sign}₹${fmt(pnl)}</div>
-            <div class="spos-pct" style="color:${clr};">${sign}${pct.toFixed(2)}%</div>
-          </div>
-        </div>
-        <div class="spos-grid">
-          <div class="spos-cell">
-            <div class="spos-cl">Quantity</div>
-            <div class="spos-cv">${pos.qty.toFixed(4)}</div>
-          </div>
-          <div class="spos-cell">
-            <div class="spos-cl">Avg Price</div>
-            <div class="spos-cv">₹${fmt(pos.avg)}</div>
-          </div>
-          <div class="spos-cell">
-            <div class="spos-cl">Market</div>
-            <div class="spos-cv sheet-pos-market" data-sym="${symbol}">₹${fmt(pos.market)}</div>
-          </div>
-          <div class="spos-cell">
-            <div class="spos-cl">Invested</div>
-            <div class="spos-cv">₹${fmt(pos.avg * pos.qty)}</div>
-          </div>
-        </div>
-        <div class="spos-close-wrap">
-          <button class="spos-close-btn" onclick="TradingPanel.closePosition('${symbol}','${pos.qty}',this)">✕ &nbsp;Close Entire Position</button>
-        </div>
-      </div>
-    `;
-  }
-
-  /* SHEET TABS */
-  function switchSheetTab(tab) {
-    ['trade', 'position'].forEach(t => {
-      document.getElementById(`spane-${t}`)?.classList.remove('active');
-      document.getElementById(`sit-${t}`)?.classList.remove('active');
-    });
-
-    document.getElementById(`spane-${tab}`)?.classList.add('active');
-    document.getElementById(`sit-${tab}`)?.classList.add('active');
-  }
-
-  /* SHEET TRADE SIDE */
-  function setSheetSide(side) {
-    sheetSide = side;
-    if (window.TradingPanel) {
-      TradingPanel.side = side;
-    }
-
-    const sb = document.getElementById('sheet-submit-btn');
-
-    if (side === 'buy') {
-      if (sb) {
-        sb.className = 'submit-btn buy';
-        sb.textContent = 'Buy / Long';
-      }
-      const buyBtn = document.getElementById('sheet-btn-buy');
-      const sellBtn = document.getElementById('sheet-btn-sell');
-      if (buyBtn) buyBtn.className = 'bs-btn buy-active';
-      if (sellBtn) sellBtn.className = 'bs-btn';
-    } else {
-      if (sb) {
-        sb.className = 'submit-btn sell';
-        sb.textContent = 'Sell / Short';
-      }
-      const sellBtn = document.getElementById('sheet-btn-sell');
-      const buyBtn = document.getElementById('sheet-btn-buy');
-      if (sellBtn) sellBtn.className = 'bs-btn sell-active';
-      if (buyBtn) buyBtn.className = 'bs-btn';
-    }
-  }
-
-  /* SHEET QTY PERCENT */
-  function setSheetQtyPercent(pct) {
-    if (typeof setQtyPercent === 'function') {
-      setQtyPercent(pct);
-    }
-
-    const main = document.getElementById('order-qty');
-    const sheet = document.getElementById('sheet-order-qty');
-    if (main && sheet) {
-      sheet.value = main.value;
-    }
-  }
-
-  /* SHEET SUBMIT */
-  function submitSheetOrder() {
-    if (!sheetSymbol || sheetSymbol === '--') {
-      if (window.Notifications?.warn) {
-        Notifications.warn('Please select a symbol first');
-      }
-      return;
-    }
-
-    const sq = document.getElementById('sheet-order-qty');
-    const mq = document.getElementById('order-qty');
-
-    if (!sq || !mq) return;
-
-    const qtyValue = sq.value;
-    if (!qtyValue || parseFloat(qtyValue) <= 0) {
-      if (window.Notifications?.warn) {
-        Notifications.warn('Please enter a valid quantity');
-      }
-      return;
-    }
-
-    // Copy quantity to main form
-    mq.value = sq.value;
-
-    // Update TradingPanel state
-    if (window.TradingPanel) {
-      TradingPanel.currentSymbol = sheetSymbol;
-      TradingPanel.side = sheetSide;
-
-      // Update the symbol badge
-      const ts = document.getElementById('trade-panel-symbol');
-      if (ts) ts.textContent = sheetSymbol;
-    }
-
-    // Update the submit button text and class based on side
-    const submitBtn = document.getElementById('submit-order-btn');
-    if (submitBtn) {
-      if (sheetSide === 'buy') {
-        submitBtn.className = 'submit-btn buy';
-        submitBtn.textContent = 'Buy / Long';
-      } else {
-        submitBtn.className = 'submit-btn sell';
-        submitBtn.textContent = 'Sell / Short';
-      }
-    }
-
-    // Dispatch symbol change event for any other listeners
-    document.dispatchEvent(new CustomEvent('symbol_change', {
-      detail: { symbol: sheetSymbol }
-    }));
-
-    // Trigger the order submission
-    if (submitBtn) submitBtn.click();
-  }
-
-  /* SHEET QTY/AMT TOGGLE */
-  document.getElementById('sheet-toggle-qty')?.addEventListener('click', () => {
-    document.getElementById('sheet-toggle-qty')?.classList.add('active');
-    document.getElementById('sheet-toggle-amt')?.classList.remove('active');
-    const lbl = document.getElementById('sheet-order-input-label');
-    const cur = document.getElementById('sheet-order-currency-display');
-    if (lbl) lbl.textContent = 'Quantity';
-    if (cur) cur.textContent = 'QTY';
-  });
-
-  document.getElementById('sheet-toggle-amt')?.addEventListener('click', () => {
-    document.getElementById('sheet-toggle-amt')?.classList.add('active');
-    document.getElementById('sheet-toggle-qty')?.classList.remove('active');
-    const lbl = document.getElementById('sheet-order-input-label');
-    const cur = document.getElementById('sheet-order-currency-display');
-    if (lbl) lbl.textContent = 'Amount (₹)';
-    if (cur) cur.textContent = '₹';
-  });
-
-  /* RESIZE DIVIDER */
-  (function () {
-    const div = document.getElementById('resize-divider');
-    const chartArea = document.getElementById('sheet-chart-area');
-    const body = document.getElementById('sheet-body');
-    if (!div || !chartArea || !body) return;
-
-    let sY = 0;
-    let sH = 0;
-    let dragging = false;
-
-    function start(y) {
-      dragging = true;
-      sY = y;
-      sH = chartArea.getBoundingClientRect().height;
-      document.body.style.userSelect = 'none';
-    }
-
-    function move(y) {
-      if (!dragging) return;
-      const bH = body.getBoundingClientRect().height;
-      const nH = Math.min(Math.max(sH + (y - sY), 80), bH - 120);
-      chartArea.style.flex = 'none';
-      chartArea.style.height = nH + 'px';
-    }
-
-    function end() {
-      dragging = false;
-      document.body.style.userSelect = '';
-    }
-
-    div.addEventListener('mousedown', e => {
-      start(e.clientY);
-      e.preventDefault();
-    });
-
-    document.addEventListener('mousemove', e => move(e.clientY));
-    document.addEventListener('mouseup', end);
-
-    div.addEventListener('touchstart', e => start(e.touches[0].clientY), { passive: true });
-    document.addEventListener('touchmove', e => {
-      if (dragging) {
-        move(e.touches[0].clientY);
-        e.preventDefault();
-      }
-    }, { passive: false });
-    document.addEventListener('touchend', end);
-  })();
-
-  /* SWIPE DOWN TO CLOSE */
-  (function () {
-    const handle = document.getElementById('sheet-drag-handle');
-    const sheet = document.getElementById('stock-sheet');
-    if (!handle || !sheet) return;
-
-    let sY = 0;
-    handle.addEventListener('touchstart', e => {
-      sY = e.touches[0].clientY;
-    }, { passive: true });
-
-    handle.addEventListener('touchend', e => {
-      if (e.changedTouches[0].clientY - sY > 60) closeStockSheet();
-    });
-  })();
-
-  /* MOBILE CHART TIMEFRAME BUTTONS */
-  (function () {
-    const timeframeBar = document.getElementById('sheet-timeframe-bar');
-    if (!timeframeBar) return;
-
-    timeframeBar.addEventListener('click', e => {
-      const btn = e.target.closest('.tf-btn');
-      if (!btn) return;
-
-      const interval = btn.dataset.interval;
-      if (!interval) return;
-
-      // Update active state
-      timeframeBar.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      // Dispatch interval change event
-      document.dispatchEvent(new CustomEvent('chart_interval_change', {
-        detail: { interval: interval }
-      }));
-    });
-  })();
-
-  /* QUICK TRADE FROM FIXED BAR */
-  function quickTradeFromBar(side) {
-    if (!sheetSymbol) {
-      if (window.Notifications?.warn) {
-        Notifications.warn('Select a symbol first');
-      }
-      return;
-    }
-
-    // Set the trade side
-    sheetSide = side;
-    if (window.TradingPanel) {
-      TradingPanel.side = side;
-    }
-
-    // Get current price
-    const priceEl = document.querySelector(`.price-display[data-symbol="${sheetSymbol}"]`);
-    const currentPrice = priceEl ? parseFloat(priceEl.textContent.replace(/[^\d.-]/g, '')) : 0;
-
-    if (!currentPrice || isNaN(currentPrice)) {
-      if (window.Notifications?.warn) {
-        Notifications.warn('Price not available');
-      }
-      return;
-    }
-
-    // Calculate quantity based on 10% of wallet balance (default quick trade)
-    const walletBalance = parseFloat("{{ wallet }}") || 0;
-    const quickAmount = walletBalance * 0.1;
-    const quantity = quickAmount / currentPrice;
-
-    // Update order form
-    const qtyInput = document.getElementById('order-qty');
-    const sheetQtyInput = document.getElementById('sheet-order-qty');
-
-    if (qtyInput) qtyInput.value = quantity.toFixed(4);
-    if (sheetQtyInput) sheetQtyInput.value = quantity.toFixed(4);
-
-    // Update TradingPanel state
-    if (window.TradingPanel) {
-      TradingPanel.currentSymbol = sheetSymbol;
-    }
-
-    // Dispatch event
-    document.dispatchEvent(new CustomEvent('symbol_change', {
-      detail: { symbol: sheetSymbol }
-    }));
-
-    // Trigger order submission
-    document.getElementById('submit-order-btn')?.click();
-
-    // Show confirmation
-    if (window.Notifications?.info) {
-      const sideLabel = side === 'buy' ? 'Buying' : 'Selling';
-      Notifications.info(`${sideLabel} ${quantity.toFixed(4)} ${sheetSymbol} @ ₹${currentPrice.toLocaleString()}`);
-    }
-  }
-
-  /* QUICK TRADE - for mobile compact toolbar buy/sell buttons */
-  function quickTrade(side) {
-    if (!sheetSymbol) {
-      if (window.Notifications?.warn) {
-        Notifications.warn('Select a symbol first');
-      }
-      return;
-    }
-
-    // Set the trade side
-    setSheetSide(side);
-    sheetSide = side;
-
-    // Get current price
-    const priceEl = document.querySelector(`.price-display[data-symbol="${sheetSymbol}"]`);
-    const currentPrice = priceEl ? parseFloat(priceEl.textContent.replace(/[^\d.-]/g, '')) : 0;
-
-    if (!currentPrice || isNaN(currentPrice)) {
-      if (window.Notifications?.warn) {
-        Notifications.warn('Price not available');
-      }
-      return;
-    }
-
-    // Calculate quantity based on 10% of wallet balance (default quick trade)
-    const walletBalance = parseFloat("{{ wallet }}") || 0;
-    const quickAmount = walletBalance * 0.1; // 10% of wallet
-    const quantity = quickAmount / currentPrice;
-
-    // Update order form
-    const qtyInput = document.getElementById('order-qty');
-    const sheetQtyInput = document.getElementById('sheet-order-qty');
-
-    if (qtyInput) qtyInput.value = quantity.toFixed(4);
-    if (sheetQtyInput) sheetQtyInput.value = quantity.toFixed(4);
-
-    // Switch to trade tab to show confirmation
-    switchSheetTab('trade');
-
-    // Dispatch event to notify trading panel
-    document.dispatchEvent(new CustomEvent('symbol_change', {
-      detail: { symbol: sheetSymbol }
-    }));
-
-    // Show quick trade confirmation toast
-    if (window.Notifications?.info) {
-      const sideLabel = side === 'buy' ? 'Buying' : 'Selling';
-      Notifications.info(`${sideLabel} ${quantity.toFixed(4)} ${sheetSymbol} @ ₹${currentPrice.toLocaleString()}`);
-    }
-  }
-
-  /* QUICK TRADE WITH AMOUNT - allow custom amount selection */
-  function quickTradeAmount(side, percent) {
-    if (!sheetSymbol) {
-      if (window.Notifications?.warn) {
-        Notifications.warn('Select a symbol first');
-      }
-      return;
-    }
-
-    // Set the trade side
-    setSheetSide(side);
-    sheetSide = side;
-
-    // Get current price
-    const priceEl = document.querySelector(`.price-display[data-symbol="${sheetSymbol}"]`);
-    const currentPrice = priceEl ? parseFloat(priceEl.textContent.replace(/[^\d.-]/g, '')) : 0;
-
-    if (!currentPrice || isNaN(currentPrice)) {
-      if (window.Notifications?.warn) {
-        Notifications.warn('Price not available');
-      }
-      return;
-    }
-
-    // Calculate quantity based on percentage of wallet balance
-    const walletBalance = parseFloat("{{ wallet }}") || 0;
-    const tradeAmount = walletBalance * (percent / 100);
-    const quantity = tradeAmount / currentPrice;
-
-    // Update order form
-    const qtyInput = document.getElementById('order-qty');
-    const sheetQtyInput = document.getElementById('sheet-order-qty');
-
-    if (qtyInput) qtyInput.value = quantity.toFixed(4);
-    if (sheetQtyInput) sheetQtyInput.value = quantity.toFixed(4);
-
-    // Switch to trade tab to show confirmation
-    switchSheetTab('trade');
-
-    // Dispatch event
-    document.dispatchEvent(new CustomEvent('symbol_change', {
-      detail: { symbol: sheetSymbol }
-    }));
-
-    // Show quick trade confirmation
-    if (window.Notifications?.info) {
-      const sideLabel = side === 'buy' ? 'Buying' : 'Selling';
-      Notifications.info(`${sideLabel} ${quantity.toFixed(4)} ${sheetSymbol} (${percent}% of balance)`);
-    }
-  }
-
-  /* COMPACT TOOLBAR - interval buttons handler */
-  (function () {
-    var toolbar = document.getElementById('chart-toolbar');
-    if (!toolbar) return;
-
-    toolbar.addEventListener('click', function (e) {
-      var btn = e.target.closest('.ct-if-btn');
-      if (!btn) return;
-
-      var interval = btn.dataset.interval;
-      if (!interval) return;
-
-      // Update active state
-      toolbar.querySelectorAll('.ct-if-btn').forEach(function (b) {
-        b.classList.remove('active');
-      });
-      btn.classList.add('active');
-
-      // Also update the old timeframe bar for consistency
-      var oldBar = document.getElementById('sheet-timeframe-bar');
-      if (oldBar) {
-        oldBar.querySelectorAll('.tf-btn').forEach(function (b) {
-          b.classList.remove('active');
-          if (b.dataset.interval === interval) {
-            b.classList.add('active');
-          }
-        });
-      }
-
-      // Dispatch interval change event
-      document.dispatchEvent(new CustomEvent('chart_interval_change', {
-        detail: { interval: interval }
-      }));
-    });
-  })();
-
-  /* SYMBOL CHANGE */
-  document.addEventListener('symbol_change', e => {
-    const sym = e.detail.symbol;
-    const h = document.getElementById('active-symbol-header');
-    const ts = document.getElementById('trade-panel-symbol');
-    if (h) h.textContent = sym;
-    if (ts) ts.textContent = sym;
-
-    const pe = document.getElementById('active-symbol-price');
-    const ce = document.getElementById('active-symbol-change');
-    if (pe) pe.textContent = '--';
-    if (ce) {
-      ce.textContent = '--';
-      ce.className = 'desk-chg';
-    }
-  });
-
-  /* PRICE UPDATE */
-  document.addEventListener('price_update', e => {
+            /* MOBILE PANEL */
+            const PANELS = ['watch','positions','trade'];
+
+            function showPanel(name) {
+              if (window.innerWidth >= 1024) return;
+              PANELS.forEach(p => {
+                document.getElementById(`panel-${p}`)?.classList.remove('active');
+                document.getElementById(`mnav-${p}`)?.classList.remove('active');
+              });
+              document.getElementById(`panel-${name}`)?.classList.add('active');
+              document.getElementById(`mnav-${name}`)?.classList.add('active');
+            }
+
+            function ensureDesktop() {
+              if (window.innerWidth >= 1024) {
+                ['watch', 'chart-desktop', 'trade'].forEach(p => {
+                  document.getElementById(`panel-${p}`)?.classList.add('active');
+                });
+                document.getElementById('panel-positions')?.classList.remove('active');
+              }
+            }
+
+            window.addEventListener('resize', ensureDesktop);
+            ensureDesktop();
+
+            /* WATCHLIST TABS */
+            function switchWTab(tab) {
+              document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+              document.getElementById(`${tab}-content`)?.classList.remove('hidden');
+              document.getElementById('wtab-fav')?.classList.toggle('active', tab === 'fav');
+              document.getElementById('wtab-pos')?.classList.toggle('active', tab === 'pos');
+            }
+
+            function switchTab(tab) {
+              switchWTab(tab);
+            }
+
+            /* DESKTOP BOTTOM TABS */
+            function switchBottomTab(tab) {
+              ['orderbook', 'trades', 'positions', 'orders'].forEach(p => {
+                document.getElementById(`pane-${p}`)?.classList.remove('active');
+                document.getElementById(`btn-tab-${p}`)?.classList.remove('active');
+              });
+
+              document.getElementById(`pane-${tab}`)?.classList.add('active');
+              document.getElementById(`btn-tab-${tab}`)?.classList.add('active');
+            }
+
+            /* TRADE SIDE */
+            function setTradeSide(side) {
+              if (window.TradingPanel) {
+                TradingPanel.side = side;
+              }
+
+              const sb = document.getElementById('submit-order-btn');
+
+              if (side === 'buy') {
+                if (sb) {
+                  sb.className = 'submit-btn buy';
+                  sb.textContent = 'Buy / Long';
+                }
+                const buyBtn = document.getElementById('btn-buy');
+                const sellBtn = document.getElementById('btn-sell');
+                if (buyBtn) buyBtn.className = 'bs-btn buy-active';
+                if (sellBtn) sellBtn.className = 'bs-btn';
+              } else {
+                if (sb) {
+                  sb.className = 'submit-btn sell';
+                  sb.textContent = 'Sell / Short';
+                }
+                const sellBtn = document.getElementById('btn-sell');
+                const buyBtn = document.getElementById('btn-buy');
+                if (sellBtn) sellBtn.className = 'bs-btn sell-active';
+                if (buyBtn) buyBtn.className = 'bs-btn';
+              }
+            }
+
+            /* STOCK SHEET */
+            let sheetSymbol = null;
+            let sheetSide = 'buy';
+
+            const openPositions = {
+              {% for pos in open_positions %}
+              "{{ pos.stock.symbol }}": {
+                symbol: "{{ pos.stock.symbol }}",
+                qty: {{ pos.quantity }},
+                avg: {{ pos.buy_price }},
+                market: {{ pos.stock.current_price }}
+              },
+              {% endfor %}
+            };
+
+            function getPositionSnapshotFromElement(el) {
+              if (!el) return null;
+
+              const symbol = el.dataset.positionSymbol || el.dataset.symbol;
+              const qty = parseFloat(el.dataset.positionQty || el.dataset.qty || '0');
+              const avg = parseFloat(el.dataset.positionAvg || el.dataset.avg || '0');
+              const market = parseFloat(el.dataset.positionMarket || '0');
+
+              if (!symbol || !Number.isFinite(qty) || qty <= 0 || !Number.isFinite(avg)) {
+                return null;
+              }
+
+              return {
+                symbol,
+                qty,
+                avg,
+                market: Number.isFinite(market) ? market : 0
+              };
+            }
+
+            function syncOpenPositionsMapFromDocument(root = document) {
+              Object.keys(openPositions).forEach(symbol => delete openPositions[symbol]);
+
+              root.querySelectorAll('[data-position-symbol]').forEach(el => {
+                const snapshot = getPositionSnapshotFromElement(el);
+                if (!snapshot) return;
+                if (!openPositions[snapshot.symbol]) {
+                  openPositions[snapshot.symbol] = snapshot;
+                }
+              });
+            }
+
+            function refreshPositionSectionsFromHtml(html) {
+              const doc = new DOMParser().parseFromString(html, 'text/html');
+              [
+                'pos-content',
+                'positions-table-body',
+                'orders-table-body',
+                'stat-wallet',
+                'wallet-balance',
+                'stat-total-portfolio',
+                'stat-invested',
+                'dashboard-unrealised-pnl',
+                'panel-positions'
+              ].forEach(id => {
+                const nextEl = doc.getElementById(id);
+                const currentEl = document.getElementById(id);
+                if (!nextEl || !currentEl) return;
+                currentEl.innerHTML = nextEl.innerHTML;
+              });
+
+              syncOpenPositionsMapFromDocument(document);
+            }
+
+            function openStockSheet(symbol) {
+              sheetSymbol = symbol;
+              syncOpenPositionsMapFromDocument(document);
+
+              const sheet = document.getElementById('stock-sheet');
+              if (!sheet) {
+                console.error('Stock sheet modal not found');
+                return;
+              }
+
+              const symbolEl = document.getElementById('sheet-symbol');
+              const sheetPriceEl = document.getElementById('sheet-price');
+              const tradeBadge = document.getElementById('trade-panel-symbol');
+
+              if (symbolEl) symbolEl.textContent = symbol;
+              if (tradeBadge) tradeBadge.textContent = symbol;
+
+              const priceEl = document.querySelector(`.price-display[data-symbol="${symbol}"]`);
+              if (priceEl && sheetPriceEl && priceEl.textContent !== '--') {
+                sheetPriceEl.textContent = priceEl.textContent;
+              }
+
+              // Show and update the fixed trading bar
+              const tradingBar = document.getElementById('trading-bar');
+              const tbSymbol = document.getElementById('tb-symbol');
+              const tbPrice = document.getElementById('tb-price');
+              if (tradingBar) tradingBar.classList.add('active');
+              if (tbSymbol) tbSymbol.textContent = symbol;
+              if (tbPrice && priceEl && priceEl.textContent !== '--') {
+                tbPrice.textContent = priceEl.textContent;
+              }
+
+              renderSheetPosition(symbol);
+
+              sheet.style.display = 'flex';
+              sheet.style.visibility = 'visible';
+              sheet.style.pointerEvents = 'auto';
+
+              requestAnimationFrame(() => {
+                sheet.classList.add('open');
+
+                setTimeout(() => {
+                  if (window.TradingChart?.loadChart) {
+                    window.TradingChart.loadChart(symbol, 'sheet-tv-chart');
+                  }
+                }, 300);
+              });
+            }
+
+            window.openStockSheet = openStockSheet;
+
+            function closeStockSheet() {
+              const sheet = document.getElementById('stock-sheet');
+              if (!sheet) return;
+
+              sheet.classList.remove('open');
+              setTimeout(() => {
+                sheet.style.display = 'none';
+                sheet.style.visibility = 'hidden';
+                sheet.style.pointerEvents = 'none';
+              }, 320);
+
+              // Hide the fixed trading bar
+              const tradingBar = document.getElementById('trading-bar');
+              if (tradingBar) tradingBar.classList.remove('active');
+
+              sheetSymbol = null;
+            }
+
+            function renderSheetPositionLegacy(symbol) {
+              const container = document.getElementById('sheet-pos-content');
+              if (!container) return;
+
+              const pos = openPositions[symbol];
+              if (!pos) {
+                container.innerHTML = `
+                  <div class="sheet-pos-none">
+                    <strong>No active position</strong>
+                    Nothing is open for <span style="color:var(--accent);font-family:var(--fmono);">${symbol}</span> right now.<br>
+                    <span style="color:var(--t3);font-size:11px;">Use the Trade tab to open a new position.</span>
+                  </div>
+                `;
+                return;
+              }
+              const pnl = (pos.market - pos.avg) * pos.qty;
+              const positionReturnPct = pos.avg > 0 ? ((pos.market - pos.avg) / pos.avg) * 100 : 0;
+              const clr = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+              const pnlClass = pnl >= 0 ? 'green' : 'red';
+              const sign = pnl >= 0 ? '+' : '-';
+              const marketValue = pos.market * pos.qty;
+              const investedValue = pos.avg * pos.qty;
+              const statusText = pnl >= 0 ? 'In Profit' : 'In Drawdown';
+              const fmt = n => Math.abs(n).toLocaleString('en-IN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              });
+
+              container.innerHTML = `
+                <div class="spos-card">
+                  <div class="spos-top">
+                    <div>
+                      <div class="spos-tag">Open Position</div>
+                      <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Binance · ${symbol}</div>
+                    </div>
+                    <div style="text-align:right;">
+                      <div class="spos-pnl" style="color:${clr};">${sign}₹${fmt(pnl)}</div>
+                      <div class="spos-pct" style="color:${clr};">${positionReturnPct >= 0 ? '+' : '-'}${Math.abs(positionReturnPct).toFixed(2)}%</div>
+                    </div>
+                  </div>
+                  <div class="spos-grid">
+                    <div class="spos-cell">
+                      <div class="spos-cl">Quantity</div>
+                      <div class="spos-cv">${pos.qty.toFixed(4)}</div>
+                    </div
+                    <div class="spos-cell">
+                      <div class="spos-cl">Avg Price</div>
+                      <div class="spos-cv">₹${fmt(pos.avg)}</div>
+                    </div>
+                    <div class="spos-cell">
+                      <div class="spos-cl">Market</div>
+                      <div class="spos-cv sheet-pos-market" data-sym="${symbol}">₹${fmt(pos.market)}</div>
+                    </div>
+                    <div class="spos-cell">
+                      <div class="spos-cl">Invested</div>
+                      <div class="spos-cv">₹${fmt(pos.avg * pos.qty)}</div>
+                    </div>
+                  </div>
+                  <div class="spos-close-wrap">
+                    <button class="spos-close-btn" onclick="TradingPanel.closePosition('${symbol}','${pos.qty}',this)">✕ &nbsp;Close Entire Position</button>
+                  </div>
+                </div>
+              `;
+            }
+
+            function renderSheetPosition(symbol) {
+              const container = document.getElementById('sheet-pos-content');
+              if (!container) return;
+
+              const pos = openPositions[symbol];
+              if (!pos) {
+                container.innerHTML = `
+                  <div class="sheet-pos-none">
+                    <strong>No active position</strong>
+                    Nothing is open for <span style="color:var(--accent);font-family:var(--fmono);">${symbol}</span> right now.<br>
+                    <span style="color:var(--t3);font-size:11px;">Use the Trade tab to open a new position.</span>
+                  </div>
+                `;
+                return;
+              }
+
+              const pnl = (pos.market - pos.avg) * pos.qty;
+              const positionReturnPct = pos.avg > 0 ? ((pos.market - pos.avg) / pos.avg) * 100 : 0;
+              const pnlClass = pnl >= 0 ? 'green' : 'red';
+              const sign = pnl >= 0 ? '+' : '-';
+              const marketValue = pos.market * pos.qty;
+              const investedValue = pos.avg * pos.qty;
+              const statusText = pnl >= 0 ? 'In Profit' : 'In Drawdown';
+              const fmt = n => Math.abs(n).toLocaleString('en-IN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              });
+
+              container.innerHTML = `
+                <div class="spos-card">
+                  <div class="spos-top">
+                    <div>
+                      <div class="spos-tag">Open Position</div>
+                      <div class="spos-symbol">${symbol}</div>
+                      <div class="spos-meta">Binance | Crypto | Long</div>
+                    </div>
+                    <div class="spos-pnl-block">
+                      <div class="spos-pnl-label">Unrealised P&amp;L</div>
+                      <div class="spos-pnl sheet-pos-unrealised" data-sym="${symbol}">${sign}₹${fmt(pnl)}</div>
+                      <div class="spos-pct sheet-pos-return ${pnlClass}" data-sym="${symbol}">${positionReturnPct >= 0 ? '+' : '-'}${Math.abs(positionReturnPct).toFixed(2)}%</div>
+                    </div>
+                  </div>
+                  <div class="spos-strip">
+                    <div class="spos-pill">
+                      <span class="spos-pill-label">Current Value</span>
+                      <span class="spos-pill-value sheet-pos-value" data-sym="${symbol}">₹${fmt(marketValue)}</span>
+                    </div>
+                    <div class="spos-pill">
+                      <span class="spos-pill-label">Status</span>
+                      <span class="spos-pill-value ${pnlClass}">${statusText}</span>
+                    </div>
+                  </div>
+                  <div class="spos-grid">
+                    <div class="spos-cell">
+                      <div class="spos-cl">Quantity</div>
+                      <div class="spos-cv">${pos.qty.toFixed(4)}</div>
+                    </div>
+                    <div class="spos-cell">
+                      <div class="spos-cl">Avg Price</div>
+                      <div class="spos-cv">₹${fmt(pos.avg)}</div>
+                    </div>
+                    <div class="spos-cell">
+                      <div class="spos-cl">Market Price</div>
+                      <div class="spos-cv sheet-pos-market" data-sym="${symbol}">₹${fmt(pos.market)}</div>
+                    </div>
+                    <div class="spos-cell">
+                      <div class="spos-cl">Invested</div>
+                      <div class="spos-cv">₹${fmt(investedValue)}</div>
+                    </div>
+                    <div class="spos-cell">
+                      <div class="spos-cl">Side</div>
+                      <div class="spos-cv">Long</div>
+                    </div>
+                    <div class="spos-cell">
+                      <div class="spos-cl">Exchange</div>
+                      <div class="spos-cv">Binance</div>
+                    </div>
+                  </div>
+                  <div class="spos-footer">
+                    <div class="spos-note">
+                      This action closes the full position for <strong>${symbol}</strong> using the current market flow.
+                    </div>
+                    <button class="spos-close-btn" onclick="TradingPanel.closePosition('${symbol}','${pos.qty}',this)">Close Entire Position</button>
+                  </div>
+                </div>
+              `;
+            }
+
+            /* SHEET TABS */
+            function switchSheetTab(tab) {
+              ['trade', 'position'].forEach(t => {
+                document.getElementById(`spane-${t}`)?.classList.remove('active');
+                document.getElementById(`sit-${t}`)?.classList.remove('active');
+              });
+
+              document.getElementById(`spane-${tab}`)?.classList.add('active');
+              document.getElementById(`sit-${tab}`)?.classList.add('active');
+            }
+
+            /* SHEET TRADE SIDE */
+            function setSheetSide(side) {
+              sheetSide = side;
+              if (window.TradingPanel) {
+                TradingPanel.side = side;
+              }
+
+              const sb = document.getElementById('sheet-submit-btn');
+
+              if (side === 'buy') {
+                if (sb) {
+                  sb.className = 'submit-btn buy';
+                  sb.textContent = 'Buy / Long';
+                }
+                const buyBtn = document.getElementById('sheet-btn-buy');
+                const sellBtn = document.getElementById('sheet-btn-sell');
+                if (buyBtn) buyBtn.className = 'bs-btn buy-active';
+                if (sellBtn) sellBtn.className = 'bs-btn';
+              } else {
+                if (sb) {
+                  sb.className = 'submit-btn sell';
+                  sb.textContent = 'Sell / Short';
+                }
+                const sellBtn = document.getElementById('sheet-btn-sell');
+                const buyBtn = document.getElementById('sheet-btn-buy');
+                if (sellBtn) sellBtn.className = 'bs-btn sell-active';
+                if (buyBtn) buyBtn.className = 'bs-btn';
+              }
+            }
+
+            function getSheetInputMode() {
+              return document.getElementById('sheet-toggle-amt')?.classList.contains('active') ? 'amt' : 'qty';
+            }
+
+            function syncSheetInputMode(mode) {
+              const qtyBtn = document.getElementById('sheet-toggle-qty');
+              const amtBtn = document.getElementById('sheet-toggle-amt');
+              const lbl = document.getElementById('sheet-order-input-label');
+              const cur = document.getElementById('sheet-order-currency-display');
+
+              qtyBtn?.classList.toggle('active', mode === 'qty');
+              amtBtn?.classList.toggle('active', mode === 'amt');
+
+              if (lbl) lbl.textContent = mode === 'amt' ? 'Amount (â‚¹)' : 'Quantity';
+              if (cur) cur.textContent = mode === 'amt' ? 'â‚¹' : 'QTY';
+
+              if (window.TradingPanel?.setInputMode) {
+                TradingPanel.setInputMode(mode);
+              } else if (window.TradingPanel) {
+                TradingPanel.inputMode = mode;
+              }
+
+              updateSheetEstimate();
+            }
+
+            function updateSheetEstimate() {
+              const inputEl = document.getElementById('sheet-order-qty');
+              const estContainer = document.getElementById('sheet-order-estimate-container');
+              const estLabel = document.getElementById('sheet-estimate-label');
+              const estValue = document.getElementById('sheet-estimate-value');
+
+              if (!inputEl || !estContainer || !estLabel || !estValue) return;
+
+              const inputVal = parseFloat(inputEl.value);
+              const price = window.TradingPanel?.getCurrentPrice ? TradingPanel.getCurrentPrice() : null;
+
+              if (isNaN(inputVal) || inputVal <= 0 || !price) {
+                estContainer.classList.add('hidden');
+                return;
+              }
+
+              estContainer.classList.remove('hidden');
+
+              if (getSheetInputMode() === 'amt') {
+                estLabel.textContent = 'Est. Qty:';
+                estValue.textContent = (inputVal / price).toFixed(4);
+              } else {
+                estLabel.textContent = 'Est. Amount:';
+                estValue.textContent = 'â‚¹' + (inputVal * price).toFixed(2);
+              }
+            }
+
+            /* SHEET QTY PERCENT */
+            function setSheetQtyPercent(pct) {
+              if (window.TradingPanel) {
+                TradingPanel.currentSymbol = sheetSymbol;
+                TradingPanel.side = sheetSide;
+              }
+
+              syncSheetInputMode(getSheetInputMode());
+
+              if (typeof setQtyPercent === 'function') {
+                setQtyPercent(pct);
+              }
+
+              const main = document.getElementById('order-qty');
+              const sheet = document.getElementById('sheet-order-qty');
+              if (main && sheet) {
+                sheet.value = main.value;
+              }
+
+              updateSheetEstimate();
+            }
+
+            /* SHEET SUBMIT */
+            function submitSheetOrder() {
+              if (!sheetSymbol || sheetSymbol === '--') {
+                if (window.Notifications?.warn) {
+                  Notifications.warn('Please select a symbol first');
+                }
+                return;
+              }
+
+              const sq = document.getElementById('sheet-order-qty');
+              const mq = document.getElementById('order-qty');
+
+              if (!sq || !mq) return;
+
+              const inputMode = getSheetInputMode();
+              const qtyValue = sq.value;
+              if (!qtyValue || parseFloat(qtyValue) <= 0) {
+                if (window.Notifications?.warn) {
+                  Notifications.warn(`Please enter a valid ${inputMode === 'amt' ? 'amount' : 'quantity'}`);
+                }
+                return;
+              }
+
+              syncSheetInputMode(inputMode);
+
+              // Copy current sheet value to main form
+              mq.value = sq.value;
+
+              // Update TradingPanel state
+              if (window.TradingPanel) {
+                TradingPanel.currentSymbol = sheetSymbol;
+                TradingPanel.side = sheetSide;
+
+                // Update the symbol badge
+                const ts = document.getElementById('trade-panel-symbol');
+                if (ts) ts.textContent = sheetSymbol;
+              }
+
+              // Update the submit button text and class based on side
+              const submitBtn = document.getElementById('submit-order-btn');
+              if (submitBtn) {
+                if (sheetSide === 'buy') {
+                  submitBtn.className = 'submit-btn buy';
+                  submitBtn.textContent = 'Buy / Long';
+                } else {
+                  submitBtn.className = 'submit-btn sell';
+                  submitBtn.textContent = 'Sell / Short';
+                }
+              }
+
+              // Dispatch symbol change event for any other listeners
+              document.dispatchEvent(new CustomEvent('symbol_change', {
+                detail: { symbol: sheetSymbol }
+              }));
+
+              // Trigger the order submission
+              if (submitBtn) submitBtn.click();
+            }
+
+            /* SHEET QTY/AMT TOGGLE */
+            document.getElementById('sheet-toggle-qty')?.addEventListener('click', () => {
+              syncSheetInputMode('qty');
+            });
+
+            document.getElementById('sheet-toggle-amt')?.addEventListener('click', () => {
+              syncSheetInputMode('amt');
+              const lbl = document.getElementById('sheet-order-input-label');
+              const cur = document.getElementById('sheet-order-currency-display');
+              if (lbl) lbl.textContent = 'Amount (₹)';
+              if (cur) cur.textContent = '₹';
+            });
+
+            document.getElementById('sheet-order-qty')?.addEventListener('input', () => {
+              updateSheetEstimate();
+            });
+
+            function bindMobileSymbolRowOpener() {
+              if (document.body.dataset.mobileRowOpenerBound === 'true') return;
+              document.body.dataset.mobileRowOpenerBound = 'true';
+
+              document.addEventListener('click', e => {
+                const actionButton = e.target.closest('button, a, input, select, textarea, label, .star-btn, .rm-btn, .sheet-close-btn, .spos-close-btn');
+                if (actionButton) return;
+
+                const row = e.target.closest('.witem[data-symbol], .pos-card[data-symbol]');
+                if (!row || window.innerWidth >= 1024) return;
+
+                const symbol = row.dataset.symbol;
+                if (!symbol) return;
+
+                openStockSheet(symbol);
+              });
+            }
+
+            function focusPositionsAfterOrderSuccess() {
+              if (window.innerWidth < 1024) {
+                const sheet = document.getElementById('stock-sheet');
+                const isSheetOpen = !!sheet && sheet.classList.contains('open');
+
+                if (isSheetOpen) {
+                  closeStockSheet();
+                  setTimeout(() => {
+                    showPanel('positions');
+                  }, 330);
+                } else {
+                  showPanel('positions');
+                }
+                return;
+              }
+
+              if (typeof switchBottomTab === 'function') {
+                switchBottomTab('positions');
+              }
+            }
+
+            /* RESIZE DIVIDER */
+            (function () {
+              const div = document.getElementById('resize-divider');
+              const chartArea = document.getElementById('sheet-chart-area');
+              const body = document.getElementById('sheet-body');
+              if (!div || !chartArea || !body) return;
+
+              let sY = 0;
+              let sH = 0;
+              let dragging = false;
+
+              function start(y) {
+                dragging = true;
+                sY = y;
+                sH = chartArea.getBoundingClientRect().height;
+                document.body.style.userSelect = 'none';
+              }
+
+              function move(y) {
+                if (!dragging) return;
+                const bH = body.getBoundingClientRect().height;
+                const nH = Math.min(Math.max(sH + (y - sY), 80), bH - 120);
+                chartArea.style.flex = 'none';
+                chartArea.style.height = nH + 'px';
+              }
+
+              function end() {
+                dragging = false;
+                document.body.style.userSelect = '';
+              }
+
+              div.addEventListener('mousedown', e => {
+                start(e.clientY);
+                e.preventDefault();
+              });
+
+              document.addEventListener('mousemove', e => move(e.clientY));
+              document.addEventListener('mouseup', end);
+
+              div.addEventListener('touchstart', e => start(e.touches[0].clientY), { passive: true });
+              document.addEventListener('touchmove', e => {
+                if (dragging) {
+                  move(e.touches[0].clientY);
+                  e.preventDefault();
+                }
+              }, { passive: false });
+              document.addEventListener('touchend', end);
+            })();
+
+            /* SWIPE DOWN TO CLOSE */
+            (function () {
+              const handle = document.getElementById('sheet-drag-handle');
+              const sheet = document.getElementById('stock-sheet');
+              if (!handle || !sheet) return;
+
+              let sY = 0;
+              handle.addEventListener('touchstart', e => {
+                sY = e.touches[0].clientY;
+              }, { passive: true });
+
+              handle.addEventListener('touchend', e => {
+                if (e.changedTouches[0].clientY - sY > 60) closeStockSheet();
+              });
+            })();
+
+            /* MOBILE CHART TIMEFRAME BUTTONS */
+            (function () {
+              const timeframeBar = document.getElementById('sheet-timeframe-bar');
+              if (!timeframeBar) return;
+
+              timeframeBar.addEventListener('click', e => {
+                const btn = e.target.closest('.tf-btn');
+                if (!btn) return;
+
+                const interval = btn.dataset.interval;
+                if (!interval) return;
+
+                // Update active state
+                timeframeBar.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Dispatch interval change event
+                document.dispatchEvent(new CustomEvent('chart_interval_change', {
+                  detail: { interval: interval }
+                }));
+              });
+            })();
+
+            /* QUICK TRADE FROM FIXED BAR */
+            function quickTradeFromBar(side) {
+              if (!sheetSymbol) {
+                if (window.Notifications?.warn) {
+                  Notifications.warn('Select a symbol first');
+                }
+                return;
+              }
+
+              // Set the trade side
+              sheetSide = side;
+              if (window.TradingPanel) {
+                TradingPanel.side = side;
+              }
+
+              // Get current price
+              const priceEl = document.querySelector(`.price-display[data-symbol="${sheetSymbol}"]`);
+              const currentPrice = priceEl ? parseFloat(priceEl.textContent.replace(/[^\d.-]/g, '')) : 0;
+
+              if (!currentPrice || isNaN(currentPrice)) {
+                if (window.Notifications?.warn) {
+                  Notifications.warn('Price not available');
+                }
+                return;
+              }
+
+              // Calculate quantity based on 10% of wallet balance (default quick trade)
+              const walletBalance = parseFloat("{{ wallet }}") || 0;
+              const quickAmount = walletBalance * 0.1;
+              const quantity = quickAmount / currentPrice;
+
+              // Update order form
+              const qtyInput = document.getElementById('order-qty');
+              const sheetQtyInput = document.getElementById('sheet-order-qty');
+
+              if (qtyInput) qtyInput.value = quantity.toFixed(4);
+              if (sheetQtyInput) sheetQtyInput.value = quantity.toFixed(4);
+
+              // Update TradingPanel state
+              if (window.TradingPanel) {
+                TradingPanel.currentSymbol = sheetSymbol;
+              }
+
+              // Dispatch event
+              document.dispatchEvent(new CustomEvent('symbol_change', {
+                detail: { symbol: sheetSymbol }
+              }));
+
+              // Trigger order submission
+              document.getElementById('submit-order-btn')?.click();
+
+              // Show confirmation
+              if (window.Notifications?.info) {
+                const sideLabel = side === 'buy' ? 'Buying' : 'Selling';
+                Notifications.info(`${sideLabel} ${quantity.toFixed(4)} ${sheetSymbol} @ ₹${currentPrice.toLocaleString()}`);
+              }
+            }
+
+            /* QUICK TRADE - for mobile compact toolbar buy/sell buttons */
+            function quickTrade(side) {
+              if (!sheetSymbol) {
+                if (window.Notifications?.warn) {
+                  Notifications.warn('Select a symbol first');
+                }
+                return;
+              }
+
+              // Set the trade side
+              setSheetSide(side);
+              sheetSide = side;
+
+              // Get current price
+              const priceEl = document.querySelector(`.price-display[data-symbol="${sheetSymbol}"]`);
+              const currentPrice = priceEl ? parseFloat(priceEl.textContent.replace(/[^\d.-]/g, '')) : 0;
+
+              if (!currentPrice || isNaN(currentPrice)) {
+                if (window.Notifications?.warn) {
+                  Notifications.warn('Price not available');
+                }
+                return;
+              }
+
+              // Calculate quantity based on 10% of wallet balance (default quick trade)
+              const walletBalance = parseFloat("{{ wallet }}") || 0;
+              const quickAmount = walletBalance * 0.1; // 10% of wallet
+              const quantity = quickAmount / currentPrice;
+
+              // Update order form
+              const qtyInput = document.getElementById('order-qty');
+              const sheetQtyInput = document.getElementById('sheet-order-qty');
+
+              if (qtyInput) qtyInput.value = quantity.toFixed(4);
+              if (sheetQtyInput) sheetQtyInput.value = quantity.toFixed(4);
+
+              // Switch to trade tab to show confirmation
+              switchSheetTab('trade');
+
+              // Dispatch event to notify trading panel
+              document.dispatchEvent(new CustomEvent('symbol_change', {
+                detail: { symbol: sheetSymbol }
+              }));
+
+              // Show quick trade confirmation toast
+              if (window.Notifications?.info) {
+                const sideLabel = side === 'buy' ? 'Buying' : 'Selling';
+                Notifications.info(`${sideLabel} ${quantity.toFixed(4)} ${sheetSymbol} @ ₹${currentPrice.toLocaleString()}`);
+              }
+            }
+
+            /* QUICK TRADE WITH AMOUNT - allow custom amount selection */
+            function quickTradeAmount(side, percent) {
+              if (!sheetSymbol) {
+                if (window.Notifications?.warn) {
+                  Notifications.warn('Select a symbol first');
+                }
+                return;
+              }
+
+              // Set the trade side
+              setSheetSide(side);
+              sheetSide = side;
+
+              // Get current price
+              const priceEl = document.querySelector(`.price-display[data-symbol="${sheetSymbol}"]`);
+              const currentPrice = priceEl ? parseFloat(priceEl.textContent.replace(/[^\d.-]/g, '')) : 0;
+
+              if (!currentPrice || isNaN(currentPrice)) {
+                if (window.Notifications?.warn) {
+                  Notifications.warn('Price not available');
+                }
+                return;
+              }
+
+              // Calculate quantity based on percentage of wallet balance
+              const walletBalance = parseFloat("{{ wallet }}") || 0;
+              const tradeAmount = walletBalance * (percent / 100);
+              const quantity = tradeAmount / currentPrice;
+
+              // Update order form
+              const qtyInput = document.getElementById('order-qty');
+              const sheetQtyInput = document.getElementById('sheet-order-qty');
+
+              if (qtyInput) qtyInput.value = quantity.toFixed(4);
+              if (sheetQtyInput) sheetQtyInput.value = quantity.toFixed(4);
+
+              // Switch to trade tab to show confirmation
+              switchSheetTab('trade');
+
+              // Dispatch event
+              document.dispatchEvent(new CustomEvent('symbol_change', {
+                detail: { symbol: sheetSymbol }
+              }));
+
+              // Show quick trade confirmation
+              if (window.Notifications?.info) {
+                const sideLabel = side === 'buy' ? 'Buying' : 'Selling';
+                Notifications.info(`${sideLabel} ${quantity.toFixed(4)} ${sheetSymbol} (${percent}% of balance)`);
+              }
+            }
+
+            /* COMPACT TOOLBAR - interval buttons handler */
+            (function () {
+              var toolbar = document.getElementById('chart-toolbar');
+              if (!toolbar) return;
+
+              toolbar.addEventListener('click', function (e) {
+                var btn = e.target.closest('.ct-if-btn');
+                if (!btn) return;
+
+                var interval = btn.dataset.interval;
+                if (!interval) return;
+
+                // Update active state
+                toolbar.querySelectorAll('.ct-if-btn').forEach(function (b) {
+                  b.classList.remove('active');
+                });
+                btn.classList.add('active');
+
+                // Also update the old timeframe bar for consistency
+                var oldBar = document.getElementById('sheet-timeframe-bar');
+                if (oldBar) {
+                  oldBar.querySelectorAll('.tf-btn').forEach(function (b) {
+                    b.classList.remove('active');
+                    if (b.dataset.interval === interval) {
+                      b.classList.add('active');
+                    }
+                  });
+                  if (activePos) {
+                    const livePnl = (su.current_price - activePos.avg) * activePos.qty;
+                    const liveReturn = activePos.avg > 0 ? ((su.current_price - activePos.avg) / activePos.avg) * 100 : 0;
+                    const liveValue = su.current_price * activePos.qty;
+                    const pnlClass = livePnl >= 0 ? 'green' : 'red';
+                    const moneySign = livePnl >= 0 ? '+' : '-';
+                    const pctSign = liveReturn >= 0 ? '+' : '-';
+
+                    document.querySelectorAll(`.sheet-pos-unrealised[data-sym="${sheetSymbol}"]`).forEach(el => {
+                      el.textContent = `${moneySign}â‚¹${Math.abs(livePnl).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                      el.style.color = livePnl >= 0 ? 'var(--green)' : 'var(--red)';
+                    });
+
+                    document.querySelectorAll(`.sheet-pos-return[data-sym="${sheetSymbol}"]`).forEach(el => {
+                      el.textContent = `${pctSign}${Math.abs(liveReturn).toFixed(2)}%`;
+                      el.classList.remove('green', 'red');
+                      el.classList.add(pnlClass);
+                      el.style.color = livePnl >= 0 ? 'var(--green)' : 'var(--red)';
+                    });
+
+                    document.querySelectorAll(`.sheet-pos-value[data-sym="${sheetSymbol}"]`).forEach(el => {
+                      el.textContent = `â‚¹${liveValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    });
+                  }
+                }
+
+                // Dispatch interval change event
+                document.dispatchEvent(new CustomEvent('chart_interval_change', {
+                  detail: { interval: interval }
+                }));
+              });
+            })();
+
+            /* SYMBOL CHANGE */
+            document.addEventListener('symbol_change', e => {
+              const sym = e.detail.symbol;
+              const h = document.getElementById('active-symbol-header');
+              const ts = document.getElementById('trade-panel-symbol');
+              if (h) h.textContent = sym;
+              if (ts) ts.textContent = sym;
+
+              const pe = document.getElementById('active-symbol-price');
+              const ce = document.getElementById('active-symbol-change');
+              if (pe) pe.textContent = '--';
+              if (ce) {
+                ce.textContent = '--';
+                ce.className = 'desk-chg';
+              }
+            });
+
+            /* PRICE UPDATE */
+            document.addEventListener('price_update', e => {
     const updates = e.detail;
     if (!Array.isArray(updates)) return;
+
+    const fmt = (n, d = 2) =>
+      Math.abs(Number(n) || 0).toLocaleString('en-IN', {
+        minimumFractionDigits: d,
+        maximumFractionDigits: d
+      });
+
+    const signedMoney = (n, d = 2) =>
+      `${n >= 0 ? '+' : '-'}₹${fmt(n, d)}`;
+
+    const signedPercent = (n, d = 2) =>
+      `${n >= 0 ? '+' : '-'}${Math.abs(Number(n) || 0).toFixed(d)}%`;
+
+    const calcPositionMetrics = ({ currentPrice, avgPrice, qty }) => {
+      const current = Number(currentPrice);
+      const avg = Number(avgPrice);
+      const quantity = Number(qty);
+
+      if (
+        !Number.isFinite(current) ||
+        !Number.isFinite(avg) ||
+        !Number.isFinite(quantity) ||
+        avg <= 0 ||
+        quantity <= 0
+      ) {
+        return null;
+      }
+
+      const invested = avg * quantity;
+      const marketValue = current * quantity;
+      const pnl = marketValue - invested;
+      const returnPct = ((current - avg) / avg) * 100;
+
+      return {
+        current,
+        avg,
+        quantity,
+        invested,
+        marketValue,
+        pnl,
+        returnPct,
+        pnlClass: pnl >= 0 ? 'green' : 'red'
+      };
+    };
+
+    const calcPortfolioMetrics = ({ wallet, startEquity, positions }) => {
+      const cash = Number(wallet);
+      const baseEquity = Number(startEquity);
+
+      if (!Number.isFinite(cash) || !Number.isFinite(baseEquity)) {
+        return null;
+      }
+
+      let holdingsValue = 0;
+      let totalPnL = 0;
+
+      positions.forEach(pos => {
+        const m = calcPositionMetrics(pos);
+        if (!m) return;
+        holdingsValue += m.marketValue;
+        totalPnL += m.pnl;
+      });
+
+      const totalEquity = cash + holdingsValue;
+      const portfolioPnL = totalEquity - baseEquity;
+      const portfolioReturnPct = baseEquity > 0 ? (portfolioPnL / baseEquity) * 100 : 0;
+
+      return {
+        totalPnL,
+        holdingsValue,
+        totalEquity,
+        portfolioPnL,
+        portfolioReturnPct
+      };
+    };
 
     const ah = document.getElementById('active-symbol-header');
     if (ah) {
@@ -3253,9 +3785,12 @@
       const ce = document.getElementById('active-symbol-change');
 
       if (au && pe && ce) {
-        pe.textContent = `₹${au.current_price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        pe.textContent = `₹${Number(au.current_price).toLocaleString('en-IN', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })}`;
         pe.className = `desk-price ${au.percentage_change >= 0 ? 'green' : 'red'}`;
-        ce.textContent = `${au.percentage_change >= 0 ? '+' : ''}${au.percentage_change.toFixed(2)}%`;
+        ce.textContent = `${au.percentage_change >= 0 ? '+' : ''}${Number(au.percentage_change).toFixed(2)}%`;
         ce.className = `desk-chg ${au.percentage_change >= 0 ? 'pos' : 'neg'}`;
       }
     }
@@ -3267,155 +3802,183 @@
         const sc = document.getElementById('sheet-change');
 
         if (sp) {
-          sp.textContent = `₹${su.current_price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+          sp.textContent = `₹${Number(su.current_price).toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}`;
           sp.className = `sheet-price ${su.percentage_change >= 0 ? 'green' : 'red'}`;
         }
 
         if (sc) {
-          sc.textContent = `${su.percentage_change >= 0 ? '+' : ''}${su.percentage_change.toFixed(2)}%`;
+          sc.textContent = `${su.percentage_change >= 0 ? '+' : ''}${Number(su.percentage_change).toFixed(2)}%`;
           sc.className = `sheet-change ${su.percentage_change >= 0 ? 'pos' : 'neg'}`;
         }
 
-        if (openPositions[sheetSymbol]) openPositions[sheetSymbol].market = su.current_price;
+        if (openPositions[sheetSymbol]) {
+          openPositions[sheetSymbol].market = Number(su.current_price);
+        }
 
-        document.querySelectorAll(`.sheet-pos-market[data-sym="${sheetSymbol}"]`).forEach(el => {
-          el.textContent = `₹${su.current_price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        });
+        const activePos = openPositions[sheetSymbol];
+        if (activePos) {
+          const m = calcPositionMetrics({
+            currentPrice: su.current_price,
+            avgPrice: activePos.avg,
+            qty: activePos.qty
+          });
+
+          if (m) {
+            document.querySelectorAll(`.sheet-pos-unrealised[data-sym="${sheetSymbol}"]`).forEach(el => {
+              el.textContent = signedMoney(m.pnl);
+              el.style.color = m.pnl >= 0 ? 'var(--green)' : 'var(--red)';
+            });
+
+            document.querySelectorAll(`.sheet-pos-return[data-sym="${sheetSymbol}"]`).forEach(el => {
+              el.textContent = signedPercent(m.returnPct);
+              el.classList.remove('green', 'red');
+              el.classList.add(m.pnlClass);
+              el.style.color = m.pnl >= 0 ? 'var(--green)' : 'var(--red)';
+            });
+
+            document.querySelectorAll(`.sheet-pos-value[data-sym="${sheetSymbol}"]`).forEach(el => {
+              el.textContent = `₹${fmt(m.marketValue)}`;
+            });
+
+            document.querySelectorAll(`.sheet-pos-market[data-sym="${sheetSymbol}"]`).forEach(el => {
+              el.textContent = `₹${fmt(m.current)}`;
+            });
+          }
+        }
       }
     }
 
-    let wallet = parseFloat("{{ wallet }}");
-    let startEq = parseFloat("{{ total_equity }}") - parseFloat("{{ today_pnl }}");
-    let holdingsVal = 0;
-    let totalPnL = 0;
-    const fmt = (n, d = 2) => Math.abs(n).toLocaleString('en-IN', { minimumFractionDigits: d, maximumFractionDigits: d });
+    const positions = [];
 
-    document.querySelectorAll('.pnl-value[data-symbol]').forEach(function(pnlEl) {
-      var sym = pnlEl.dataset.symbol;
-      var up = updates.find(function(u) { return u.symbol === sym; });
-      var qty = parseFloat(pnlEl.dataset.qty);
-      var avg = parseFloat(pnlEl.dataset.avg);
+    document.querySelectorAll('.pnl-value[data-symbol]').forEach(pnlEl => {
+      const sym = pnlEl.dataset.symbol;
+      const up = updates.find(u => u.symbol === sym);
+      if (!up) return;
 
-      var mpEl = document.querySelector('.market-price[data-symbol="' + sym + '"]');
-      var current = mpEl ? parseFloat(mpEl.textContent.replace(/[^\d.-]/g, '')) : NaN;
+      const qty = Number(pnlEl.dataset.qty);
+      const avg = Number(pnlEl.dataset.avg);
+      const current = Number(up.current_price);
 
-      if (up) {
-        current = up.current_price;
-        if (mpEl) mpEl.textContent = '\u20B9' + fmt(current);
+      const m = calcPositionMetrics({
+        currentPrice: current,
+        avgPrice: avg,
+        qty
+      });
 
-        // Update quick trade price display
-        var qpEl = document.getElementById('quick-price');
-        if (qpEl && sheetSymbol === sym) {
-          qpEl.textContent = '\u20B9' + fmt(current);
-        }
-      }
+      if (!m) return;
 
-      if (!isNaN(current) && !isNaN(avg) && !isNaN(qty)) {
-        const pnl = (current - avg) * qty;
-        const pct = avg > 0 ? ((current - avg) / avg) * 100 : 0;
-        const s = pnl >= 0 ? '+' : '';
-        const cl = pnl >= 0 ? 'green' : 'red';
+      positions.push({
+        currentPrice: current,
+        avgPrice: avg,
+        qty
+      });
 
-        pnlEl.textContent = `${s}₹${fmt(pnl)}`;
-        pnlEl.className = pnlEl.className.replace(/green|red/g, '').trim() + ' ' + cl;
+      document.querySelectorAll(`.market-price[data-symbol="${sym}"]`).forEach(el => {
+        el.textContent = `₹${fmt(m.current)}`;
+      });
 
-        const ppEl = document.querySelector(`.pnl-percent[data-symbol="${sym}"]`);
-        if (ppEl) {
-          ppEl.textContent = `${s}${pct.toFixed(2)}%`;
-          ppEl.className = ppEl.className.replace(/green|red/g, '').trim() + ' ' + cl;
-        }
+      pnlEl.textContent = signedMoney(m.pnl);
+      pnlEl.className = pnlEl.className.replace(/\bgreen\b|\bred\b/g, '').trim() + ` ${m.pnlClass}`;
 
-        totalPnL += pnl;
-        holdingsVal += (current * qty);
-      }
+      document.querySelectorAll(`.pnl-percent[data-symbol="${sym}"]`).forEach(ppEl => {
+        ppEl.textContent = signedPercent(m.returnPct);
+        ppEl.className = ppEl.className.replace(/\bgreen\b|\bred\b/g, '').trim() + ` ${m.pnlClass}`;
+      });
     });
+
+    const wallet = Number("{{ wallet }}");
+    const startEquity = Number("{{ total_equity }}") - Number("{{ today_pnl }}");
+
+    const portfolio = calcPortfolioMetrics({
+      wallet,
+      startEquity,
+      positions
+    });
+
+    if (!portfolio) return;
 
     const unEl = document.getElementById('dashboard-unrealised-pnl');
     if (unEl) {
-      unEl.textContent = `₹${fmt(totalPnL)}`;
-      unEl.className = `t-val ${totalPnL >= 0 ? 'green' : 'red'}`;
+      unEl.textContent = signedMoney(portfolio.totalPnL);
+      unEl.className = `t-val ${portfolio.totalPnL >= 0 ? 'green' : 'red'}`;
     }
-
-    const te = wallet + holdingsVal;
-    const tdp = te - startEq;
-    const ret = startEq > 0 ? (tdp / startEq) * 100 : 0;
 
     const teEl = document.getElementById('stat-total-portfolio');
+    if (teEl) {
+      teEl.textContent = `₹${fmt(portfolio.totalEquity)}`;
+    }
+
     const tpEl = document.getElementById('stat-today-pnl');
-
-    if (teEl) teEl.textContent = `₹${fmt(te)}`;
     if (tpEl) {
-      tpEl.textContent = `${fmt(tdp)} (${ret.toFixed(2)}%)`;
-      tpEl.className = `metric-value text-sm ${tdp >= 0 ? 'green' : 'red'}`;
+      tpEl.textContent = `${signedMoney(portfolio.portfolioPnL)} (${signedPercent(portfolio.portfolioReturnPct)})`;
+      tpEl.className = `metric-value text-sm ${portfolio.portfolioPnL >= 0 ? 'green' : 'red'}`;
     }
   });
+            /* ORDER UPDATE */
+            document.addEventListener('order_update', e => {
+              const u = e.detail;
 
-  /* ORDER UPDATE */
-  document.addEventListener('order_update', e => {
-    const u = e.detail;
+              if (window.Notifications?.info) {
+                Notifications.info(`Order Status: ${u.status} for ${u.symbol || 'your order'}`);
+              }
 
-    if (window.Notifications?.info) {
-      Notifications.info(`Order Status: ${u.status} for ${u.symbol || 'your order'}`);
-    }
+              if (u.status === 'completed') {
+                focusPositionsAfterOrderSuccess();
 
-    if (u.status === 'completed') {
-      fetch(window.location.href)
-        .then(r => r.text())
-        .then(html => {
-          const doc = new DOMParser().parseFromString(html, 'text/html');
-          ['pos-content', 'positions-table-body', 'orders-table-body', 'stat-wallet', 'wallet-balance', 'stat-total-portfolio', 'stat-invested', 'dashboard-unrealised-pnl'].forEach(id => {
-            const n = doc.getElementById(id);
-            const o = document.getElementById(id);
-            if (n && o) o.innerHTML = n.innerHTML;
-          });
-        })
-        .catch(err => console.error('Refresh failed', err));
-    }
-  });
+                fetch(window.location.href)
+                  .then(r => r.text())
+                  .then(refreshPositionSectionsFromHtml)
+                  .catch(err => console.error('Refresh failed', err));
+              }
+            });
 
-  /* INIT */
-  document.addEventListener('DOMContentLoaded', () => {
-    if (window.WatchlistManager?.init) WatchlistManager.init();
-    if (window.TradingChart?.init) TradingChart.init();
-    if (window.WSManager?.init) WSManager.init();
+            /* INIT */
+            document.addEventListener('DOMContentLoaded', () => {
+              bindMobileSymbolRowOpener();
+              if (window.WatchlistManager?.init) WatchlistManager.init();
+              if (window.TradingChart?.init) TradingChart.init();
+              if (window.WSManager?.init) WSManager.init();
 
-    const chartEl = document.querySelector('#pnl-chart');
-    if (chartEl) {
-      new ApexCharts(chartEl, {
-        series: [{ name: 'Equity', data: JSON.parse('{{ pnl_history_data|escapejs }}' || '[]') }],
-        chart: {
-          type: 'area',
-          height: 120,
-          sparkline: { enabled: true },
-          toolbar: { show: false },
-          animations: { enabled: true, easing: 'easeinout', speed: 800 }
-        },
-        stroke: { curve: 'smooth', width: 2 },
-        fill: {
-          type: 'gradient',
-          gradient: {
-            shadeIntensity: 1,
-            opacityFrom: .45,
-            opacityTo: .05,
-            stops: [20, 100, 100, 100]
-          }
-        },
-        colors: ['#4f8cff'],
-        tooltip: {
-          theme: 'dark',
-          x: { show: false },
-          y: { title: { formatter: () => 'Equity: ₹' } }
-        },
-        xaxis: {
-          categories: JSON.parse('{{ pnl_history_labels|escapejs }}' || '[]'),
-          labels: { show: false },
-          axisBorder: { show: false },
-          axisTicks: { show: false }
-        },
-        yaxis: { show: false }
-      }).render();
-    }
-  });
+              const chartEl = document.querySelector('#pnl-chart');
+              if (chartEl) {
+                new ApexCharts(chartEl, {
+                  series: [{ name: 'Equity', data: JSON.parse('{{ pnl_history_data|escapejs }}' || '[]') }],
+                  chart: {
+                    type: 'area',
+                    height: 120,
+                    sparkline: { enabled: true },
+                    toolbar: { show: false },
+                    animations: { enabled: true, easing: 'easeinout', speed: 800 }
+                  },
+                  stroke: { curve: 'smooth', width: 2 },
+                  fill: {
+                    type: 'gradient',
+                    gradient: {
+                      shadeIntensity: 1,
+                      opacityFrom: .45,
+                      opacityTo: .05,
+                      stops: [20, 100, 100, 100]
+                    }
+                  },
+                  colors: ['#4f8cff'],
+                  tooltip: {
+                    theme: 'dark',
+                    x: { show: false },
+                    y: { title: { formatter: () => 'Equity: ₹' } }
+                  },
+                  xaxis: {
+                    categories: JSON.parse('{{ pnl_history_labels|escapejs }}' || '[]'),
+                    labels: { show: false },
+                    axisBorder: { show: false },
+                    axisTicks: { show: false }
+                  },
+                  yaxis: { show: false }
+                }).render();
+              }
+            });
 </script>
 
 {% endblock %}

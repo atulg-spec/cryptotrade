@@ -402,8 +402,9 @@
 // ============================================
 
 (function() {
+    if (true) return;
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws/watchlist/`;
+    const legacySocketUrl = null;
     
     let ws = null;
     let reconnectAttempts = 0;
@@ -412,7 +413,7 @@
 
     function connect() {
         try {
-            ws = new WebSocket(wsUrl);
+            ws = null;
             
             ws.onopen = function() {
                 console.log('WebSocket connected');
@@ -493,5 +494,64 @@
 
     connect();
 })();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (!window.AppRealtime?.subscribePrices) return;
+
+    function updatePrices(updates) {
+        updates.forEach(update => {
+            const priceElement = document.getElementById(`price-${update.id}`);
+            const changeElement = document.getElementById(`change-${update.id}`);
+            const stockItem = document.querySelector(`[data-stock-id="${update.id}"]`);
+
+            if (!priceElement || !stockItem) return;
+
+            const oldPrice = parseFloat(priceElement.textContent.replace(/[^\d.-]/g, ''));
+            const newPrice = update.current_price;
+            const streamPercentage = update.percentage_change;
+
+            if (!oldPrice || oldPrice === 0) {
+                priceElement.textContent = `₹${newPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                return;
+            }
+
+            priceElement.textContent = `₹${newPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            priceElement.classList.remove('text-green-400', 'text-red-400', 'text-white');
+            if (newPrice > oldPrice) priceElement.classList.add('text-green-400');
+            else if (newPrice < oldPrice) priceElement.classList.add('text-red-400');
+            else priceElement.classList.add('text-white');
+
+            if (changeElement && streamPercentage !== undefined) {
+                const isPositive = streamPercentage > 0;
+                const isNegative = streamPercentage < 0;
+                const absChange = Math.abs(streamPercentage);
+
+                changeElement.className = `stock-change ${isPositive ? 'positive' : isNegative ? 'negative' : 'neutral'}`;
+                changeElement.innerHTML = `
+                    ${isPositive ? `
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7" />
+                        </svg>
+                        <span>+${absChange.toFixed(2)}%</span>
+                    ` : isNegative ? `
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <span>-${absChange.toFixed(2)}%</span>
+                    ` : `
+                        <span>0.00%</span>
+                    `}
+                `;
+            }
+        });
+    }
+
+    const unsubscribe = window.AppRealtime.subscribePrices(({ updates }) => {
+        updatePrices(updates);
+    });
+
+    window.addEventListener('pagehide', unsubscribe, { once: true });
+});
 </script>
 {% endblock %}

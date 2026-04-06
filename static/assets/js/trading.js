@@ -9,10 +9,15 @@ class TradingPanelController {
             this.setSymbol(e.detail.symbol);
         });
 
-        // Listen for balance updates if the backend pushes them
-        document.addEventListener('balance_update', (e) => {
-            this.updateBalanceUI(e.detail);
-        });
+        if (window.AppRealtime?.subscribeWallet) {
+            window.AppRealtime.subscribeWallet((payload) => {
+                this.updateBalanceUI(payload);
+            });
+        } else {
+            document.addEventListener('balance_update', (e) => {
+                this.updateBalanceUI(e.detail);
+            });
+        }
         
         document.addEventListener('DOMContentLoaded', () => {
              this.initListeners();
@@ -173,7 +178,9 @@ class TradingPanelController {
         const walletDisplay = document.getElementById('wallet-balance');
         const statWallet = document.getElementById('stat-wallet');
         
-        if (data.balance !== undefined) {
+        const balance = data.balance ?? data.wallet_balance;
+        if (balance !== undefined) {
+             data.balance = balance;
              const formattedBalance = `₹${parseFloat(data.balance).toFixed(2)}`;
              if(balanceDisplay) balanceDisplay.textContent = formattedBalance;
              if(walletDisplay) walletDisplay.textContent = formattedBalance;
@@ -358,18 +365,19 @@ class TradingPanelController {
             if(response.ok && result.success) {
                 this.showNotification(`Order placed: ${this.side.toUpperCase()} ${this.currentSymbol} - ₹${amount.toFixed(2)}`, 'success');
                 
-                // Update balance display
-                this.updateBalanceDisplay();
-                
-                // Trigger order update event for UI refresh
-                document.dispatchEvent(new CustomEvent('order_update', {
-                    detail: {
+                if (window.AppRealtime && !window.AppRealtime.isConnected('user')) {
+                    this.updateBalanceDisplay();
+                    window.AppRealtime.publishLocal('orders:update', {
                         status: 'completed',
                         symbol: this.currentSymbol,
                         order_type: this.side.toUpperCase(),
-                        amount: amount
-                    }
-                }));
+                        amount: amount,
+                        quantity: qty,
+                        optimistic: true
+                    }, {
+                        legacyEvent: 'order_update'
+                    });
+                }
                 
                 if(document.getElementById('order-qty')) document.getElementById('order-qty').value = '';
                 if(document.getElementById('order-price')) document.getElementById('order-price').value = '';
@@ -412,18 +420,18 @@ class TradingPanelController {
             if(response.ok && result.success) {
                 this.showNotification(`Position closed: Sold ${quantity} ${symbol}`, 'success');
                 
-                // Update balance display
-                this.updateBalanceDisplay();
-                
-                // Trigger order update event for UI refresh
-                document.dispatchEvent(new CustomEvent('order_update', {
-                    detail: {
+                if (window.AppRealtime && !window.AppRealtime.isConnected('user')) {
+                    this.updateBalanceDisplay();
+                    window.AppRealtime.publishLocal('orders:update', {
                         status: 'completed',
                         symbol: symbol,
                         order_type: 'SELL',
-                        quantity: quantity
-                    }
-                }));
+                        quantity: Number(quantity),
+                        optimistic: true
+                    }, {
+                        legacyEvent: 'order_update'
+                    });
+                }
             } else {
                 this.showNotification(result.message || 'Failed to close position.', 'error');
                 btn.disabled = false;

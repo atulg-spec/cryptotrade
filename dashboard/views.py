@@ -47,13 +47,25 @@ def wallet(request):
 
 @login_required(login_url='login')
 def dashboard(request):
+    open_positions = (
+        Position.objects
+        .filter(user=request.user, is_closed=False, quantity__gt=0)
+        .select_related('stock')
+        .order_by('-created_at')
+    )
+    positions = (
+        Position.objects
+        .filter(user=request.user)
+        .select_related('stock')
+        .order_by('-created_at')
+    )
+
     watchlist_items = Watchlist.objects.filter(user=request.user).select_related('stock')
     favorites = []
     for item in watchlist_items:
         item.stock.is_favorite = True
         favorites.append(item.stock)
-    positions = Position.objects.filter(user=request.user).select_related('stock')
-    open_positions = Position.objects.filter(user=request.user, is_closed=False)
+
     portfolio_value = Decimal('0')
     portfolio_purchased_value = Decimal('0')
     labels = [pos.stock.name for pos in open_positions]
@@ -84,7 +96,7 @@ def dashboard(request):
         'portfolio_value': portfolio_value,
         'positions': positions,
         'unrealised_pnl': unrealised_pnl,
-        'holdings': open_positions.__len__(),
+        'holdings': open_positions.count(),
         'open_positions': open_positions,
         'chart_data': chart_data,
         'chart_data_json': chart_data_json,
