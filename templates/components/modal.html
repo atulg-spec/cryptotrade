@@ -1,0 +1,9 @@
+<div class="fixed inset-0 z-40 hidden items-center justify-center bg-black/60 p-4" id="{{ modal_id|default:'app-modal' }}">
+  <div class="w-full max-w-lg rounded-2xl border border-slate-700 bg-primary p-4 shadow-xl">
+    <div class="mb-3 flex items-center justify-between">
+      <h3 class="text-sm font-semibold text-white">{{ title|default:"Modal" }}</h3>
+      <button type="button" class="rounded-lg border border-slate-700 px-2 py-1 text-xs text-slate-300">Close</button>
+    </div>
+    {{ body|default:""|safe }}
+  </div>
+</div>

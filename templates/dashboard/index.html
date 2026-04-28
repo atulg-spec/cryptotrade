@@ -1,0 +1,427 @@
+{% extends "base/dashboard_base.html" %}
+{% load humanize %}
+
+{% block title %}Dashboard — TradeHub{% endblock %}
+
+{% block content %}
+{# ── Full-screen trading layout: Watchlist | Chart | Trade Panel ── #}
+<div class="flex h-full w-full overflow-hidden">
+
+  {# WATCHLIST (left panel) #}
+  {% include "components/watchlist.html" %}
+
+  {# CHART + BOTTOM TABS (centre – desktop only) #}
+  <div id="panel-chart-desktop" class="hidden flex-1 min-w-0 flex-col overflow-hidden lg:flex">
+
+    {# Chart header #}
+    <div class="flex flex-shrink-0 items-center gap-3 border-b border-slate-800 bg-slate-900 px-4 py-2.5">
+      <span id="active-symbol-header" class="font-mono font-semibold text-white">Select Symbol</span>
+      <span id="active-symbol-price" class="font-mono text-base text-slate-300">--</span>
+      <span id="active-symbol-change" class="rounded px-2 py-0.5 font-mono text-xs"></span>
+      <div class="ml-auto rounded-xl border border-slate-700 bg-slate-800/60 px-3 py-1 text-xs text-slate-300">
+        Equity: <span data-dashboard-total-assets>₹{{ total_equity|floatformat:2|intcomma }}</span>
+      </div>
+    </div>
+
+    {# TradingView chart #}
+    <div class="flex-1 min-h-0 bg-slate-950">
+      <div id="tv-chart-container" class="h-full w-full"></div>
+    </div>
+
+    {# Bottom tabs (positions / orderbook / trades / orders) #}
+    {% include "components/bottom_tabs.html" %}
+  </div>
+
+  {# MOBILE POSITIONS panel (hidden on desktop) #}
+  {% include "components/mobile_positions.html" %}
+
+  {# TRADE PANEL (right panel) #}
+  {% include "components/trade_panel.html" %}
+
+</div>
+
+{# STOCK SHEET (full-screen modal on mobile / side-panel on desktop) #}
+{% include "components/stock_sheet.html" %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  /* ─── PANEL SWITCHING (mobile) ─────────────────────────────── */
+  const MOBILE_PANELS = ['watch', 'positions', 'trade'];
+
+  function showPanel(name) {
+    if (window.innerWidth >= 1024) return;
+    MOBILE_PANELS.forEach(p => {
+      const panel = document.getElementById(`panel-${p}`);
+      if (panel) panel.classList.add('hidden');
+      const btn = document.getElementById(`mnav-${p}`);
+      if (btn) btn.classList.replace('text-blue-400', 'text-slate-500');
+    });
+    const active = document.getElementById(`panel-${name}`);
+    if (active) active.classList.remove('hidden');
+    const activeBtn = document.getElementById(`mnav-${name}`);
+    if (activeBtn) activeBtn.classList.replace('text-slate-500', 'text-blue-400');
+  }
+
+  function ensureDesktop() {
+    if (window.innerWidth >= 1024) {
+      ['watch', 'chart-desktop', 'trade'].forEach(p => {
+        const el = document.getElementById(`panel-${p}`);
+        if (el) el.classList.remove('hidden');
+      });
+      const pos = document.getElementById('panel-positions');
+      if (pos) pos.classList.add('hidden');
+    } else {
+      const chart = document.getElementById('panel-chart-desktop');
+      if (chart) chart.classList.add('hidden');
+      showPanel('watch');
+    }
+  }
+  window.addEventListener('resize', ensureDesktop);
+  ensureDesktop();
+
+  /* ─── WATCHLIST TABS ────────────────────────────────────────── */
+  function switchWTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+    document.getElementById(`${tab}-content`)?.classList.remove('hidden');
+    ['fav', 'pos'].forEach(t => {
+      const btn = document.getElementById(`wtab-${t}`);
+      if (!btn) return;
+      const isActive = t === tab;
+      btn.classList.toggle('bg-blue-500/15', isActive);
+      btn.classList.toggle('text-blue-400', isActive);
+      btn.classList.toggle('border', isActive);
+      btn.classList.toggle('border-blue-500/20', isActive);
+      btn.classList.toggle('text-slate-500', !isActive);
+      btn.classList.toggle('bg-transparent', !isActive);
+    });
+  }
+
+  /* ─── BOTTOM TABS (desktop) ─────────────────────────────────── */
+  const BOTTOM_TABS = ['positions', 'orderbook', 'trades', 'orders', 'closedpositions'];
+  function switchBottomTab(tab) {
+    BOTTOM_TABS.forEach(p => {
+      const pane = document.getElementById(`pane-${p}`);
+      const btn = document.getElementById(`btn-tab-${p}`);
+      if (pane) pane.classList.add('hidden');
+      if (btn) {
+        btn.classList.remove('border-blue-400', 'bg-blue-500/10', 'text-blue-400');
+        btn.classList.add('border-transparent', 'text-slate-500');
+      }
+    });
+    document.getElementById(`pane-${tab}`)?.classList.remove('hidden');
+    const ab = document.getElementById(`btn-tab-${tab}`);
+    if (ab) {
+      ab.classList.add('border-blue-400', 'bg-blue-500/10', 'text-blue-400');
+      ab.classList.remove('border-transparent', 'text-slate-500');
+    }
+  }
+
+  /* ─── TRADE SIDE ─────────────────────────────────────────────── */
+  function setTradeSide(side) {
+    if (window.TradingPanel) TradingPanel.side = side;
+    const sb = document.getElementById('submit-order-btn');
+    const bb = document.getElementById('btn-buy');
+    const sl = document.getElementById('btn-sell');
+    if (side === 'buy') {
+      if (sb) { sb.className = sb.className.replace(/bg-\S+/, 'bg-emerald-500'); sb.textContent = 'Buy / Long'; }
+      bb?.classList.add('bg-emerald-500', 'text-black');
+      bb?.classList.remove('text-slate-500');
+      sl?.classList.remove('bg-rose-500', 'text-white');
+      sl?.classList.add('text-slate-500');
+    } else {
+      if (sb) { sb.className = sb.className.replace(/bg-\S+/, 'bg-rose-500'); sb.textContent = 'Sell / Short'; }
+      sl?.classList.add('bg-rose-500', 'text-white');
+      sl?.classList.remove('text-slate-500');
+      bb?.classList.remove('bg-emerald-500', 'text-black');
+      bb?.classList.add('text-slate-500');
+    }
+  }
+
+  /* ─── STOCK SHEET ─────────────────────────────────────────────── */
+  let sheetSymbol = null, sheetSide = 'buy';
+
+  const openPositions = {
+  {% for pos in open_positions %}
+  "{{ pos.stock.symbol }}": { symbol: "{{ pos.stock.symbol }}", qty: {{ pos.quantity }}, avg: {{ pos.buy_price }}, market: {{ pos.stock.current_price }} },
+  {% endfor %}
+};
+
+  function openStockSheet(symbol) {
+    sheetSymbol = symbol;
+    const sheet = document.getElementById('stock-sheet');
+    if (!sheet) return;
+    document.getElementById('sheet-symbol').textContent = symbol;
+    document.getElementById('trade-panel-symbol').textContent = symbol;
+    const priceEl = document.querySelector(`.price-display[data-symbol="${symbol}"]`);
+    const sp = document.getElementById('sheet-price');
+    if (priceEl && sp && priceEl.textContent !== '--') sp.textContent = priceEl.textContent;
+    renderSheetPosition(symbol);
+    sheet.style.display = 'flex';
+    requestAnimationFrame(() => {
+      sheet.classList.remove('pointer-events-none', 'invisible', 'opacity-0', 'translate-y-full', 'lg:translate-x-full');
+      sheet.classList.add('pointer-events-auto', 'visible', 'opacity-100', 'translate-y-0', 'lg:translate-x-0');
+      setTimeout(() => { window.TradingChart?.loadChart?.(symbol, 'sheet-tv-chart'); }, 300);
+    });
+  }
+  window.openStockSheet = openStockSheet;
+
+  function closeStockSheet() {
+    const sheet = document.getElementById('stock-sheet');
+    if (!sheet) return;
+    sheet.classList.add('pointer-events-none', 'invisible', 'opacity-0', 'translate-y-full', 'lg:translate-x-full');
+    sheet.classList.remove('pointer-events-auto', 'visible', 'opacity-100', 'translate-y-0', 'lg:translate-x-0');
+    sheetSymbol = null;
+  }
+
+  function renderSheetPosition(symbol) {
+    const container = document.getElementById('sheet-pos-content');
+    if (!container) return;
+    const pos = openPositions[symbol];
+    if (!pos) {
+      container.innerHTML = `<div class="rounded-xl border border-dashed border-slate-700 bg-blue-500/5 px-4 py-8 text-center"><p class="font-semibold text-white">No active position</p><p class="mt-1 text-xs text-slate-500">Use the Trade tab to open a new position.</p></div>`;
+      return;
+    }
+    const pnl = (pos.market - pos.avg) * pos.qty;
+    const pct = pos.avg > 0 ? ((pos.market - pos.avg) / pos.avg) * 100 : 0;
+    const clr = pnl >= 0 ? 'text-emerald-400' : 'text-rose-400';
+    const sign = pnl >= 0 ? '+' : '-';
+    const fmt = n => Math.abs(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    container.innerHTML = `
+    <div class="rounded-2xl border border-slate-700/60 bg-slate-900/80 overflow-hidden shadow-xl">
+      <div class="flex justify-between p-4">
+        <div>
+          <span class="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 font-mono text-[10px] font-semibold text-blue-400 uppercase tracking-wider">Open Position</span>
+          <div class="mt-2 font-mono text-lg font-semibold text-white">${symbol}</div>
+          <div class="text-[10px] uppercase tracking-wider text-slate-500 mt-0.5">Binance | Crypto | Long</div>
+        </div>
+        <div class="text-right">
+          <div class="text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">Unrealised P&L</div>
+          <div class="spos-pnl font-mono text-xl font-semibold ${clr} sheet-pos-unrealised" data-sym="${symbol}">${sign}₹${fmt(pnl)}</div>
+          <div class="font-mono text-xs mt-1 ${clr} sheet-pos-return" data-sym="${symbol}">${pct >= 0 ? '+' : '-'}${Math.abs(pct).toFixed(2)}%</div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 px-4 pb-4">
+        ${[['Quantity', pos.qty.toFixed(4)], ['Avg Price', '₹' + fmt(pos.avg)], ['Market Price', '₹' + fmt(pos.market)], ['Invested', '₹' + fmt(pos.avg * pos.qty)]].map(([l, v]) => `<div class="rounded-xl border border-slate-700/60 bg-slate-800/60 p-3"><div class="text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">${l}</div><div class="font-mono text-xs text-slate-200">${v}</div></div>`).join('')}
+      </div>
+      <div class="px-4 pb-4">
+        <button onclick="TradingPanel.closePosition('${symbol}','${pos.qty}',this)"
+          class="w-full rounded-xl border border-rose-500/25 bg-rose-500/10 py-3 font-mono text-xs font-bold uppercase tracking-wider text-rose-400 transition hover:bg-rose-500 hover:text-white">
+          Close Entire Position
+        </button>
+      </div>
+    </div>`;
+  }
+
+  /* ─── SHEET TABS ─────────────────────────────────────────────── */
+  function switchSheetTab(tab) {
+    ['trade', 'position'].forEach(t => {
+      document.getElementById(`spane-${t}`)?.classList.add('hidden');
+      const btn = document.getElementById(`sit-${t}`);
+      if (btn) { btn.classList.remove('border-blue-400', 'bg-blue-500/10', 'text-blue-400'); btn.classList.add('border-transparent', 'text-slate-500'); }
+    });
+    document.getElementById(`spane-${tab}`)?.classList.remove('hidden');
+    const ab = document.getElementById(`sit-${tab}`);
+    if (ab) { ab.classList.add('border-blue-400', 'bg-blue-500/10', 'text-blue-400'); ab.classList.remove('border-transparent', 'text-slate-500'); }
+  }
+
+  /* ─── SHEET TRADE SIDE ───────────────────────────────────────── */
+  function setSheetSide(side) {
+    sheetSide = side;
+    if (window.TradingPanel) TradingPanel.side = side;
+    const sb = document.getElementById('sheet-submit-btn');
+    const bb = document.getElementById('sheet-btn-buy');
+    const sl = document.getElementById('sheet-btn-sell');
+    if (side === 'buy') {
+      if (sb) { sb.classList.replace('bg-rose-500', 'bg-emerald-500'); sb.textContent = 'Buy / Long'; }
+      bb?.classList.add('bg-emerald-500', 'text-black'); bb?.classList.remove('text-slate-500');
+      sl?.classList.remove('bg-rose-500', 'text-white'); sl?.classList.add('text-slate-500');
+    } else {
+      if (sb) { sb.classList.replace('bg-emerald-500', 'bg-rose-500'); sb.textContent = 'Sell / Short'; }
+      sl?.classList.add('bg-rose-500', 'text-white'); sl?.classList.remove('text-slate-500');
+      bb?.classList.remove('bg-emerald-500', 'text-black'); bb?.classList.add('text-slate-500');
+    }
+  }
+
+  /* ─── SHEET QTY HELPERS ──────────────────────────────────────── */
+  function getSheetInputMode() { return document.getElementById('sheet-toggle-amt')?.classList.contains('text-blue-400') ? 'amt' : 'qty'; }
+
+  function setSheetQtyPercent(pct) {
+    if (window.TradingPanel) { TradingPanel.currentSymbol = sheetSymbol; TradingPanel.side = sheetSide; }
+    if (typeof setQtyPercent === 'function') setQtyPercent(pct);
+    const main = document.getElementById('order-qty');
+    const sheet = document.getElementById('sheet-order-qty');
+    if (main && sheet) sheet.value = main.value;
+  }
+
+  function submitSheetOrder() {
+    if (!sheetSymbol) return;
+    const sq = document.getElementById('sheet-order-qty');
+    const mq = document.getElementById('order-qty');
+    if (!sq || !mq || parseFloat(sq.value) <= 0) return;
+    mq.value = sq.value;
+    if (window.TradingPanel) { TradingPanel.currentSymbol = sheetSymbol; TradingPanel.side = sheetSide; }
+    document.getElementById('submit-order-btn')?.click();
+  }
+
+  /* ─── MOBILE ROW → OPEN SHEET ────────────────────────────────── */
+  document.addEventListener('click', e => {
+    if (e.target.closest('button,a,input,select,textarea,label,.star-btn,.rm-btn')) return;
+    const row = e.target.closest('.watchlist-item[data-symbol],.pos-card[data-symbol]');
+    if (!row || window.innerWidth >= 1024) return;
+    openStockSheet(row.dataset.symbol);
+  });
+
+  /* ─── DRAG RESIZE (sheet) ────────────────────────────────────── */
+  (function () {
+    const div = document.getElementById('resize-divider');
+    const ca = document.getElementById('sheet-chart-area');
+    const body = document.getElementById('sheet-body');
+    if (!div || !ca || !body) return;
+    let sY = 0, sH = 0, drag = false;
+    const start = y => { drag = true; sY = y; sH = ca.getBoundingClientRect().height; document.body.style.userSelect = 'none'; };
+    const move = y => { if (!drag) return; const bH = body.getBoundingClientRect().height; const nH = Math.min(Math.max(sH + (y - sY), 80), bH - 120); ca.style.flex = 'none'; ca.style.height = nH + 'px'; };
+    const end = () => { drag = false; document.body.style.userSelect = ''; };
+    div.addEventListener('mousedown', e => { start(e.clientY); e.preventDefault(); });
+    document.addEventListener('mousemove', e => move(e.clientY));
+    document.addEventListener('mouseup', end);
+    div.addEventListener('touchstart', e => start(e.touches[0].clientY), { passive: true });
+    document.addEventListener('touchmove', e => { if (drag) { move(e.touches[0].clientY); e.preventDefault(); } }, { passive: false });
+    document.addEventListener('touchend', end);
+  })();
+
+  /* ─── SWIPE DOWN TO CLOSE ─────────────────────────────────────── */
+  (function () {
+    const handle = document.getElementById('sheet-drag-handle');
+    const sheet = document.getElementById('stock-sheet');
+    if (!handle || !sheet) return;
+    let sY = 0;
+    handle.addEventListener('touchstart', e => { sY = e.touches[0].clientY; }, { passive: true });
+    handle.addEventListener('touchend', e => { if (e.changedTouches[0].clientY - sY > 60) closeStockSheet(); });
+  })();
+
+  /* ─── SYMBOL CHANGE ──────────────────────────────────────────── */
+  document.addEventListener('symbol_change', e => {
+    const sym = e.detail.symbol;
+    const h = document.getElementById('active-symbol-header');
+    const ts = document.getElementById('trade-panel-symbol');
+    const sp = document.getElementById('active-symbol-price');
+    const sc = document.getElementById('active-symbol-change');
+
+    if (h) h.textContent = sym;
+    if (ts) ts.textContent = sym;
+
+    // Immediately update price from watchlist if available
+    const wItem = document.querySelector(`.watchlist-item[data-symbol="${sym}"]`);
+    if (wItem) {
+      const wPrice = wItem.querySelector('.price-display');
+      const wChange = wItem.querySelector('.change-display');
+
+      if (wPrice && sp) {
+        sp.textContent = wPrice.textContent;
+        sp.className = wPrice.className.replace('price-display', 'font-mono text-base');
+      }
+      if (wChange && sc) {
+        sc.textContent = wChange.textContent;
+        sc.className = wChange.className.replace('change-display', 'rounded px-2 py-0.5 font-mono text-xs');
+      }
+    } else if (sp) {
+      sp.textContent = '--';
+    }
+  });
+
+  /* ─── PRICE UPDATE ───────────────────────────────────────────── */
+  document.addEventListener('price_update', e => {
+    const updates = e.detail;
+    if (!Array.isArray(updates)) return;
+    const fmt = (n, d = 2) => Math.abs(Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: d, maximumFractionDigits: d });
+    const signed = (n, d = 2) => `${n >= 0 ? '+' : '-'}₹${fmt(n, d)}`;
+    const signedPct = (n, d = 2) => `${n >= 0 ? '+' : '-'}${Math.abs(Number(n) || 0).toFixed(d)}%`;
+
+    updates.forEach(su => {
+      document.querySelectorAll(`.price-display[data-symbol="${su.symbol}"]`).forEach(el => {
+        el.textContent = `₹${Number(su.current_price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      });
+      document.querySelectorAll(`.change-display[data-symbol="${su.symbol}"]`).forEach(el => {
+        const v = Number(su.percentage_change);
+        el.textContent = `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+        el.className = `change-display font-mono text-[10px] ${v >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+      });
+    });
+
+    const ah = document.getElementById('active-symbol-header');
+    if (ah) {
+      const au = updates.find(u => u.symbol === ah.textContent);
+      if (au) {
+        const pe = document.getElementById('active-symbol-price');
+        const ce = document.getElementById('active-symbol-change');
+        if (pe) { pe.textContent = `₹${Number(au.current_price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; pe.className = `font-mono text-base ${au.percentage_change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`; }
+        if (ce) { ce.textContent = `${au.percentage_change >= 0 ? '+' : ''}${Number(au.percentage_change).toFixed(2)}%`; ce.className = `rounded px-2 py-0.5 font-mono text-xs ${au.percentage_change >= 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'}`; }
+      }
+    }
+
+    if (sheetSymbol) {
+      const su = updates.find(u => u.symbol === sheetSymbol);
+      if (su) {
+        const sp = document.getElementById('sheet-price');
+        const sc = document.getElementById('sheet-change');
+        if (sp) { sp.textContent = `₹${Number(su.current_price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; sp.className = `font-mono text-lg font-semibold ${su.percentage_change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`; }
+        if (sc) { sc.textContent = `${su.percentage_change >= 0 ? '+' : ''}${Number(su.percentage_change).toFixed(2)}%`; sc.className = `rounded px-2 py-0.5 font-mono text-[11px] ${su.percentage_change >= 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'}`; }
+        if (openPositions[sheetSymbol]) openPositions[sheetSymbol].market = Number(su.current_price);
+      }
+    }
+
+    let totalPnL = 0;
+    document.querySelectorAll('.pnl-value[data-symbol]').forEach(pnlEl => {
+      const sym = pnlEl.dataset.symbol;
+      const up = updates.find(u => u.symbol === sym);
+      if (!up) return;
+      const qty = Number(pnlEl.dataset.qty), avg = Number(pnlEl.dataset.avg), cur = Number(up.current_price);
+      if (!qty || !avg) return;
+      const pnl = (cur - avg) * qty;
+      const pct = ((cur - avg) / avg) * 100;
+      totalPnL += pnl;
+      const clr = pnl >= 0 ? 'text-emerald-400' : 'text-rose-400';
+      pnlEl.textContent = signed(pnl);
+      pnlEl.classList.remove('text-emerald-400', 'text-rose-400');
+      pnlEl.classList.add(pnl >= 0 ? 'text-emerald-400' : 'text-rose-400');
+      document.querySelectorAll(`.pnl-percent[data-symbol="${sym}"]`).forEach(pp => {
+        pp.textContent = signedPct(pct);
+        pp.classList.remove('text-emerald-400', 'text-rose-400');
+        pp.classList.add(pnl >= 0 ? 'text-emerald-400' : 'text-rose-400');
+      });
+      document.querySelectorAll(`.market-price[data-symbol="${sym}"]`).forEach(mp => {
+        mp.textContent = `₹${fmt(cur)}`;
+      });
+    });
+
+    const unEl = document.getElementById('dashboard-unrealised-pnl');
+    if (unEl) { unEl.textContent = signed(totalPnL); unEl.className = `font-mono text-xs font-semibold ${totalPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`; }
+  });
+
+  /* ─── ORDER UPDATE ───────────────────────────────────────────── */
+  document.addEventListener('order_update', e => {
+    const u = e.detail;
+    if (window.Notifications?.info) Notifications.info(`Order ${u.status} for ${u.symbol || 'your order'}`);
+    if (u.status === 'completed') {
+      if (window.innerWidth < 1024) { closeStockSheet(); setTimeout(() => showPanel('positions'), 330); }
+      else switchBottomTab('positions');
+      fetch(window.location.href).then(r => r.text()).then(html => {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        ['pos-content', 'positions-table-body', 'orders-table-body', 'wallet-balance', 'dashboard-unrealised-pnl', 'mobile-positions-list', 'topbar-wallet-balance', 'topbar-total-assets', 'closedpositions-table-body'].forEach(id => {
+          const n = doc.getElementById(id), c = document.getElementById(id);
+          if (n && c) c.innerHTML = n.innerHTML;
+        });
+      }).catch(console.error);
+    }
+  });
+
+  /* ─── INIT ───────────────────────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.WatchlistManager?.init) WatchlistManager.init();
+    if (window.TradingChart?.init) TradingChart.init();
+    if (window.WSManager?.init) WSManager.init();
+  });
+</script>
+{% endblock %}

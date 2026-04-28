@@ -1,0 +1,32 @@
+<header class="bg-gradient-to-r from-orange-500/10 via-emerald-500/5 to-sky-500/10 border-b border-orange-200/40 px-6 py-4 flex items-center justify-between shadow-lg">
+    <div class="flex items-center space-x-4 w-full">
+        {% if site_settings and site_settings.logo %}
+        <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}" class="h-10 w-auto rounded-xl border border-white/20 shadow">
+        {% else %}
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/20 border border-orange-400/40 flex items-center justify-center">
+            <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l6-6 4 4 7-7" />
+            </svg>
+        </div>
+        {% endif %}
+        <div>
+            <h1 class="text-xl font-bold text-white tracking-wide">
+                {{ site_settings.site_name|default:'Dashboard' }}
+            </h1>
+            {% if site_settings and site_settings.tagline %}
+            <p class="text-xs text-orange-100/90">{{ site_settings.tagline }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="hidden md:flex items-center space-x-4 text-sm text-orange-50">
+        <div class="px-3 py-1 rounded-full bg-white/10 border border-white/20">
+            <span class="font-semibold">Live</span>
+        </div>
+        <button class="text-white hover:text-orange-200 transition-colors duration-200" title="Quick action">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+        </button>
+    </div>
+</header>

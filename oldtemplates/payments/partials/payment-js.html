@@ -1,0 +1,288 @@
+
+<script>
+    // Deposit amount management
+    let depositAmount = 0;
+    let withdrawAmount = 0;
+
+    // Deposit functions
+    function setDepositAmount(amount) {
+        depositAmount = amount;
+        document.getElementById('depositAmount').value = amount;
+        updateDepositButtonState();
+        
+        // Add visual feedback for active button
+        document.querySelectorAll('.deposit-amount-btn').forEach(btn => {
+            btn.classList.remove('active', 'bg-green-500/20', 'border-green-500/30');
+        });
+        event.target.classList.add('active', 'bg-green-500/20', 'border-green-500/30');
+    }
+
+    function validateDepositAmount(input) {
+        let value = parseFloat(input.value) || 0;
+        
+        // Validate min and max
+        if (value < 1) {
+            input.value = '';
+            depositAmount = 0;
+        } else if (value > 1000000) {
+            input.value = 1000000;
+            depositAmount = 1000000;
+        } else {
+            depositAmount = value;
+        }
+        
+        // Remove active state from quick amount buttons when typing
+        document.querySelectorAll('.deposit-amount-btn').forEach(btn => {
+            btn.classList.remove('active', 'bg-green-500/20', 'border-green-500/30');
+        });
+        
+        updateDepositButtonState();
+    }
+
+    function updateDepositButtonState() {
+        const addButton = document.getElementById('addFundsBtn');
+        if (depositAmount > 0) {
+            addButton.disabled = false;
+        } else {
+            addButton.disabled = true;
+        }
+    }
+
+    function addToWallet() {
+        if (depositAmount <= 0) {
+            showToast('Please enter a valid amount', 'error');
+            return;
+        }
+        
+        // Update modal with current amount
+        document.getElementById('confirmDepositAmount').textContent = `₹${depositAmount.toLocaleString('en-IN')}`;
+        document.getElementById('modalDepositAmount').textContent = `₹${depositAmount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        
+        // Calculate new balance
+        const currentBalance = parseFloat('{{ user.wallet }}') || 0;
+        const newBalance = currentBalance + depositAmount;
+        document.getElementById('newDepositBalance').textContent = `₹${newBalance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        
+        // Show modal
+        document.getElementById('depositModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDepositModal() {
+        document.getElementById('depositModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    function confirmAddToWallet() {
+        document.getElementById('depositForm').submit();
+    }
+
+    // Withdraw functions
+    function setWithdrawAmount(amount) {
+        withdrawAmount = amount;
+        document.getElementById('withdrawAmount').value = amount;
+        updateWithdrawButtonState();
+        
+        // Add visual feedback for active button
+        document.querySelectorAll('.withdraw-amount-btn').forEach(btn => {
+            btn.classList.remove('active', 'bg-orange-500/20', 'border-orange-500/30');
+        });
+        event.target.classList.add('active', 'bg-orange-500/20', 'border-orange-500/30');
+    }
+
+    function validateWithdrawAmount(input) {
+        const currentBalance = parseFloat('{{ user.wallet }}') || 0;
+        let value = parseFloat(input.value) || 0;
+        
+        // Validate min and max
+        if (value < 1) {
+            input.value = '';
+            withdrawAmount = 0;
+        } else if (value > currentBalance) {
+            input.value = currentBalance;
+            withdrawAmount = currentBalance;
+        } else {
+            withdrawAmount = value;
+        }
+        
+        // Remove active state from quick amount buttons when typing
+        document.querySelectorAll('.withdraw-amount-btn').forEach(btn => {
+            btn.classList.remove('active', 'bg-orange-500/20', 'border-orange-500/30');
+        });
+        
+        updateWithdrawButtonState();
+    }
+
+    function updateWithdrawButtonState() {
+        const withdrawButton = document.getElementById('withdrawFundsBtn');
+        const currentBalance = parseFloat('{{ user.wallet }}') || 0;
+        
+        if (withdrawAmount > 0 && withdrawAmount <= currentBalance) {
+            withdrawButton.disabled = false;
+        } else {
+            withdrawButton.disabled = true;
+        }
+    }
+
+    function withdrawFromWallet() {
+        const currentBalance = parseFloat('{{ user.wallet }}') || 0;
+        
+        if (withdrawAmount <= 0) {
+            showToast('Please enter a valid amount', 'error');
+            return;
+        }
+        
+        if (withdrawAmount > currentBalance) {
+            showToast('Insufficient balance for withdrawal', 'error');
+            return;
+        }
+        
+        // Update modal with current amount
+        document.getElementById('confirmWithdrawAmount').textContent = `₹${withdrawAmount.toLocaleString('en-IN')}`;
+        document.getElementById('modalWithdrawAmount').textContent = `₹${withdrawAmount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        
+        // Calculate new balance
+        const newBalance = currentBalance - withdrawAmount;
+        document.getElementById('newWithdrawBalance').textContent = `₹${newBalance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        
+        // Show modal
+        document.getElementById('withdrawModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeWithdrawModal() {
+        document.getElementById('withdrawModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    function confirmWithdrawFromWallet() {
+        document.getElementById('withdrawForm').submit();
+    }
+
+    // Copy Referral Code
+    function copyReferralCode() {
+        const referralCode = document.getElementById('referralCode');
+        referralCode.select();
+        referralCode.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(referralCode.value);
+        
+        showToast('Referral code copied to clipboard!');
+    }
+
+    // Generate Referral Code (placeholder)
+    function generateReferralCode() {
+        showToast('Referral code generation feature coming soon!', 'info');
+    }
+
+    // Show Toast Notification
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+
+        if (type === 'error') {
+            toast.innerHTML = `
+                <div class="bg-gradient-to-r from-rose-500 to-rose-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-rose-400/30">
+                    <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </div>
+                    <span class="font-semibold">${message}</span>
+                </div>
+            `;
+        } else if (type === 'info') {
+            toast.innerHTML = `
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-blue-400/30">
+                    <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <span class="font-semibold">${message}</span>
+                </div>
+            `;
+        } else {
+            toast.innerHTML = `
+                <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-400/30">
+                    <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <span class="font-semibold">${message}</span>
+                </div>
+            `;
+        }
+
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 3000);
+    }
+
+    // Form submission feedback
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        submitBtn.innerHTML = `
+            <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            Saving...
+        `;
+        submitBtn.disabled = true;
+        
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 2000);
+    });
+
+    // Close modals when clicking outside
+    document.getElementById('depositModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDepositModal();
+        }
+    });
+
+    document.getElementById('withdrawModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeWithdrawModal();
+        }
+    });
+
+    // Keyboard support
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeDepositModal();
+            closeWithdrawModal();
+        }
+    });
+
+    // Auto-hide toast when scrolling
+    let scrollTimer;
+    window.addEventListener('scroll', function() {
+        const toast = document.getElementById('toast');
+        if (!toast.classList.contains('hidden')) {
+            clearTimeout(scrollTimer);
+            toast.classList.add('opacity-0');
+            scrollTimer = setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('opacity-0');
+            }, 300);
+        }
+    });
+
+    // Initialize button states
+    document.addEventListener('DOMContentLoaded', function() {
+        updateDepositButtonState();
+        updateWithdrawButtonState();
+        
+        // Set max attribute for withdraw input
+        const withdrawInput = document.getElementById('withdrawAmount');
+        const currentBalance = parseFloat('{{ user.wallet }}') || 0;
+        withdrawInput.max = currentBalance;
+    });
+</script>

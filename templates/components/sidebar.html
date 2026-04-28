@@ -1,0 +1,52 @@
+{% comment %}
+Sidebar component — used on non-dashboard pages (portfolio, orders, etc.)
+{% endcomment %}
+<aside id="sidebar" class="hidden w-64 flex-shrink-0 flex-col border-r border-slate-800 bg-slate-900/80 lg:flex">
+  <div class="border-b border-slate-800 px-5 py-4">
+    <a href="{% url 'dashboard' %}" class="text-lg font-extrabold tracking-tight text-white">
+      Trade<span class="text-blue-400">Hub</span>
+    </a>
+  </div>
+  <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5 text-sm">
+    <a href="{% url 'dashboard' %}"
+      class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-slate-300 transition hover:bg-slate-800 hover:text-white
+             {% if request.resolver_match.url_name == 'dashboard' %}bg-slate-800 text-white{% endif %}">
+      <svg class="h-4 w-4 flex-shrink-0 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10-2a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1h-4a1 1 0 01-1-1v-6z"/>
+      </svg>
+      Dashboard
+    </a>
+    <a href="{% url 'orders' %}"
+      class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-slate-300 transition hover:bg-slate-800 hover:text-white
+             {% if request.resolver_match.url_name == 'orders' %}bg-slate-800 text-white{% endif %}">
+      <svg class="h-4 w-4 flex-shrink-0 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+      </svg>
+      Orders
+    </a>
+    <a href="{% url 'portfolio' %}"
+      class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-slate-300 transition hover:bg-slate-800 hover:text-white
+             {% if request.resolver_match.url_name == 'portfolio' %}bg-slate-800 text-white{% endif %}">
+      <svg class="h-4 w-4 flex-shrink-0 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+      </svg>
+      Portfolio
+    </a>
+    <a href="{% url 'wallet' %}"
+      class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-slate-300 transition hover:bg-slate-800 hover:text-white
+             {% if request.resolver_match.url_name == 'wallet' %}bg-slate-800 text-white{% endif %}">
+      <svg class="h-4 w-4 flex-shrink-0 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+      </svg>
+      Wallet
+    </a>
+    <a href="{% url 'my-transactions' %}"
+      class="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-slate-300 transition hover:bg-slate-800 hover:text-white
+             {% if request.resolver_match.url_name == 'my-transactions' %}bg-slate-800 text-white{% endif %}">
+      <svg class="h-4 w-4 flex-shrink-0 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+      </svg>
+      Transactions
+    </a>
+  </nav>
+</aside>

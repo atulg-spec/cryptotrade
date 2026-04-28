@@ -1,0 +1,488 @@
+{% extends 'home/base.html' %}
+{% block body %}
+<!-- Hero Section -->
+<div class="relative pt-24 pb-20 sm:pt-32 sm:pb-28 lg:pt-40 lg:pb-32 grid-pattern">
+    <div class="absolute inset-0 bg-gradient-to-b from-cyber-dark/0 via-cyber-dark/80 to-cyber-dark z-10"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20" data-aos="fade-down">
+        <div class="lg:grid lg:grid-cols-12 lg:gap-8">
+            <div class="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
+                <h1 class="text-4xl tracking-tight font-extrabold sm:text-5xl md:text-6xl">
+                    <span class="block text-gray-300">INVEST WITH</span>
+                    <span
+                        class="block bg-clip-text text-transparent bg-gradient-to-r from-cyber-primary to-cyber-secondary">
+                        {{site_settings.site_name}}
+                    </span>
+                </h1>
+                <p
+                    class="mt-3 text-base text-gray-400 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                    Online platform to invest in stocks, derivatives, mutual funds, ETFs, bonds, and more. We
+                    connect our customers with the best.
+                </p>
+                <div class="mt-8 sm:mt-10 flex flex-col sm:flex-row sm:items-center sm:space-x-3">
+                    <div class="rounded-md shadow w-full sm:w-auto">
+                        <a href="{% url 'register' %}"
+                            class="w-full cyber-border flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-md text-cyber-dark bg-cyber-primary hover:bg-cyber-primary/90 md:py-4 md:text-lg md:px-10 transition-all hover:shadow-lg hover:shadow-cyber-primary/30">
+                            Register Now
+                        </a>
+                    </div>
+                    <div class="mt-3 sm:mt-0 w-full sm:w-auto">
+                        <a href="{% url 'login' %}"
+                            class="w-full flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-md text-cyber-primary border-cyber-primary hover:bg-cyber-primary/10 md:py-4 md:text-lg md:px-10 transition-all">
+                            <i class="fas fa-chart-line mr-2"></i> Login
+                        </a>
+                    </div>
+                    <div class="mt-3 sm:mt-0 w-full sm:w-auto">
+                        <a href="{% url 'contactus' %}"
+                            class="w-full flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-md text-cyber-dark bg-white/10 hover:bg-white/20 md:py-4 md:text-lg md:px-10 transition-all">
+                            <i class="fas fa-headset mr-2"></i> Contact Support
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">
+                <div class="relative mx-auto w-full rounded-lg shadow-lg lg:max-w-md cyber-border">
+                    <div
+                        class="absolute -inset-1 bg-gradient-to-r from-cyber-primary to-cyber-secondary rounded-lg blur opacity-75">
+                    </div>
+                    <div class="relative bg-cyber-dark rounded-lg overflow-hidden">
+                        <div class="h-6 bg-gray-900 flex items-center px-3 border-b border-gray-800">
+                            <div class="w-2 h-2 rounded-full bg-red-500 mr-2"></div>
+                            <div class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></div>
+                            <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                            <div class="ml-3 text-xs text-gray-500 terminal-text">
+                                {{site_settings.site_name}}://dashboard</div>
+                        </div>
+                        <div class="p-4 h-96 bg-gradient-to-br from-gray-900 to-cyber-dark">
+                            <div class="h-full flex items-center justify-center">
+                                <div class="text-center">
+                                    <div class="animate-float">
+                                        <div
+                                            class="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-cyber-primary to-cyber-secondary flex items-center justify-center mb-4">
+                                            <i class="fas fa-robot text-2xl text-cyber-dark"></i>
+                                        </div>
+                                    </div>
+                                    <div class="terminal-text text-cyber-primary text-sm mt-4">SYSTEM
+                                        INITIALIZING...</div>
+                                    <div class="terminal-text text-gray-400 text-xs mt-2">CONNECTING TO LIVE MARKET
+                                        FEED
+                                    </div>
+                                    <div class="flex space-x-2 justify-center mt-4">
+                                        <div class="w-2 h-2 rounded-full bg-cyber-primary animate-pulse"></div>
+                                        <div class="w-2 h-2 rounded-full bg-cyber-primary animate-pulse-slow"></div>
+                                        <div class="w-2 h-2 rounded-full bg-cyber-primary animate-pulse"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div id="features" class="py-16 bg-cyber-dark relative overflow-hidden" data-aos="fade-up">
+    <div class="absolute top-0 left-0 w-full h-full opacity-10">
+        <div class="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-cyber-primary filter blur-3xl opacity-30">
+        </div>
+        <div class="absolute top-3/4 left-3/4 w-64 h-64 rounded-full bg-cyber-secondary filter blur-3xl opacity-30">
+        </div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div class="text-center">
+            <h2 class="text-base font-semibold tracking-wider text-cyber-primary uppercase">TECHNOLOGY STACK</h2>
+            <p class="mt-2 text-3xl font-extrabold sm:text-4xl terminal-text">
+                QUANTUM-ENHANCED ALGORITHMS
+            </p>
+            <p class="mt-4 max-w-2xl text-xl text-gray-400 mx-auto">
+                Combining cutting-edge technologies for market dominance
+            </p>
+        </div>
+
+        <div class="mt-16">
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+                <div class="cyber-border pt-6 pb-8 px-6 bg-gradient-to-b from-gray-900 to-cyber-dark rounded-lg"
+                    data-aos="fade-up">
+                    <div class="flex justify-center">
+                        <div
+                            class="flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-cyber-primary to-cyber-secondary -mt-12">
+                            <i class="fas fa-brain text-2xl text-cyber-dark"></i>
+                        </div>
+                    </div>
+                    <div class="mt-6 text-center">
+                        <h3 class="text-lg font-bold text-gray-200">DAILY TRADE</h3>
+                        <p class="mt-2 text-sm text-gray-400">
+                            Our ultra-fast flagship trading platform with streaming market data, advanced charts, an
+                            elegant UI, and more.
+                        </p>
+                        <div class="mt-6">
+                            <span
+                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-cyber-dark text-cyber-primary border border-cyber-primary/30">
+                                ACCURACY
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cyber-border pt-6 pb-8 px-6 bg-gradient-to-b from-gray-900 to-cyber-dark rounded-lg"
+                    data-aos="fade-up">
+                    <div class="flex justify-center">
+                        <div
+                            class="flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-cyber-primary to-cyber-secondary -mt-12">
+                            <i class="fas fa-atom text-2xl text-cyber-dark"></i>
+                        </div>
+                    </div>
+                    <div class="mt-6 text-center">
+                        <h3 class="text-lg font-bold text-gray-200">CUSTOMER SUPPORT</h3>
+                        <p class="mt-2 text-sm text-gray-400">
+                            We connect our customers with the best, and help them keep up-and stay open.
+                        </p>
+                        <div class="mt-6">
+                            <span
+                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-cyber-dark text-cyber-primary border border-cyber-primary/30">
+                                TRUST
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cyber-border pt-6 pb-8 px-6 bg-gradient-to-b from-gray-900 to-cyber-dark rounded-lg"
+                    data-aos="fade-up">
+                    <div class="flex justify-center">
+                        <div
+                            class="flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-cyber-primary to-cyber-secondary -mt-12">
+                            <i class="fas fa-bolt text-2xl text-cyber-dark"></i>
+                        </div>
+                    </div>
+                    <div class="mt-6 text-center">
+                        <h3 class="text-lg font-bold text-gray-200">REAL TIME MARKET DATA</h3>
+                        <p class="mt-2 text-sm text-gray-400">
+                            The central dashboard for your {{site_settings.site_name}} account. Gain insights into
+                            your trades and investments with in-depth reports and visualisations.
+                        </p>
+                        <div class="mt-6">
+                            <span
+                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-cyber-dark text-cyber-primary border border-cyber-primary/30">
+                                SPEED
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="features" class="py-16 bg-cyber-dark relative overflow-hidden" data-aos="fade-up">
+    <div class="absolute top-0 left-0 w-full h-full opacity-10">
+        <div class="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-cyber-primary filter blur-3xl opacity-30">
+        </div>
+        <div class="absolute top-3/4 left-3/4 w-64 h-64 rounded-full bg-cyber-secondary filter blur-3xl opacity-30">
+        </div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div class="text-center">
+            <p class="mt-2 text-3xl font-extrabold sm:text-4xl terminal-text">
+                Unlock the Power of Precision Trading
+            </p>
+            <video class="video-LvEbEsr1 rounded-2xl mt-4" poster="" muted="" autoplay="" loop="" playsinline="">
+                <source
+                    src="https://static.tradingview.com/static/bundles/widgets-main-video.hvc1.ca6978f4c1d93d75de54.mp4"
+                    type="video/mp4;codecs=hvc1.1.0.L150.b0">
+                <source src="https://static.tradingview.com/static/bundles/widgets-main-video.a3d7152108cd9db92d6c.webm"
+                    type="video/webm">
+                <source
+                    src="https://static.tradingview.com/static/bundles/widgets-main-video.avc1.5746d3e24209326a4c11.mp4"
+                    type="video/mp4;codecs=avc1">
+            </video>
+        </div>
+    </div>
+</div>
+
+<!-- Active Members Section -->
+<div class="py-16 bg-gradient-to-b from-gray-900 to-cyber-dark relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-1/3 left-1/4 w-96 h-96 rounded-full bg-cyan-500 filter blur-3xl opacity-20"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-purple-500 filter blur-3xl opacity-20">
+        </div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div class="lg:text-center">
+            <h2 class="text-base font-semibold tracking-wider text-cyber-primary uppercase">Community Pulse</h2>
+            <p class="mt-2 text-3xl font-extrabold sm:text-4xl terminal-text">
+                LIVE TRADING ACTIVITY
+            </p>
+            <p class="mt-4 max-w-2xl text-xl text-gray-400 mx-auto">
+                Join our network of 12,847 active traders
+            </p>
+        </div>
+
+        <!-- Member Testimonials -->
+        <div class="mt-16">
+            <h3 class="text-lg font-bold text-gray-200 mb-6 text-center">TRUSTED BY QUANT TRADERS</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Testimonial 1 -->
+                <div class="cyber-border bg-gradient-to-b from-gray-900 to-cyber-dark rounded-lg overflow-hidden p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div
+                                class="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold">
+                                AS
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-200">Aryan S.</p>
+                            <p class="text-xs text-gray-500">Pro Member since 2022</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-400 italic">
+                        {{site_settings.site_name}} has completely transformed how I manage my daily trades. The
+                        real-time portfolio tracking and performance analytics helped me identify patterns I was missing
+                        before. My win rate improved by 22% in just two months of using the platform. The mobile
+                        responsiveness means I can monitor positions even when I'm away from my desk. </p>
+                    <div class="mt-4 flex">
+                        <i class="fas fa-star text-amber-400 text-sm"></i>
+                        <i class="fas fa-star text-amber-400 text-sm"></i>
+                        <i class="fas fa-star text-amber-400 text-sm"></i>
+                        <i class="fas fa-star text-amber-400 text-sm"></i>
+                        <i class="fas fa-star text-amber-400 text-sm"></i>
+                    </div>
+                </div>
+
+                <!-- Testimonial 2 -->
+                <div class="cyber-border bg-gradient-to-b from-gray-900 to-cyber-dark rounded-lg overflow-hidden p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div
+                                class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold">
+                                PK
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-200">Priya K.</p>
+                            <p class="text-xs text-gray-500">VIP Member since 2021</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-400 italic">
+                        As someone who invests for the long term, I needed a platform that could give me clear insights
+                        without overwhelming me with unnecessary noise. {{site_settings.site_name}}'s clean dashboard
+                        and comprehensive reporting give me exactly what I need to make informed decisions. The referral
+                        system has also been a nice bonus - I've earned enough credits to cover my subscription for the
+                        next year! </p>
+                    <div class="mt-4 flex">
+                        <i class="fas fa-star text-amber-400 text-sm"></i>
+                        <i class="fas fa-star text-amber-400 text-sm"></i>
+                        <i class="fas fa-star text-amber-400 text-sm"></i>
+                        <i class="fas fa-star text-amber-400 text-sm"></i>
+                        <i class="fas fa-star-half-alt text-amber-400 text-sm"></i>
+                    </div>
+                </div>
+
+                <!-- Testimonial 3 -->
+                <div class="cyber-border bg-gradient-to-b from-gray-900 to-cyber-dark rounded-lg overflow-hidden p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div
+                                class="w-12 h-12 rounded-full bg-gradient-to-r from-amber-500 to-red-600 flex items-center justify-center text-white font-bold">
+                                RM
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-200">Rahul M.</p>
+                            <p class="text-xs text-gray-500">Premium Member since 2023</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-400 italic">
+                        I recommend {{site_settings.site_name}} to all my clients because it provides the perfect
+                        balance of depth and usability. The admin panel allows me to monitor multiple client portfolios
+                        efficiently, and the security features give me peace of mind. The team's responsiveness to
+                        feature requests shows they genuinely care about their users' success. </p>
+                    <div class="mt-4 flex">
+                        <i class="fas fa-star text-amber-400 text-sm"></i>
+                        <i class="fas fa-star text-amber-400 text-sm"></i>
+                        <i class="fas fa-star text-amber-400 text-sm"></i>
+                        <i class="fas fa-star text-amber-400 text-sm"></i>
+                        <i class="fas fa-star text-amber-400 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Strategies Section -->
+<div id="strategies" class="py-16 bg-cyber-dark relative overflow-hidden">
+    <div class="absolute inset-0 opacity-5">
+        <div class="absolute top-1/3 left-1/4 w-96 h-96 rounded-full bg-cyber-secondary filter blur-3xl"></div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div class="lg:text-center" data-aos="fade-up">
+            <h2 class="text-base font-semibold tracking-wider text-cyber-primary uppercase">ALGORITHM MODULES</h2>
+            <p class="mt-2 text-3xl font-extrabold sm:text-4xl terminal-text">
+                SPECIALIZED STRATEGIES
+            </p>
+            <p class="mt-4 max-w-2xl text-xl text-gray-400 mx-auto">
+                Sleek, modern, and intuitive trading platforms
+            </p>
+        </div>
+
+        <div class="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div class="cyber-border bg-gradient-to-b from-gray-900 to-cyber-dark rounded-lg overflow-hidden group hover:shadow-lg hover:shadow-cyber-primary/20 transition-all duration-300"
+                data-aos="fade-up">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div
+                            class="flex-shrink-0 bg-gradient-to-br from-cyber-primary to-cyber-secondary rounded-md p-3 group-hover:rotate-12 transition-transform">
+                            <i class="fas fa-bolt text-cyber-dark text-xl"></i>
+                        </div>
+                        <div class="ml-5">
+                            <h3 class="text-lg font-bold text-gray-200">Stocks</h3>
+                            <p class="mt-1 text-sm text-gray-400">HIGH FREQUENCY</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-400">
+                        Trade stocks for delivery or intraday on over 5000 stocks listed
+                    </p>
+                    <div class="mt-6 flex flex-wrap gap-2">
+                        <span
+                            class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-cyber-dark text-cyber-primary border border-cyber-primary/30">
+                            <i class="fas fa-clock mr-1"></i> 500μs
+                        </span>
+                        <span
+                            class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-cyber-dark text-cyber-primary border border-cyber-primary/30">
+                            <i class="fas fa-percentage mr-1"></i> 0.85 Sharpe
+                        </span>
+                    </div>
+                </div>
+                <div class="px-6 pb-6">
+                    <a href="#"
+                        class="text-sm font-bold text-cyber-primary hover:text-cyber-primary/80 flex items-center">
+                        <span>VIEW SPECS</span>
+                        <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="cyber-border bg-gradient-to-b from-gray-900 to-cyber-dark rounded-lg overflow-hidden group hover:shadow-lg hover:shadow-cyber-secondary/20 transition-all duration-300"
+                data-aos="fade-up">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div
+                            class="flex-shrink-0 bg-gradient-to-br from-cyber-secondary to-cyber-accent rounded-md p-3 group-hover:rotate-12 transition-transform">
+                            <i class="fas fa-chess-queen text-cyber-dark text-xl"></i>
+                        </div>
+                        <div class="ml-5">
+                            <h3 class="text-lg font-bold text-gray-200">Direct Mutual Funds</h3>
+                            <p class="mt-1 text-sm text-gray-400">CONNECT NOW</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-400">
+                        Invest in over 2000 direct mutual funds directly without a distributor.
+                    </p>
+                    <div class="mt-6 flex flex-wrap gap-2">
+                        <span
+                            class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-cyber-dark text-cyber-secondary border border-cyber-secondary/30">
+                            <i class="fas fa-brain mr-1"></i> LSTM
+                        </span>
+                        <span
+                            class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-cyber-dark text-cyber-secondary border border-cyber-secondary/30">
+                            <i class="fas fa-project-diagram mr-1"></i> 5-LEG
+                        </span>
+                    </div>
+                </div>
+                <div class="px-6 pb-6">
+                    <a href="#"
+                        class="text-sm font-bold text-cyber-secondary hover:text-cyber-secondary/80 flex items-center">
+                        <span>VIEW SPECS</span>
+                        <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="cyber-border bg-gradient-to-b from-gray-900 to-cyber-dark rounded-lg overflow-hidden group hover:shadow-lg hover:shadow-cyber-accent/20 transition-all duration-300"
+                data-aos="fade-up">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div
+                            class="flex-shrink-0 bg-gradient-to-br from-cyber-accent to-cyber-primary rounded-md p-3 group-hover:rotate-12 transition-transform">
+                            <i class="fas fa-wave-square text-cyber-dark text-xl"></i>
+                        </div>
+                        <div class="ml-5">
+                            <h3 class="text-lg font-bold text-gray-200">IPO</h3>
+                            <p class="mt-1 text-sm text-gray-400">CUSTOM ALGORITHM</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-400">
+                        Now apply online and invest in companies listing on the Indian exchanges with an IPO (Initial
+                        Public Offering) with your BHIM UPI app
+                    </p>
+                    <div class="mt-6 flex flex-wrap gap-2">
+                        <span
+                            class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-cyber-dark text-cyber-accent border border-cyber-accent/30">
+                            <i class="fas fa-robot mr-1"></i> 47 AGENTS
+                        </span>
+                        <span
+                            class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-cyber-dark text-cyber-accent border border-cyber-accent/30">
+                            <i class="fas fa-calendar mr-1"></i> 3-10 DAYS
+                        </span>
+                    </div>
+                </div>
+                <div class="px-6 pb-6">
+                    <a href="#"
+                        class="text-sm font-bold text-cyber-accent hover:text-cyber-accent/80 flex items-center">
+                        <span>VIEW SPECS</span>
+                        <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="relative bg-gradient-to-r from-cyber-dark to-gray-900 overflow-hidden">
+    <div class="absolute inset-0">
+        <div class="absolute inset-0 bg-gradient-to-br from-cyber-primary/10 to-cyber-secondary/10 opacity-30">
+        </div>
+        <div class="absolute left-1/2 top-0 h-full w-1/2 bg-gradient-to-l from-cyber-primary/5 to-transparent">
+        </div>
+    </div>
+    <div class="relative max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8" data-aos="fade-up">
+        <div class="text-center">
+            <h2 class="text-3xl font-extrabold sm:text-4xl terminal-text">
+                <span class="block">READY TO ACTIVATE</span>
+                <span
+                    class="block bg-clip-text text-transparent bg-gradient-to-r from-cyber-primary to-cyber-secondary">
+                    YOUR INVESTING JOURNEY?
+                </span>
+            </h2>
+            <p class="mt-6 max-w-2xl text-xl text-gray-400 mx-auto">
+                Join the revolution transforming markets.
+            </p>
+            <div class="mt-10">
+                <a href="#"
+                    class="cyber-border px-8 py-4 border border-transparent text-base font-bold rounded-md text-cyber-dark bg-cyber-primary hover:bg-cyber-primary/90 md:py-4 md:text-lg md:px-10 transition-all hover:shadow-lg hover:shadow-cyber-primary/30 inline-flex items-center">
+                    <i class="fas fa-lock-open mr-2"></i> UNLOCK NOW
+                </a>
+            </div>
+            <div class="mt-8 flex items-center justify-center space-x-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-cyber-primary rounded-full p-1">
+                        <i class="fas fa-check text-cyber-dark text-xs"></i>
+                    </div>
+                    <p class="ml-3 text-sm text-gray-400">0 Brokerage</p>
+                </div>
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-cyber-primary rounded-full p-1">
+                        <i class="fas fa-check text-cyber-dark text-xs"></i>
+                    </div>
+                    <p class="ml-3 text-sm text-gray-400">No credit card required</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

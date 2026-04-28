@@ -1,0 +1,135 @@
+{% extends "base/dashboard_base.html" %}
+{% load humanize %}
+
+{% block title %}Orders - TradeHub{% endblock %}
+
+{% block content %}
+<div class="flex-1 overflow-y-auto bg-slate-950/50">
+  <div class="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto pb-24 md:pb-8">
+    
+    <!-- Header & Filters -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <div class="p-2 bg-indigo-500/20 border border-indigo-500/30 rounded-xl">
+            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <h1 class="text-2xl font-extrabold text-white tracking-tight">Order Management</h1>
+        </div>
+        <p class="text-sm text-slate-400">{{ total_orders|default:0 }} orders • ₹{{ total_investment|default:0|floatformat:2|intcomma }} invested</p>
+      </div>
+
+      <form method="get" class="flex flex-wrap items-center gap-3">
+        <div class="relative group">
+          <input name="search" value="{{ search_query|default:'' }}" placeholder="Filter symbol..."
+            class="w-full md:w-48 bg-slate-900/40 border border-slate-800 rounded-2xl px-4 py-2.5 text-sm text-white placeholder:text-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" />
+          <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <select name="status" class="bg-slate-900/40 border border-slate-800 rounded-2xl px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500 transition-all cursor-pointer">
+          <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+          <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+          <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+        </select>
+        <select name="type" class="bg-slate-900/40 border border-slate-800 rounded-2xl px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500 transition-all cursor-pointer">
+          <option value="all" {% if order_type_filter == 'all' %}selected{% endif %}>All Types</option>
+          <option value="BUY" {% if order_type_filter == 'BUY' %}selected{% endif %}>Buy</option>
+          <option value="SELL" {% if order_type_filter == 'SELL' %}selected{% endif %}>Sell</option>
+        </select>
+        <button class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-2xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95">Filter</button>
+      </form>
+    </div>
+
+    <!-- Orders Table -->
+    {% if orders %}
+    <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-3xl overflow-hidden shadow-xl">
+      <div class="overflow-x-auto">
+        <table class="min-w-full">
+          <thead>
+            <tr class="bg-slate-800/30 border-b border-slate-800/50">
+              <th class="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500">Asset</th>
+              <th class="px-6 py-4 text-center text-[10px] font-bold uppercase tracking-widest text-slate-500">Side</th>
+              <th class="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">Quantity</th>
+              <th class="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">Execution Price</th>
+              <th class="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">Total Value</th>
+              <th class="px-6 py-4 text-center text-[10px] font-bold uppercase tracking-widest text-slate-500">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/50 text-slate-200">
+            {% for order in orders %}
+            <tr class="hover:bg-slate-800/20 transition-colors group">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-slate-800/50 flex items-center justify-center font-bold text-xs text-white group-hover:scale-110 transition-transform">
+                    {{ order.stock.symbol|slice:":1" }}
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">{{ order.stock.symbol }}</p>
+                    <p class="text-[10px] text-slate-500 font-medium">{{ order.created_at|timesince }} ago</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border
+                  {% if order.order_type == 'BUY' %}bg-emerald-500/10 text-emerald-400 border-emerald-500/20{% else %}bg-rose-500/10 text-rose-400 border-rose-500/20{% endif %}">
+                  {{ order.order_type }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right font-mono text-sm">{{ order.quantity|floatformat:4 }}</td>
+              <td class="px-6 py-4 text-right font-mono text-sm text-slate-300">₹{{ order.price|floatformat:2 }}</td>
+              <td class="px-6 py-4 text-right font-mono font-bold text-white">₹{{ order.amount|floatformat:2|intcomma }}</td>
+              <td class="px-6 py-4 text-center">
+                <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border
+                  {% if order.status == 'completed' %}bg-emerald-500/10 text-emerald-400 border-emerald-500/20
+                  {% elif order.status == 'pending' %}bg-amber-500/10 text-amber-400 border-amber-500/20
+                  {% else %}bg-slate-500/10 text-slate-400 border-slate-500/20{% endif %}">
+                  {{ order.status }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if orders.has_other_pages %}
+    <div class="mt-8 flex items-center justify-center gap-3">
+      {% if orders.has_previous %}
+      <a class="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition-all active:scale-90" href="?page={{ orders.previous_page_number }}">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      </a>
+      {% endif %}
+      
+      <div class="px-6 py-3 rounded-2xl bg-slate-900 border border-slate-800 text-sm font-bold text-white">
+        <span class="text-blue-400">{{ orders.number }}</span> <span class="text-slate-600 px-2">/</span> {{ orders.paginator.num_pages }}
+      </div>
+
+      {% if orders.has_next %}
+      <a class="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition-all active:scale-90" href="?page={{ orders.next_page_number }}">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-3xl p-16 text-center">
+      <div class="w-20 h-20 bg-slate-800/50 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-slate-700/50">
+        <svg class="w-10 h-10 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+        </svg>
+      </div>
+      <h3 class="text-white font-bold text-lg mb-2">No Orders Found</h3>
+      <p class="text-slate-500 text-sm max-w-xs mx-auto">Your trading activity will appear here once you place orders on the exchange.</p>
+      <div class="mt-8 flex justify-center gap-4">
+        <a href="{% url 'dashboard' %}" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-2xl text-sm font-bold transition-all shadow-lg shadow-blue-500/20">Go to Exchange</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+

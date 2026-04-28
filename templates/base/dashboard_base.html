@@ -1,0 +1,88 @@
+{% extends "base/base.html" %}
+
+{% block layout %}
+<div class="flex h-screen flex-col overflow-hidden bg-slate-950 text-white">
+
+  {# ── Top Stats Bar ── #}
+  <div class="flex flex-shrink-0 items-center gap-0 overflow-x-auto border-b border-slate-800 bg-slate-900 no-scrollbar"
+       style="height:48px;">
+    <div class="flex flex-shrink-0 items-center gap-2 border-r border-slate-800 px-3 md:px-4">
+      <span class="font-mono text-[8px] md:text-[9px] font-bold uppercase tracking-widest text-slate-500 whitespace-nowrap">Total Assets</span>
+      <span id="topbar-total-assets" class="font-mono text-xs font-semibold text-white whitespace-nowrap" data-dashboard-total-assets>
+        ₹{{ total_equity|floatformat:2 }}
+      </span>
+    </div>
+    <div class="flex flex-shrink-0 items-center gap-2 border-r border-slate-800 px-3 md:px-4">
+      <span class="font-mono text-[8px] md:text-[9px] font-bold uppercase tracking-widest text-slate-500 whitespace-nowrap">Unrealized P&L</span>
+      <span id="dashboard-unrealised-pnl" data-dashboard-unrealised-pnl
+        class="font-mono text-xs font-semibold whitespace-nowrap {% if unrealised_pnl >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
+        ₹{{ unrealised_pnl|floatformat:2 }}
+      </span>
+    </div>
+    <div class="flex flex-shrink-0 items-center gap-2 px-3 md:px-4">
+      <span class="font-mono text-[8px] md:text-[9px] font-bold uppercase tracking-widest text-slate-500 whitespace-nowrap">Balance</span>
+      <span id="topbar-wallet-balance" class="font-mono text-xs font-semibold text-emerald-400 whitespace-nowrap">₹{{ wallet|floatformat:2 }}</span>
+    </div>
+
+    {# Connection Status Indicator #}
+    <div class="hidden md:flex items-center gap-1.5 px-4 border-l border-slate-800">
+        <div id="connection-dot" class="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+        <span class="font-mono text-[8px] font-bold uppercase tracking-widest text-slate-500">Live</span>
+    </div>
+
+    {# Right-side nav links #}
+    <div class="ml-auto flex flex-shrink-0 items-center gap-1 px-3">
+      <a href="{% url 'dashboard' %}"
+        class="rounded-lg px-2 py-1.5 text-[10px] font-semibold text-slate-400 transition hover:bg-slate-800 hover:text-white">
+        Dashboard
+      </a>
+      <a href="{% url 'orders' %}"
+        class="hidden sm:inline-block rounded-lg px-2 py-1.5 text-[10px] font-semibold text-slate-400 transition hover:bg-slate-800 hover:text-white">
+        Orders
+      </a>
+      <a href="{% url 'profile' %}"
+        class="ml-1 rounded-xl border border-slate-700 px-2.5 py-1.5 text-[10px] text-slate-300 transition hover:bg-slate-800">
+        Profile
+      </a>
+    </div>
+  </div>
+
+  {# ── Main Content ── #}
+  <main class="flex flex-1 min-h-0 overflow-hidden">
+    {% block content %}{% endblock %}
+  </main>
+
+  {# ── Mobile Bottom Nav ── #}
+  <nav id="mob-nav"
+    class="flex flex-shrink-0 border-t border-slate-800 bg-slate-900 lg:hidden"
+    style="height:52px; padding-bottom: env(safe-area-inset-bottom)">
+    <button class="mob-nav-btn flex flex-1 flex-col items-center justify-center gap-0.5 text-[9px] font-bold uppercase tracking-widest text-blue-400 transition"
+      id="mnav-watch" onclick="showPanel('watch')">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+      </svg>
+      Watch
+    </button>
+    <button class="mob-nav-btn flex flex-1 flex-col items-center justify-center gap-0.5 text-[9px] font-bold uppercase tracking-widest text-slate-500 transition hover:text-slate-300"
+      id="mnav-positions" onclick="showPanel('positions')">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+      </svg>
+      Positions
+    </button>
+    <button class="mob-nav-btn flex flex-1 flex-col items-center justify-center gap-0.5 text-[9px] font-bold uppercase tracking-widest text-slate-500 transition hover:text-slate-300"
+      id="mnav-trade" onclick="showPanel('trade')">
+      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+      </svg>
+      Trade
+    </button>
+  </nav>
+
+</div>
+
+{# Partials alerts #}
+{% include "partials/alerts.html" %}
+
+{% endblock %}

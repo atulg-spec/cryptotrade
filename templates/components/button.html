@@ -1,0 +1,4 @@
+<button type="{{ button_type|default:'button' }}"
+  class="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition {% if variant == 'ghost' %}border border-slate-700 text-slate-200 hover:bg-slate-800{% elif variant == 'danger' %}bg-rose-500 text-white hover:bg-rose-400{% elif variant == 'success' %}bg-emerald-500 text-white hover:bg-emerald-400{% else %}bg-blue-500 text-white hover:bg-blue-400{% endif %}">
+  {{ label }}
+</button>

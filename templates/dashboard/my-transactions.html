@@ -1,0 +1,149 @@
+{% extends "base/dashboard_base.html" %}
+{% load humanize %}
+
+{% block title %}Transactions - TradeHub{% endblock %}
+
+{% block content %}
+<div class="flex-1 overflow-y-auto bg-slate-950/50">
+  <div class="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto pb-24 md:pb-8">
+    
+    <!-- Header & Search -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <div class="p-2 bg-blue-500/20 border border-blue-500/30 rounded-xl">
+            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+          </div>
+          <h1 class="text-2xl font-extrabold text-white tracking-tight">Transaction History</h1>
+        </div>
+        <p class="text-sm text-slate-400">View and filter all your financial activities</p>
+      </div>
+
+      <form method="get" class="flex flex-wrap items-center gap-3">
+        <div class="relative group">
+          <input name="search" value="{{ search_query|default:'' }}" placeholder="Search ID..."
+            class="w-full md:w-48 bg-slate-900/40 border border-slate-800 rounded-2xl px-4 py-2.5 text-sm text-white placeholder:text-slate-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" />
+          <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <select name="status" class="bg-slate-900/40 border border-slate-800 rounded-2xl px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500 transition-all cursor-pointer">
+          <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+          <option value="COMPLETED" {% if status_filter == 'COMPLETED' %}selected{% endif %}>Completed</option>
+          <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
+          <option value="REQUESTED" {% if status_filter == 'REQUESTED' %}selected{% endif %}>Requested</option>
+        </select>
+        <select name="type" class="bg-slate-900/40 border border-slate-800 rounded-2xl px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500 transition-all cursor-pointer">
+          <option value="all" {% if type_filter == 'all' %}selected{% endif %}>All Types</option>
+          <option value="DEPOSIT" {% if type_filter == 'DEPOSIT' %}selected{% endif %}>Deposit</option>
+          <option value="WITHDRAW" {% if type_filter == 'WITHDRAW' %}selected{% endif %}>Withdraw</option>
+        </select>
+        <button class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-2xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95">Apply</button>
+      </form>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-4">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Deposits</p>
+        <p class="font-mono text-lg font-bold text-emerald-400">₹{{ total_deposits|floatformat:2|intcomma }}</p>
+      </div>
+      <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-4">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Withdrawals</p>
+        <p class="font-mono text-lg font-bold text-rose-400">₹{{ total_withdrawals|floatformat:2|intcomma }}</p>
+      </div>
+      <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-4">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Pending</p>
+        <p class="font-mono text-lg font-bold text-amber-400">{{ pending_transactions }}</p>
+      </div>
+      <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-4">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Total Logs</p>
+        <p class="font-mono text-lg font-bold text-white">{{ total_transactions }}</p>
+      </div>
+    </div>
+
+    <!-- Table -->
+    {% if transactions %}
+    <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-3xl overflow-hidden shadow-xl">
+      <div class="overflow-x-auto">
+        <table class="min-w-full">
+          <thead>
+            <tr class="bg-slate-800/30 border-b border-slate-800/50">
+              <th class="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500">Transaction ID</th>
+              <th class="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">Amount</th>
+              <th class="px-6 py-4 text-center text-[10px] font-bold uppercase tracking-widest text-slate-500">Type</th>
+              <th class="px-6 py-4 text-center text-[10px] font-bold uppercase tracking-widest text-slate-500">Status</th>
+              <th class="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">Date</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/50">
+            {% for transaction in transactions %}
+            <tr class="hover:bg-slate-800/20 transition-colors group">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-transform group-hover:scale-110 {% if transaction.transaction_type == 'DEPOSIT' %}bg-emerald-500/10 text-emerald-400{% else %}bg-rose-500/10 text-rose-400{% endif %}">
+                    {% if transaction.transaction_type == 'DEPOSIT' %}
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                    {% else %}
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+                    {% endif %}
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors font-mono">{{ transaction.transaction_id|default:"N/A" }}</p>
+                    <p class="text-[10px] text-slate-500 font-medium">{{ transaction.remark|default:"Standard Gateway" }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <p class="text-sm font-mono font-bold {% if transaction.transaction_type == 'DEPOSIT' %}text-emerald-400{% else %}text-rose-400{% endif %}">
+                  {% if transaction.transaction_type == 'DEPOSIT' %}+{% else %}-{% endif %}₹{{ transaction.amount|floatformat:2|intcomma }}
+                </p>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ transaction.transaction_type }}</span>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <div class="flex flex-col items-center gap-1">
+                  <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border
+                    {% if transaction.status == 'COMPLETED' %}bg-emerald-500/10 text-emerald-400 border-emerald-500/20
+                    {% elif transaction.status == 'PENDING' or transaction.status == 'REQUESTED' %}bg-amber-500/10 text-amber-400 border-amber-500/20
+                    {% else %}bg-slate-500/10 text-slate-400 border-slate-500/20{% endif %}">
+                    {{ transaction.status }}
+                  </span>
+                  {% if transaction.status == 'PENDING' and transaction.transaction_type == 'DEPOSIT' %}
+                    <a href="{% url 'verify_payment' transaction.id %}" 
+                       class="text-[9px] font-extrabold uppercase tracking-tighter text-blue-400 hover:text-white transition-colors">
+                      [ Verify Now ]
+                    </a>
+                  {% endif %}
+                </div>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <p class="text-xs text-slate-400 font-medium">{{ transaction.created_at|date:"M d, Y" }}</p>
+                <p class="text-[10px] text-slate-600 font-mono">{{ transaction.created_at|date:"H:i" }}</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-3xl p-16 text-center">
+      <div class="w-20 h-20 bg-slate-800/50 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-slate-700/50">
+        <svg class="w-10 h-10 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+      </div>
+      <h3 class="text-white font-bold text-lg mb-2">No Transactions Found</h3>
+      <p class="text-slate-500 text-sm max-w-xs mx-auto">You haven't made any deposits or withdrawals yet. Start trading to see your activity here.</p>
+      <div class="mt-8 flex justify-center gap-4">
+        <a href="{% url 'add-amount' %}" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-2xl text-sm font-bold transition-all shadow-lg shadow-emerald-500/20">Add Funds</a>
+        <a href="{% url 'dashboard' %}" class="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-2xl text-sm font-bold transition-all border border-slate-700">Back to Trade</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,187 @@
+{% extends 'home/base.html' %}
+
+{% block body %}
+<div class="relative min-h-screen bg-slate-950 text-slate-200 overflow-hidden">
+  <!-- Background Elements -->
+  <div class="absolute inset-0 z-0">
+    <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 rounded-full blur-[120px] animate-pulse"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse" style="animation-delay: 2s;"></div>
+    <div class="absolute inset-0 grid-pattern opacity-[0.03]"></div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="lg:grid lg:grid-cols-12 lg:gap-12 items-center">
+        <div class="lg:col-span-7 text-center lg:text-left" data-aos="fade-right">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-6">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            </span>
+            Next-Gen Trading Infrastructure
+          </div>
+          <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-tight mb-8">
+            Invest with <br/>
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">
+              {{site_settings.site_name|default:"TradeHub"}}
+            </span>
+          </h1>
+          <p class="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto lg:mx-0 mb-10 leading-relaxed font-medium">
+            Experience the future of wealth building. Access global markets with zero latency, advanced analytics, and bank-grade security.
+          </p>
+          <div class="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
+            <a href="{% url 'register' %}" class="w-full sm:w-auto px-10 py-5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold rounded-2xl transition-all hover:scale-105 shadow-xl shadow-blue-500/20 text-center">
+              Start Trading Now
+            </a>
+            <a href="{% url 'login' %}" class="w-full sm:w-auto px-10 py-5 bg-slate-900/50 backdrop-blur-md border border-slate-800 hover:border-slate-700 text-white font-extrabold rounded-2xl transition-all hover:bg-slate-900/80 text-center">
+              Member Portal
+            </a>
+          </div>
+          
+          <!-- Social Proof Small -->
+          <div class="mt-12 flex items-center justify-center lg:justify-start gap-8 opacity-40 grayscale group-hover:grayscale-0 transition-all">
+            <div class="text-[10px] font-bold uppercase tracking-tighter text-slate-500">Trusted by 15k+ traders</div>
+            <div class="h-px w-12 bg-slate-800"></div>
+            <div class="flex gap-4">
+              <i class="fab fa-cc-visa text-xl"></i>
+              <i class="fab fa-cc-mastercard text-xl"></i>
+              <i class="fab fa-cc-apple-pay text-xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Graphic -->
+        <div class="lg:col-span-5 mt-16 lg:mt-0" data-aos="zoom-in">
+          <div class="relative">
+            <!-- Glass Mockup -->
+            <div class="bg-slate-900/40 backdrop-blur-3xl border border-slate-800/50 rounded-[2.5rem] p-1 shadow-2xl overflow-hidden group">
+              <div class="bg-slate-950/80 rounded-[2.25rem] overflow-hidden">
+                <!-- Mockup Header -->
+                <div class="px-6 py-4 bg-slate-900/50 border-b border-slate-800 flex items-center justify-between">
+                  <div class="flex gap-1.5">
+                    <div class="w-2.5 h-2.5 rounded-full bg-rose-500/50"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-amber-500/50"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/50"></div>
+                  </div>
+                  <div class="text-[9px] font-mono text-slate-600 tracking-widest uppercase">Live_Terminal_v4</div>
+                </div>
+                <!-- Mockup Body -->
+                <div class="p-8 space-y-6">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Portfolio Balance</div>
+                      <div class="text-3xl font-mono font-bold text-white">$42,850.24</div>
+                    </div>
+                    <div class="h-12 w-24 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center">
+                      <div class="text-emerald-500 font-bold text-xs">+14.2%</div>
+                    </div>
+                  </div>
+                  <div class="space-y-3">
+                    <div class="h-1 bg-slate-900 rounded-full overflow-hidden">
+                      <div class="h-full w-2/3 bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]"></div>
+                    </div>
+                    <div class="flex justify-between text-[8px] font-bold text-slate-600 uppercase">
+                      <span>Equities</span>
+                      <span>$28,566.00</span>
+                    </div>
+                  </div>
+                  <!-- Mini Chart Mockup -->
+                  <div class="h-32 flex items-end gap-1.5 pt-4">
+                    <div class="flex-1 bg-blue-500/20 rounded-t-lg h-[40%] animate-pulse"></div>
+                    <div class="flex-1 bg-blue-500/40 rounded-t-lg h-[70%] animate-pulse" style="animation-delay: 0.2s"></div>
+                    <div class="flex-1 bg-blue-500/30 rounded-t-lg h-[50%] animate-pulse" style="animation-delay: 0.4s"></div>
+                    <div class="flex-1 bg-blue-500/60 rounded-t-lg h-[90%] animate-pulse" style="animation-delay: 0.6s"></div>
+                    <div class="flex-1 bg-blue-600 rounded-t-lg h-[100%] animate-pulse" style="animation-delay: 0.8s"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Floating Elements -->
+            <div class="absolute -top-6 -right-6 p-6 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl shadow-2xl animate-float">
+              <i class="fas fa-shield-check text-blue-400 text-2xl"></i>
+            </div>
+            <div class="absolute -bottom-6 -left-6 p-6 bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl shadow-2xl animate-float" style="animation-delay: 3s">
+              <i class="fas fa-bolt text-amber-400 text-2xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <section class="relative py-24 z-10 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-20" data-aos="fade-up">
+        <h2 class="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 mb-4">Ecosystem</h2>
+        <h3 class="text-3xl sm:text-5xl font-extrabold text-white">Quantum Infrastructure</h3>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Feature 1 -->
+        <div class="group bg-slate-900/30 backdrop-blur-md border border-slate-800/50 rounded-[2rem] p-10 transition-all hover:bg-slate-900/50 hover:border-blue-500/30" data-aos="fade-up">
+          <div class="w-14 h-14 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+            <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <h4 class="text-xl font-bold text-white mb-4">Hyper-Execution</h4>
+          <p class="text-slate-400 leading-relaxed text-sm">Experience sub-500μs trade execution with our proprietary matching engine optimized for speed.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="group bg-slate-900/30 backdrop-blur-md border border-slate-800/50 rounded-[2rem] p-10 transition-all hover:bg-slate-900/50 hover:border-indigo-500/30" data-aos="fade-up" style="animation-delay: 0.2s">
+          <div class="w-14 h-14 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+            <svg class="w-7 h-7 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          </div>
+          <h4 class="text-xl font-bold text-white mb-4">Advanced Analytics</h4>
+          <p class="text-slate-400 leading-relaxed text-sm">Gain deep insights into your trading performance with our institutional-grade reporting suite.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="group bg-slate-900/30 backdrop-blur-md border border-slate-800/50 rounded-[2rem] p-10 transition-all hover:bg-slate-900/50 hover:border-purple-500/30" data-aos="fade-up" style="animation-delay: 0.4s">
+          <div class="w-14 h-14 bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+            <svg class="w-7 h-7 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          </div>
+          <h4 class="text-xl font-bold text-white mb-4">Fortified Security</h4>
+          <p class="text-slate-400 leading-relaxed text-sm">Bank-level AES-256 encryption and 2FA protection ensure your assets remain impenetrable.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="relative py-24 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="relative bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[3rem] overflow-hidden p-12 sm:p-20 text-center shadow-2xl">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
+        <div class="relative z-10">
+          <h2 class="text-4xl sm:text-6xl font-extrabold text-white mb-8">Ready to revolutionize <br/> your trading?</h2>
+          <p class="text-lg text-blue-100 max-w-2xl mx-auto mb-12 font-medium opacity-90">Join 15,000+ traders already building the future of wealth on {{site_settings.site_name}}.</p>
+          <div class="flex flex-wrap justify-center gap-6">
+            <a href="{% url 'register' %}" class="px-10 py-5 bg-white text-blue-700 font-extrabold rounded-2xl hover:bg-blue-50 transition-all hover:scale-105 shadow-xl">
+              Create Free Account
+            </a>
+            <div class="flex items-center gap-2 text-white/80 text-sm font-bold uppercase tracking-widest">
+              <i class="fas fa-check-circle"></i> No Brokerage
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<style>
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  .grid-pattern {
+    background-image: radial-gradient(circle, #3b82f6 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+</style>
+{% endblock %}

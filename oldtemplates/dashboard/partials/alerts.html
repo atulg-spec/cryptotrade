@@ -1,0 +1,50 @@
+{% if messages %}
+    {% for message in messages %}
+        {% if forloop.first %}
+            <style>
+                @keyframes toast-slide {
+                    from { opacity: 0; transform: translateY(-8px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            </style>
+        {% endif %}
+        {% with level_tag=message.level_tag|default:message.tags %}
+        <div class="fixed top-4 right-4 z-50 max-w-xs w-full animate-[toast-slide_0.25s_ease]" id="message-{{ forloop.counter }}">
+            <div class="relative rounded-2xl shadow-2xl border border-gray-200 bg-white text-gray-900 px-5 py-4">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center {% if level_tag == 'error' %}bg-rose-100 text-rose-500{% else %}bg-emerald-100 text-emerald-600{% endif %}">
+                        {% if level_tag == 'error' %}
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        {% else %}
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold leading-snug">
+                            {{ message }}
+                        </p>
+                        {% if level_tag == 'error' %}
+                        <p class="text-xs text-gray-500 mt-1">Please review and try again.</p>
+                        {% endif %}
+                    </div>
+                    <button type="button"
+                        class="text-gray-400 hover:text-gray-600 transition-colors"
+                        onclick="document.getElementById('message-{{ forloop.counter }}')?.remove()"
+                        aria-label="Dismiss notification">
+                        &times;
+                    </button>
+                </div>
+            </div>
+        </div>
+        <script>
+            setTimeout(function() {
+                document.getElementById('message-{{ forloop.counter }}')?.remove();
+            }, 6500);
+        </script>
+        {% endwith %}
+    {% endfor %}
+{% endif %}

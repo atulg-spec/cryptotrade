@@ -1,0 +1,250 @@
+{% comment %}
+Order Book + Trades + Positions + Orders Bottom Tab Panel
+Used inside the desktop chart area.
+{% endcomment %}
+<div class="flex flex-shrink-0 flex-col border-t border-slate-800 bg-slate-900" style="height:36%">
+
+  {# ── Tab Strip ── #}
+  <div class="flex flex-shrink-0 overflow-x-auto border-b border-slate-800 bg-slate-900">
+    <button
+      class="tab-btn flex-shrink-0 border-b-2 border-blue-400 bg-blue-500/10 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-blue-400 transition"
+      id="btn-tab-positions" onclick="switchBottomTab('positions')">Positions</button>
+    <button
+      class="tab-btn flex-shrink-0 border-b-2 border-transparent px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 transition hover:text-slate-300"
+      id="btn-tab-orderbook" onclick="switchBottomTab('orderbook')">Order Book</button>
+    <button
+      class="tab-btn flex-shrink-0 border-b-2 border-transparent px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 transition hover:text-slate-300"
+      id="btn-tab-trades" onclick="switchBottomTab('trades')">Trades</button>
+    <button
+      class="tab-btn flex-shrink-0 border-b-2 border-transparent px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 transition hover:text-slate-300"
+      id="btn-tab-orders" onclick="switchBottomTab('orders')">Orders</button>
+    <button
+      class="tab-btn flex-shrink-0 border-b-2 border-transparent px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 transition hover:text-slate-300"
+      id="btn-tab-closedpositions" onclick="switchBottomTab('closedpositions')">Closed Positions</button>
+  </div>
+
+  {# ── Positions Pane ── #}
+  <div class="tab-pane flex-1 overflow-y-auto" id="pane-positions">
+    <table class="w-full border-collapse text-[11px]">
+      <thead>
+        <tr class="sticky top-0 z-10 bg-slate-900">
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-left text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Asset</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-right text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Qty</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-right text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Avg</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-right text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Market</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-right text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            P&L</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-right text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Ret%</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-center text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Action</th>
+        </tr>
+      </thead>
+      <tbody id="positions-table-body">
+        {% for pos in open_positions %}
+        <tr class="border-b border-slate-800/50 transition hover:bg-slate-800/40"
+          data-pos-symbol="{{ pos.stock.symbol }}" data-position-symbol="{{ pos.stock.symbol }}"
+          data-position-qty="{{ pos.quantity }}" data-position-avg="{{ pos.buy_price }}"
+          data-position-market="{{ pos.stock.current_price }}">
+          <td class="px-3 py-2">
+            <div class="font-mono font-semibold text-blue-400">{{ pos.stock.symbol }}</div>
+            <div class="text-[9px] uppercase tracking-wider text-slate-600">Binance · Long</div>
+          </td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">{{ pos.quantity|floatformat:4 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ pos.buy_price|floatformat:2 }}</td>
+          <td class="market-price px-3 py-2 text-right font-mono text-slate-300" data-symbol="{{ pos.stock.symbol }}">
+            ₹{{ pos.stock.current_price|floatformat:2 }}
+          </td>
+          <td class="pnl-value text-xs px-3 py-2 text-right font-mono" data-symbol="{{ pos.stock.symbol }}"
+            data-avg="{{ pos.buy_price }}" data-qty="{{ pos.quantity }}">--</td>
+          <td class="pnl-percent px-3 py-2 text-right font-mono" data-symbol="{{ pos.stock.symbol }}">--</td>
+          <td class="px-3 py-2 text-center">
+            <button class="rounded border border-rose-500/20 bg-rose-500/10 px-2.5 py-1
+                           text-[9px] font-bold uppercase tracking-wider text-rose-400 transition
+                           hover:bg-rose-500 hover:text-white"
+              onclick="TradingPanel.closePosition('{{ pos.stock.symbol }}','{{ pos.quantity }}',this)">
+              Close
+            </button>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="px-3 py-8 text-center text-xs text-slate-600">No open positions</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# ── Order Book Pane ── #}
+  <div class="tab-pane hidden flex-1 overflow-hidden" id="pane-orderbook">
+    <div class="flex h-full">
+      <div class="flex flex-1 flex-col overflow-hidden border-r border-slate-800">
+        <div class="flex flex-shrink-0 justify-between border-b border-slate-800 bg-slate-900 px-3 py-1.5
+                    text-[9px] font-bold uppercase tracking-widest text-slate-500">
+          <span>Bid</span><span>Amount</span><span>Total</span>
+        </div>
+        <div class="flex-1 overflow-y-auto" id="bids-container"></div>
+      </div>
+      <div class="flex flex-1 flex-col overflow-hidden">
+        <div class="flex flex-shrink-0 justify-between border-b border-slate-800 bg-slate-900 px-3 py-1.5
+                    text-[9px] font-bold uppercase tracking-widest text-slate-500">
+          <span>Ask</span><span>Amount</span><span>Total</span>
+        </div>
+        <div class="flex-1 overflow-y-auto" id="asks-container"></div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Trades Pane ── #}
+  <div class="tab-pane hidden flex-1 flex-col overflow-hidden" id="pane-trades">
+    <div class="flex flex-shrink-0 justify-between border-b border-slate-800 bg-slate-900 px-3 py-1.5
+                text-[9px] font-bold uppercase tracking-widest text-slate-500">
+      <span>Price</span><span>Amount</span><span>Time</span>
+    </div>
+    <div class="flex-1 overflow-y-auto" id="recent-trades-container"></div>
+  </div>
+
+  {# ── Orders Pane ── #}
+  <div class="tab-pane hidden flex-1 overflow-y-auto" id="pane-orders">
+    <table class="w-full border-collapse text-[11px]">
+      <thead>
+        <tr class="sticky top-0 z-10 bg-slate-900">
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-left text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Time</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-left text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Asset</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-left text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Type</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-right text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Price</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-right text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Qty</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-right text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Amount</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-center text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Status</th>
+        </tr>
+      </thead>
+      <tbody id="orders-table-body">
+        {% for order in recent_orders %}
+        <tr class="border-b border-slate-800/50 transition hover:bg-slate-800/40">
+          <td class="px-3 py-2 font-mono text-slate-500">{{ order.created_at|date:"H:i:s" }}</td>
+          <td class="px-3 py-2 font-mono font-semibold text-white">{{ order.stock.symbol }}</td>
+          <td class="px-3 py-2 font-mono font-semibold
+            {% if order.order_type == 'BUY' %}text-emerald-400{% else %}text-rose-400{% endif %}">
+            {{ order.order_type }}
+          </td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ order.price|floatformat:2 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">{{ order.quantity|floatformat:4 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ order.amount|floatformat:2 }}</td>
+          <td class="px-3 py-2 text-center">
+            <span class="rounded px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider
+              {% if order.status == 'completed' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/20
+              {% elif order.status == 'pending' %}bg-amber-500/15 text-amber-400 border border-amber-500/20
+              {% else %}bg-rose-500/15 text-rose-400 border border-rose-500/20{% endif %}">
+              {{ order.status }}
+            </span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="px-3 py-8 text-center text-xs text-slate-600">No recent orders</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# ── Closed Positions Pane ── #}
+  <div class="tab-pane hidden flex-1 overflow-y-auto" id="pane-closedpositions">
+    <table class="w-full border-collapse text-[11px]">
+      <thead>
+        <tr class="sticky top-0 z-10 bg-slate-900">
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-left text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Asset</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-right text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Qty</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-right text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Avg Buy</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-right text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Avg Sell</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-right text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            P&L</th>
+          <th
+            class="border-b border-slate-800 px-3 py-2 text-left text-[9px] font-bold uppercase tracking-widest text-slate-500">
+            Time Closed</th>
+        </tr>
+      </thead>
+      <tbody id="closedpositions-table-body">
+        {% if closed_positions_today or closed_positions_yesterday %}
+        {% if closed_positions_today %}
+        <tr class="bg-slate-800/20">
+          <td colspan="6" class="px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-slate-500">Today</td>
+        </tr>
+        {% for pos in closed_positions_today %}
+        <tr class="border-b border-slate-800/50 transition hover:bg-slate-800/40">
+          <td class="px-3 py-2 font-mono font-semibold text-white">{{ pos.stock.symbol }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">{{ pos.last_traded_quantity|floatformat:4 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ pos.buy_price|floatformat:2 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ pos.sell_price|floatformat:2 }}</td>
+          <td
+            class="px-3 py-2 text-right font-mono font-semibold {% if pos.realised_pnl >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
+            {% if pos.realised_pnl > 0 %}+{% endif %}₹{{ pos.realised_pnl|floatformat:2 }}
+          </td>
+          <td class="px-3 py-2 font-mono text-slate-500">{{ pos.last_traded_datetime|date:"H:i" }}</td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+
+        {% if closed_positions_yesterday %}
+        <tr class="bg-slate-800/20">
+          <td colspan="6" class="px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest text-slate-500">Yesterday
+          </td>
+        </tr>
+        {% for pos in closed_positions_yesterday %}
+        <tr class="border-b border-slate-800/50 transition hover:bg-slate-800/40">
+          <td class="px-3 py-2 font-mono font-semibold text-white">{{ pos.stock.symbol }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">{{ pos.last_traded_quantity|floatformat:4 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ pos.buy_price|floatformat:2 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ pos.sell_price|floatformat:2 }}</td>
+          <td
+            class="px-3 py-2 text-right font-mono font-semibold {% if pos.realised_pnl >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
+            {% if pos.realised_pnl > 0 %}+{% endif %}₹{{ pos.realised_pnl|floatformat:2 }}
+          </td>
+          <td class="px-3 py-2 font-mono text-slate-500">{{ pos.last_traded_datetime|date:"H:i" }}</td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+        {% else %}
+        <tr>
+          <td colspan="6" class="px-3 py-8 text-center text-xs text-slate-600">No closed positions</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,83 @@
+{% comment %}
+Mobile Positions Panel – rendered only on mobile when "Positions" tab is active.
+{% endcomment %}
+<div id="panel-positions" class="flex hidden flex-col bg-slate-950 lg:hidden">
+
+  {# Header #}
+  <div class="flex flex-shrink-0 items-center justify-between border-b border-slate-800 bg-slate-900 px-4 py-3">
+    <span class="text-sm font-bold text-white">Open Positions</span>
+    <span id="mobile-positions-count" class="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-0.5
+             font-mono text-[11px] font-semibold text-blue-400">
+      {{ open_positions|length }}
+    </span>
+  </div>
+
+  {# List #}
+  <div class="flex-1 overflow-y-auto py-3" id="mobile-positions-list">
+    {% for pos in open_positions %}
+    <div
+      class="mx-3 mb-2.5 overflow-hidden rounded-xl border border-slate-800 bg-slate-900 transition hover:-translate-y-px hover:border-slate-700 hover:shadow-lg"
+      data-symbol="{{ pos.stock.symbol }}" data-position-symbol="{{ pos.stock.symbol }}"
+      data-position-qty="{{ pos.quantity }}" data-position-avg="{{ pos.buy_price }}"
+      data-position-market="{{ pos.stock.current_price }}">
+
+      {# Top row #}
+      <div class="flex items-start justify-between px-4 py-3">
+        <div>
+          <div class="font-mono text-base font-semibold text-blue-400">{{ pos.stock.symbol }}</div>
+          <div class="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Binance · Long</div>
+        </div>
+        <div class="text-right">
+          <div class="pnl-value font-mono text-xs font-semibold" data-symbol="{{ pos.stock.symbol }}"
+            data-avg="{{ pos.buy_price }}" data-qty="{{ pos.quantity }}">--</div>
+          <div class="pnl-percent font-mono text-xs opacity-80" data-symbol="{{ pos.stock.symbol }}">--</div>
+        </div>
+      </div>
+
+      {# Stats grid #}
+      <div class="grid grid-cols-3 divide-x divide-slate-800 bg-slate-800/60">
+        <div class="px-3 py-2">
+          <div class="mb-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">Quantity</div>
+          <div class="font-mono text-xs text-slate-200">{{ pos.quantity|floatformat:4 }}</div>
+        </div>
+        <div class="px-3 py-2">
+          <div class="mb-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">Avg Price</div>
+          <div class="font-mono text-xs text-slate-200">₹{{ pos.buy_price|floatformat:2 }}</div>
+        </div>
+        <div class="px-3 py-2">
+          <div class="mb-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">Market</div>
+          <div class="market-price font-mono text-xs text-slate-200" data-symbol="{{ pos.stock.symbol }}">
+            ₹{{ pos.stock.current_price|floatformat:2 }}
+          </div>
+        </div>
+      </div>
+
+      {# Actions #}
+      <div class="flex gap-2 bg-slate-900 px-3 py-2.5">
+        <button class="flex-1 rounded-lg border border-blue-500/20 bg-blue-500/10 py-2
+                       text-[11px] font-bold uppercase tracking-wider text-blue-400 transition
+                       hover:bg-blue-500 hover:text-black" onclick="openStockSheet('{{ pos.stock.symbol }}')">
+          📈 Chart &amp; Trade
+        </button>
+        <button class="flex-1 rounded-lg border border-rose-500/20 bg-rose-500/10 py-2
+                       text-[11px] font-bold uppercase tracking-wider text-rose-400 transition
+                       hover:bg-rose-500 hover:text-white"
+          onclick="TradingPanel.closePosition('{{ pos.stock.symbol }}','{{ pos.quantity }}',this)">
+          ✕ Close
+        </button>
+      </div>
+    </div>
+    {% empty %}
+    <div class="flex flex-col items-center justify-center gap-3 px-4 py-16 text-center">
+      <div class="rounded-full bg-slate-800/80 p-5">
+        <svg class="h-10 w-10 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      </div>
+      <p class="text-sm text-slate-500">No open positions.</p>
+      <p class="text-xs text-slate-600">Select a symbol and trade to open your first position.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>

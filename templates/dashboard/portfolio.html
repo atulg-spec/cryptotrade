@@ -1,0 +1,134 @@
+{% extends "base/dashboard_base.html" %}
+{% load humanize %}
+
+{% block title %}Portfolio - TradeHub{% endblock %}
+
+{% block content %}
+<div class="flex-1 overflow-y-auto bg-slate-950/50">
+  <div class="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto pb-24 md:pb-8">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <div class="p-2 bg-purple-500/20 border border-purple-500/30 rounded-xl">
+            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+            </svg>
+          </div>
+          <h1 class="text-2xl font-extrabold text-white tracking-tight">Portfolio Overview</h1>
+        </div>
+        <p class="text-sm text-slate-400">{{ open_positions_count }} open • {{ closed_positions_count }} closed</p>
+      </div>
+      <a href="{% url 'orders' %}" class="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white px-6 py-3 rounded-2xl text-sm font-bold border border-slate-800 transition-all shadow-lg active:scale-95">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Transaction History
+      </a>
+    </div>
+
+    <!-- Quick Metrics -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-5 group hover:border-slate-700 transition-colors">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Total Investment</p>
+        <p class="font-mono text-xl font-bold text-white group-hover:text-blue-400 transition-colors">₹{{ total_investment|floatformat:2|intcomma }}</p>
+      </div>
+      <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-5 group hover:border-slate-700 transition-colors">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Current Value</p>
+        <p class="font-mono text-xl font-bold text-white group-hover:text-blue-400 transition-colors">₹{{ current_value|floatformat:2|intcomma }}</p>
+      </div>
+      <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-5 group hover:border-slate-700 transition-colors">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Unrealized P&L</p>
+        <div class="flex items-baseline gap-2">
+          <p class="font-mono text-xl font-bold {% if total_unrealised_pnl >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
+            {% if total_unrealised_pnl >= 0 %}+{% endif %}₹{{ total_unrealised_pnl|floatformat:2|intcomma }}
+          </p>
+        </div>
+      </div>
+      <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-5 group hover:border-slate-700 transition-colors">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Realized Profits</p>
+        <p class="font-mono text-xl font-bold {% if total_realised_pnl >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
+          {% if total_realised_pnl >= 0 %}+{% endif %}₹{{ total_realised_pnl|floatformat:2|intcomma }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Assets Table -->
+    <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-3xl overflow-hidden shadow-2xl">
+      <div class="overflow-x-auto">
+        <table class="min-w-full">
+          <thead>
+            <tr class="bg-slate-800/30 border-b border-slate-800/50 text-slate-500">
+              <th class="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest">Asset</th>
+              <th class="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest">Quantity</th>
+              <th class="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest">Avg Price</th>
+              <th class="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest">Live Value</th>
+              <th class="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest">Returns</th>
+              <th class="px-6 py-4 text-center text-[10px] font-bold uppercase tracking-widest">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/50 text-slate-200">
+            {% for symbol, summary in position_summary.items %}
+            <tr class="hover:bg-slate-800/20 transition-colors group">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 flex items-center justify-center font-bold text-xs text-white group-hover:scale-110 group-hover:border-blue-500/50 transition-all">
+                    {{ summary.stock.symbol|slice:":1" }}
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">{{ summary.stock.symbol }}</p>
+                    <p class="text-[10px] text-slate-500 font-medium truncate max-w-[120px]">{{ summary.stock.name }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-right font-mono text-sm">{{ summary.total_quantity|floatformat:4 }}</td>
+              <td class="px-6 py-4 text-right font-mono text-sm text-slate-400">₹{{ summary.avg_buy_price|floatformat:2 }}</td>
+              <td class="px-6 py-4 text-right font-mono text-sm">₹{{ summary.current_value|floatformat:2 }}</td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex flex-col items-end">
+                  <p class="font-mono text-sm font-bold {% if summary.unrealised_pnl >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
+                    {% if summary.unrealised_pnl >= 0 %}+{% endif %}₹{{ summary.unrealised_pnl|floatformat:2 }}
+                  </p>
+                  <p class="text-[10px] font-bold {% if summary.pnl_percentage >= 0 %}text-emerald-500/60{% else %}text-rose-500/60{% endif %}">
+                    {% if summary.pnl_percentage >= 0 %}+{% endif %}{{ summary.pnl_percentage|floatformat:2 }}%
+                  </p>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <form method="post" action="{% url 'close_position' %}" class="flex items-center justify-center gap-2">
+                  {% csrf_token %}
+                  <input type="hidden" name="stock_id" value="{{ summary.stock.id }}">
+                  <input type="number" name="quantity" step="any" min="0.0001" max="{{ summary.total_quantity }}" placeholder="Qty"
+                    class="w-20 bg-slate-950/50 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-white placeholder:text-slate-700 outline-none focus:border-blue-500 transition-all">
+                  <button class="bg-rose-600 hover:bg-rose-500 text-white px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-rose-900/20 active:scale-95">
+                    Exit
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="px-6 py-20 text-center">
+                <div class="max-w-xs mx-auto">
+                  <div class="w-16 h-16 bg-slate-900/50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-800">
+                    <svg class="w-8 h-8 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                    </svg>
+                  </div>
+                  <h3 class="text-white font-bold text-lg mb-1">Your Portfolio is Empty</h3>
+                  <p class="text-slate-500 text-sm mb-6">Invest in cryptocurrencies or stocks to build your wealth and track performance here.</p>
+                  <a href="{% url 'dashboard' %}" class="inline-block bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-2xl text-sm font-bold transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+                    Start Trading
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

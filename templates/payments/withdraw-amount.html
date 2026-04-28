@@ -1,0 +1,134 @@
+{% extends 'dashboard/base.html' %}
+{% load humanize %}
+
+{% block title %}Withdraw Funds - TradeHub{% endblock %}
+
+{% block body %}
+<div class="flex-1 overflow-y-auto bg-slate-950/50">
+  <div class="p-4 sm:p-6 md:p-8 max-w-4xl mx-auto pb-24 md:pb-8">
+    
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center gap-4 mb-2">
+        <div class="p-3 bg-gradient-to-br from-orange-500/20 to-rose-600/20 border border-orange-500/30 rounded-2xl shadow-lg shadow-orange-500/10">
+          <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+          </svg>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Withdraw Funds</h1>
+      </div>
+      <p class="text-sm text-slate-400">Transfer funds from your wallet to your bank account</p>
+    </div>
+
+    <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-3xl overflow-hidden shadow-2xl">
+      <!-- Balance Info -->
+      <div class="p-8 text-center border-b border-slate-800/50 bg-slate-800/20">
+        <p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Available for Withdrawal</p>
+        <p class="text-4xl font-mono font-bold text-emerald-400">₹{{ user.wallet|floatformat:2|intcomma }}</p>
+      </div>
+
+      <div class="p-6 sm:p-8 space-y-8">
+        <!-- Quick Amount Select -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Quick Selection</label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {% for amount in "500,1000,2000,5000,10000,25000"|split:"," %}
+            <button type="button" onclick="setWithdrawAmount({{ amount }})"
+              class="withdraw-amount-btn px-4 py-3 bg-slate-800/40 hover:bg-slate-800 border border-slate-800 text-white rounded-2xl transition-all hover:scale-[1.02] active:scale-95 text-sm font-bold">
+              ₹{{ amount|intcomma }}
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Input Form -->
+        <form action="{% url 'withdraw-amount' %}" method="post" id="withdrawForm" class="space-y-6">
+          {% csrf_token %}
+          <div class="space-y-3">
+            <label class="block text-xs font-bold uppercase tracking-widest text-slate-500">Custom Amount</label>
+            <div class="relative group">
+              <span class="absolute left-5 top-1/2 -translate-y-1/2 text-2xl font-bold text-slate-600 group-focus-within:text-orange-500 transition-colors">₹</span>
+              <input type="number" id="withdrawAmount" min="1" max="{{ user.wallet|floatformat:0 }}" step="100" name="amount"
+                placeholder="0.00"
+                class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl pl-12 pr-6 py-4 text-2xl font-mono font-bold text-white placeholder-slate-800 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all outline-none"
+                oninput="validateWithdrawAmount(this)">
+            </div>
+            <p class="text-[10px] text-slate-600 font-medium">Maximum: ₹{{ user.wallet|floatformat:2|intcomma }}</p>
+          </div>
+        </form>
+
+        <!-- Action Button -->
+        <button onclick="withdrawFromWallet()" id="withdrawFundsBtn"
+          class="w-full py-5 bg-gradient-to-r from-orange-600 to-rose-600 hover:from-orange-500 hover:to-rose-500 text-white font-extrabold rounded-2xl transition-all hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-3 text-lg shadow-xl shadow-orange-500/20 group">
+          <svg class="w-6 h-6 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+          Request Withdrawal
+        </button>
+
+        <!-- Status Note -->
+        <div class="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
+          <div class="flex gap-3">
+            <svg class="w-5 h-5 text-amber-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div>
+              <p class="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Processing Notice</p>
+              <p class="text-[10px] text-amber-500/70 leading-relaxed">Withdrawals are verified by our audit team and typically processed within 24-48 business hours. Ensure your bank details are correct in your profile.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="withdrawModal" class="fixed inset-0 z-[100] hidden overflow-y-auto px-4 py-6">
+  <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" onclick="closeWithdrawModal()"></div>
+  <div class="relative mx-auto max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden animate-scale-in">
+    <div class="p-8 text-center">
+      <div class="w-16 h-16 bg-orange-500/10 border border-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-white mb-2">Confirm Withdrawal</h3>
+      <p class="text-sm text-slate-500 mb-8">Are you sure you want to withdraw this amount to your registered bank account?</p>
+      
+      <div class="bg-slate-950/50 rounded-2xl p-6 mb-8 space-y-4">
+        <div class="flex justify-between text-xs font-bold uppercase tracking-widest">
+          <span class="text-slate-600">Amount</span>
+          <span class="text-white" id="modalWithdrawAmount">₹0.00</span>
+        </div>
+        <div class="h-px bg-slate-800"></div>
+        <div class="flex justify-between text-xs font-bold uppercase tracking-widest">
+          <span class="text-slate-600">Remaining</span>
+          <span class="text-rose-400" id="newWithdrawBalance">₹0.00</span>
+        </div>
+      </div>
+
+      <div class="flex gap-4">
+        <button onclick="closeWithdrawModal()" class="flex-1 py-4 bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold rounded-2xl transition-all">Cancel</button>
+        <button onclick="confirmWithdrawFromWallet()" id="confirmWithdrawBtn" class="flex-1 py-4 bg-orange-600 hover:bg-orange-500 text-white text-sm font-bold rounded-2xl transition-all shadow-lg shadow-orange-500/20">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% include 'payments/partials/payment-js.html' %}
+
+<style>
+    .withdraw-amount-btn.active {
+        background: rgba(249, 115, 22, 0.1) !important;
+        border-color: rgba(249, 115, 22, 0.5) !important;
+        color: #f97316 !important;
+        box-shadow: 0 0 20px rgba(249, 115, 22, 0.1);
+    }
+    @keyframes scale-in {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .animate-scale-in { animation: scale-in 0.2s ease-out forwards; }
+</style>
+{% endblock %}

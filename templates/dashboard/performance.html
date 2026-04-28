@@ -1,0 +1,53 @@
+<!-- templates/dashboard/performance.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Performance Analysis</h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Portfolio Value</h2>
+            <canvas id="portfolioChart" width="400" height="200"></canvas>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Win/Loss Ratio</h2>
+            <canvas id="winLossChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Portfolio Value Chart
+    const portfolioCtx = document.getElementById('portfolioChart').getContext('2d');
+    const portfolioChart = new Chart(portfolioCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Portfolio Value',
+                data: [10000, 12000, 11500, 13000, 12500, 14000],
+                borderColor: '#3B82F6',
+                tension: 0.1
+            }]
+        }
+    });
+    
+    // Win/Loss Chart
+    const winLossCtx = document.getElementById('winLossChart').getContext('2d');
+    const winLossChart = new Chart(winLossCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Winning Trades', 'Losing Trades'],
+            datasets: [{
+                data: [65, 35],
+                backgroundColor: ['#10B981', '#EF4444']
+            }]
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

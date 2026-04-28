@@ -1,0 +1,26 @@
+{% comment %}
+Navbar — used on non-dashboard pages (portfolio, orders, wallet etc.)
+{% endcomment %}
+<header class="sticky top-0 z-20 flex flex-shrink-0 items-center justify-between
+               border-b border-slate-800 bg-slate-900/90 px-4 py-3 backdrop-blur md:px-6">
+  <div class="flex items-center gap-3">
+    <button id="mobile-sidebar-trigger"
+      class="rounded-lg border border-slate-700 px-2.5 py-1.5 text-xs text-slate-300 transition hover:bg-slate-800 lg:hidden">
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+    <p class="text-sm font-semibold text-white">{% block page_title %}TradeHub{% endblock %}</p>
+  </div>
+  <div class="flex items-center gap-2">
+    <span id="topbar-wallet-balance"
+      class="rounded-xl border border-emerald-700/40 bg-emerald-500/10 px-3 py-1
+             text-xs font-semibold text-emerald-300">
+      ₹{{ wallet|default:request.user.wallet|floatformat:2 }}
+    </span>
+    <a href="{% url 'profile' %}"
+      class="rounded-xl border border-slate-700 px-3 py-1 text-xs text-slate-200 transition hover:bg-slate-800">
+      Profile
+    </a>
+  </div>
+</header>
