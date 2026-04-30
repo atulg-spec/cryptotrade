@@ -32,8 +32,7 @@
     {% include "components/bottom_tabs.html" %}
   </div>
 
-  {# MOBILE POSITIONS panel (hidden on desktop) #}
-  {% include "components/mobile_positions.html" %}
+  {# Mobile positions panel removed as per user request #}
 
   {# TRADE PANEL (right panel) #}
   {% include "components/trade_panel.html" %}
@@ -152,6 +151,14 @@
     sheetSymbol = symbol;
     const sheet = document.getElementById('stock-sheet');
     if (!sheet) return;
+    
+    // Reset chart height to prevent it from hiding the trade tabs
+    const ca = document.getElementById('sheet-chart-area');
+    if (ca) {
+      ca.style.flex = '0 0 52%';
+      ca.style.height = '';
+    }
+
     document.getElementById('sheet-symbol').textContent = symbol;
     document.getElementById('trade-panel-symbol').textContent = symbol;
     const priceEl = document.querySelector(`.price-display[data-symbol="${symbol}"]`);
@@ -178,9 +185,25 @@
   function renderSheetPosition(symbol) {
     const container = document.getElementById('sheet-pos-content');
     if (!container) return;
-    const pos = openPositions[symbol];
+    
+    let pos = openPositions[symbol];
+    
+    // Bulletproof fallback: check the DOM directly if not in JS object
     if (!pos) {
-      container.innerHTML = `<div class="rounded-xl border border-dashed border-slate-700 bg-blue-500/5 px-4 py-8 text-center"><p class="font-semibold text-white">No active position</p><p class="mt-1 text-xs text-slate-500">Use the Trade tab to open a new position.</p></div>`;
+      const posEl = document.querySelector(`[data-position-symbol="${symbol}"]`);
+      if (posEl) {
+        pos = {
+          symbol: symbol,
+          qty: parseFloat(posEl.dataset.positionQty),
+          avg: parseFloat(posEl.dataset.positionAvg),
+          market: parseFloat(posEl.dataset.positionMarket) || window.FinancialUI?.state?.prices?.get(symbol)?.current_price || 0
+        };
+        openPositions[symbol] = pos; // cache it back
+      }
+    }
+
+    if (!pos || pos.qty <= 0) {
+      container.innerHTML = `<div class="rounded-xl border border-dashed border-slate-700 bg-blue-500/5 px-4 py-8 text-center m-3"><p class="font-semibold text-white">No active position</p><p class="mt-1 text-xs text-slate-500">Use the Trade tab to open a new position.</p></div>`;
       return;
     }
     const pnl = (pos.market - pos.avg) * pos.qty;
@@ -189,29 +212,26 @@
     const sign = pnl >= 0 ? '+' : '-';
     const fmt = n => Math.abs(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     container.innerHTML = `
-    <div class="rounded-2xl border border-slate-700/60 bg-slate-900/80 overflow-hidden shadow-xl">
-      <div class="flex justify-between p-4">
+      <div class="group flex items-center justify-between border-b border-slate-800/60 px-3 py-2.5 transition hover:bg-slate-800/60">
         <div>
-          <span class="inline-flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 font-mono text-[10px] font-semibold text-blue-400 uppercase tracking-wider">Open Position</span>
-          <div class="mt-2 font-mono text-lg font-semibold text-white">${symbol}</div>
-          <div class="text-[10px] uppercase tracking-wider text-slate-500 mt-0.5">Binance | Crypto | Long</div>
+          <div class="font-mono text-xs font-semibold text-white">${symbol}</div>
+          <div class="text-[10px] text-emerald-400">
+            Qty: <span class="sidebar-pos-qty" data-symbol="${symbol}">${pos.qty.toFixed(4)}</span>
+          </div>
         </div>
-        <div class="text-right">
-          <div class="text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">Unrealised P&L</div>
-          <div class="spos-pnl font-mono text-xl font-semibold ${clr} sheet-pos-unrealised" data-sym="${symbol}">${sign}₹${fmt(pnl)}</div>
-          <div class="font-mono text-xs mt-1 ${clr} sheet-pos-return" data-sym="${symbol}">${pct >= 0 ? '+' : '-'}${Math.abs(pct).toFixed(2)}%</div>
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <div class="pnl-value px-0 py-0 text-right font-mono text-xs font-semibold ${clr}" data-symbol="${symbol}" data-qty="${pos.qty}" data-avg="${pos.avg}">${sign}₹${fmt(pnl)}</div>
+            <div class="pnl-percent px-0 py-0 mt-0.5 text-right font-mono text-[10px] ${clr}" data-symbol="${symbol}">${pct >= 0 ? '+' : '-'}${Math.abs(pct).toFixed(2)}%</div>
+          </div>
+          <button type="button"
+            class="rounded border border-rose-500/20 bg-rose-500/10 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-rose-400 transition hover:bg-rose-500 hover:text-white"
+            onclick="TradingPanel.closePosition('${symbol}','${pos.qty}',this)">
+            Close
+          </button>
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-2 px-4 pb-4">
-        ${[['Quantity', pos.qty.toFixed(4)], ['Avg Price', '₹' + fmt(pos.avg)], ['Market Price', '₹' + fmt(pos.market)], ['Invested', '₹' + fmt(pos.avg * pos.qty)]].map(([l, v]) => `<div class="rounded-xl border border-slate-700/60 bg-slate-800/60 p-3"><div class="text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">${l}</div><div class="font-mono text-xs text-slate-200">${v}</div></div>`).join('')}
-      </div>
-      <div class="px-4 pb-4">
-        <button onclick="TradingPanel.closePosition('${symbol}','${pos.qty}',this)"
-          class="w-full rounded-xl border border-rose-500/25 bg-rose-500/10 py-3 font-mono text-xs font-bold uppercase tracking-wider text-rose-400 transition hover:bg-rose-500 hover:text-white">
-          Close Entire Position
-        </button>
-      </div>
-    </div>`;
+    `;
   }
 
   /* ─── SHEET TABS ─────────────────────────────────────────────── */
@@ -281,7 +301,15 @@
     if (!div || !ca || !body) return;
     let sY = 0, sH = 0, drag = false;
     const start = y => { drag = true; sY = y; sH = ca.getBoundingClientRect().height; document.body.style.userSelect = 'none'; };
-    const move = y => { if (!drag) return; const bH = body.getBoundingClientRect().height; const nH = Math.min(Math.max(sH + (y - sY), 80), bH - 120); ca.style.flex = 'none'; ca.style.height = nH + 'px'; };
+    const move = y => { 
+      if (!drag) return; 
+      const bH = body.getBoundingClientRect().height; 
+      // Ensure at least 280px is left for the trade section so it never gets fully hidden
+      const maxChartHeight = Math.max(100, bH - 280); 
+      const nH = Math.min(Math.max(sH + (y - sY), 80), maxChartHeight); 
+      ca.style.flex = 'none'; 
+      ca.style.height = nH + 'px'; 
+    };
     const end = () => { drag = false; document.body.style.userSelect = ''; };
     div.addEventListener('mousedown', e => { start(e.clientY); e.preventDefault(); });
     document.addEventListener('mousemove', e => move(e.clientY));
@@ -405,14 +433,32 @@
     const u = e.detail;
     if (window.Notifications?.info) Notifications.info(`Order ${u.status} for ${u.symbol || 'your order'}`);
     if (u.status === 'completed') {
-      if (window.innerWidth < 1024) { closeStockSheet(); setTimeout(() => showPanel('positions'), 330); }
-      else switchBottomTab('positions');
+      if (sheetSymbol) {
+        switchSheetTab('position');
+      } else {
+        if (window.innerWidth < 1024) { showPanel('watch'); switchWTab('pos'); }
+        else switchBottomTab('positions');
+      }
       fetch(window.location.href).then(r => r.text()).then(html => {
         const doc = new DOMParser().parseFromString(html, 'text/html');
         ['pos-content', 'positions-table-body', 'orders-table-body', 'wallet-balance', 'dashboard-unrealised-pnl', 'mobile-positions-list', 'topbar-wallet-balance', 'topbar-total-assets', 'closedpositions-table-body'].forEach(id => {
           const n = doc.getElementById(id), c = document.getElementById(id);
           if (n && c) c.innerHTML = n.innerHTML;
         });
+        
+        // Sync openPositions to reflect the latest UI state
+        const newPos = {};
+        document.querySelectorAll('[data-position-symbol]').forEach(el => {
+          const sym = el.dataset.positionSymbol;
+          const qty = parseFloat(el.dataset.positionQty);
+          if (sym && qty > 0) {
+            newPos[sym] = { symbol: sym, qty: qty, avg: parseFloat(el.dataset.positionAvg), market: parseFloat(el.dataset.positionMarket) };
+          }
+        });
+        for (const k in openPositions) delete openPositions[k];
+        Object.assign(openPositions, newPos);
+        
+        if (sheetSymbol) renderSheetPosition(sheetSymbol);
       }).catch(console.error);
     }
   });

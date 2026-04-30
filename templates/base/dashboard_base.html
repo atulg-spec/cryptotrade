@@ -52,33 +52,7 @@
     {% block content %}{% endblock %}
   </main>
 
-  {# ── Mobile Bottom Nav ── #}
-  <nav id="mob-nav"
-    class="flex flex-shrink-0 border-t border-slate-800 bg-slate-900 lg:hidden"
-    style="height:52px; padding-bottom: env(safe-area-inset-bottom)">
-    <button class="mob-nav-btn flex flex-1 flex-col items-center justify-center gap-0.5 text-[9px] font-bold uppercase tracking-widest text-blue-400 transition"
-      id="mnav-watch" onclick="showPanel('watch')">
-      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
-      </svg>
-      Watch
-    </button>
-    <button class="mob-nav-btn flex flex-1 flex-col items-center justify-center gap-0.5 text-[9px] font-bold uppercase tracking-widest text-slate-500 transition hover:text-slate-300"
-      id="mnav-positions" onclick="showPanel('positions')">
-      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-      </svg>
-      Positions
-    </button>
-    <button class="mob-nav-btn flex flex-1 flex-col items-center justify-center gap-0.5 text-[9px] font-bold uppercase tracking-widest text-slate-500 transition hover:text-slate-300"
-      id="mnav-trade" onclick="showPanel('trade')">
-      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-      </svg>
-      Trade
-    </button>
-  </nav>
+
 
 </div>
 

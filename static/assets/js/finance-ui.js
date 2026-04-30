@@ -205,7 +205,15 @@ class FinancialUISync {
     applySignedClass(elements, value, positiveClass = 'text-green-400', negativeClass = 'text-red-400', neutralClass = 'text-slate-300') {
         elements.forEach(el => {
             if (!el) return;
-            el.classList.remove(positiveClass, negativeClass, neutralClass, 'green', 'red');
+            
+            const toRemove = [positiveClass, negativeClass, neutralClass, 'green', 'red']
+                .flatMap(c => (c || '').split(' '))
+                .filter(Boolean);
+            
+            if (toRemove.length > 0) {
+                el.classList.remove(...toRemove);
+            }
+            
             const klass = this.formatter.polarityClass(value, positiveClass, negativeClass, neutralClass);
             klass.split(' ').forEach(token => {
                 if (token) el.classList.add(token);

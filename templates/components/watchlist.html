@@ -126,9 +126,16 @@ Include inside the dashboard layout.
             Qty: <span class="sidebar-pos-qty" data-symbol="{{ pos.stock.symbol }}">{{ pos.quantity|floatformat:4 }}</span>
           </div>
         </div>
-        <div class="text-right">
-          <div class="pnl-value px-0 py-0 text-right font-mono text-xs font-semibold" data-symbol="{{ pos.stock.symbol }}" data-qty="{{ pos.quantity }}" data-avg="{{ pos.buy_price }}">--</div>
-          <div class="pnl-percent px-0 py-0 mt-0.5 text-right font-mono text-[10px]" data-symbol="{{ pos.stock.symbol }}">--</div>
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <div class="pnl-value px-0 py-0 text-right font-mono text-xs font-semibold" data-symbol="{{ pos.stock.symbol }}" data-qty="{{ pos.quantity }}" data-avg="{{ pos.buy_price }}">--</div>
+            <div class="pnl-percent px-0 py-0 mt-0.5 text-right font-mono text-[10px]" data-symbol="{{ pos.stock.symbol }}">--</div>
+          </div>
+          <button type="button"
+            class="lg:hidden rounded border border-rose-500/20 bg-rose-500/10 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-rose-400 transition hover:bg-rose-500 hover:text-white"
+            onclick="TradingPanel.closePosition('{{ pos.stock.symbol }}','{{ pos.quantity }}',this)">
+            Close
+          </button>
         </div>
       </div>
       {% endfor %}
