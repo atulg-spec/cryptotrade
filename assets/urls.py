@@ -8,4 +8,8 @@ urlpatterns = [
     path('watchlist/add/<str:symbol>/', views.watchlist_add, name='watchlist_add'),
     path('watchlist/remove/<str:symbol>/', views.watchlist_remove, name='watchlist_remove'),
     path('watchlist/search/', views.stock_search, name='stock_search'),
+    # Margin trading
+    path('margin/open/', views.initiate_margin_order, name='initiate_margin_order'),
+    path('margin/close/', views.close_margin_order, name='close_margin_order'),
+    path('margin/positions/', views.margin_positions_api, name='margin_positions_api'),
 ]

@@ -1,5 +1,6 @@
 {% comment %}
 Stock Sheet (modal slide-up/side panel for chart + trade on mobile & desktop)
+Includes Spot/Margin toggle and leverage selector for mobile.
 {% endcomment %}
 <div id="stock-sheet"
   class="pointer-events-none invisible fixed inset-0 z-[9999] flex flex-col bg-slate-950 opacity-0
@@ -63,6 +64,19 @@ Stock Sheet (modal slide-up/side panel for chart + trade on mobile & desktop)
     {# Trade Tab #}
     <div class="sheet-tab-pane flex-1 overflow-y-auto" id="spane-trade">
       <div class="flex flex-col gap-3 p-4">
+
+        {# Spot / Margin Mode Toggle #}
+        <div class="grid grid-cols-2 gap-1 rounded-lg bg-slate-800/60 p-0.5">
+          <button type="button" id="sheet-mode-spot"
+            onclick="setTradeMode('spot')"
+            class="mode-btn rounded-md py-1.5 text-[10px] font-bold uppercase tracking-widest
+                   bg-slate-700 text-white transition">Spot</button>
+          <button type="button" id="sheet-mode-margin"
+            onclick="setTradeMode('margin')"
+            class="mode-btn rounded-md py-1.5 text-[10px] font-bold uppercase tracking-widest
+                   text-slate-500 transition hover:text-slate-300">Margin</button>
+        </div>
+
         {# Buy/Sell #}
         <div class="grid grid-cols-2 gap-1.5 rounded-xl bg-slate-800/80 p-1">
           <button type="button" id="sheet-btn-buy" onclick="setSheetSide('buy')"
@@ -74,8 +88,40 @@ Stock Sheet (modal slide-up/side panel for chart + trade on mobile & desktop)
             Sell
           </button>
         </div>
-        {# Qty / Amount #}
-        <div class="grid grid-cols-2 gap-1 rounded-lg bg-slate-800/60 p-0.5">
+
+        {# Margin-only: Long / Short #}
+        <div id="sheet-margin-side-row" class="hidden grid grid-cols-2 gap-1.5 rounded-xl bg-slate-800/80 p-1">
+          <button type="button" id="sheet-btn-long" onclick="setMarginSide('LONG')"
+            class="rounded-lg py-1.5 text-[10px] font-bold transition
+                   bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Long ↑</button>
+          <button type="button" id="sheet-btn-short" onclick="setMarginSide('SHORT')"
+            class="rounded-lg py-1.5 text-[10px] font-bold transition
+                   text-slate-500 border border-slate-700 hover:text-rose-400 hover:border-rose-500/30">Short ↓</button>
+        </div>
+
+        <div id="sheet-leverage-row" class="hidden flex-col gap-1.5">
+          <div class="flex items-center justify-between">
+            <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Leverage</label>
+            <span id="sheet-leverage-display" class="font-mono text-sm font-extrabold text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-md px-2 py-0.5">10×</span>
+          </div>
+          <input type="range" id="sheet-leverage-slider" min="1" max="200" value="10" step="1"
+            class="w-full h-1.5 rounded-full appearance-none bg-slate-700 accent-amber-400 cursor-pointer"
+            oninput="onLeverageChange(this.value)" />
+          <div class="flex justify-between text-[9px] text-slate-600 font-mono">
+            <span>1×</span><span>50×</span><span>100×</span><span>150×</span><span>200×</span>
+          </div>
+          {# Preset leverage buttons #}
+          <div class="grid grid-cols-5 gap-1">
+            <button type="button" onclick="setLeveragePreset(10)" class="lev-preset rounded border border-slate-700 bg-slate-800/80 py-1 font-mono text-[9px] text-slate-400 hover:text-amber-400 transition">10×</button>
+            <button type="button" onclick="setLeveragePreset(20)" class="lev-preset rounded border border-slate-700 bg-slate-800/80 py-1 font-mono text-[9px] text-slate-400 hover:text-amber-400 transition">20×</button>
+            <button type="button" onclick="setLeveragePreset(50)" class="lev-preset rounded border border-slate-700 bg-slate-800/80 py-1 font-mono text-[9px] text-slate-400 hover:text-amber-400 transition">50×</button>
+            <button type="button" onclick="setLeveragePreset(100)" class="lev-preset rounded border border-slate-700 bg-slate-800/80 py-1 font-mono text-[9px] text-slate-400 hover:text-amber-400 transition">100×</button>
+            <button type="button" onclick="setLeveragePreset(200)" class="lev-preset rounded border border-slate-700 bg-slate-800/80 py-1 font-mono text-[9px] text-slate-400 hover:text-amber-400 transition">200×</button>
+          </div>
+        </div>
+
+        {# Qty / Amount (Spot only) #}
+        <div id="sheet-spot-qa-toggle" class="grid grid-cols-2 gap-1 rounded-lg bg-slate-800/60 p-0.5">
           <button type="button" id="sheet-toggle-qty"
             class="qa-btn rounded-md py-1.5 text-[10px] font-bold uppercase tracking-widest
                    bg-blue-500/15 text-blue-400 transition">Quantity</button>
@@ -83,6 +129,7 @@ Stock Sheet (modal slide-up/side panel for chart + trade on mobile & desktop)
             class="qa-btn rounded-md py-1.5 text-[10px] font-bold uppercase tracking-widest
                    text-slate-500 transition hover:text-slate-300">Amount</button>
         </div>
+
         {# Input #}
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500" id="sheet-order-input-label">Quantity</label>
@@ -95,12 +142,14 @@ Stock Sheet (modal slide-up/side panel for chart + trade on mobile & desktop)
               class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[10px] font-semibold text-slate-500">QTY</span>
           </div>
         </div>
+
         {# Estimate #}
         <div id="sheet-order-estimate-container"
           class="hidden flex items-center justify-between rounded-lg border border-blue-500/15 bg-blue-500/5 px-3 py-2">
           <span class="font-mono text-[10px] text-slate-400" id="sheet-estimate-label">Est. Amount:</span>
           <span class="font-mono text-xs font-semibold text-blue-400" id="sheet-estimate-value">--</span>
         </div>
+
         {# Percent buttons #}
         <div class="grid grid-cols-4 gap-1.5">
           <button class="rounded-lg border border-slate-700 bg-slate-800/80 py-1.5 font-mono text-[11px] text-slate-300 transition hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-blue-400" onclick="setSheetQtyPercent(25)">25%</button>
@@ -108,6 +157,7 @@ Stock Sheet (modal slide-up/side panel for chart + trade on mobile & desktop)
           <button class="rounded-lg border border-slate-700 bg-slate-800/80 py-1.5 font-mono text-[11px] text-slate-300 transition hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-blue-400" onclick="setSheetQtyPercent(75)">75%</button>
           <button class="rounded-lg border border-slate-700 bg-slate-800/80 py-1.5 font-mono text-[11px] text-slate-300 transition hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-blue-400" onclick="setSheetQtyPercent(100)">100%</button>
         </div>
+
         {# Submit #}
         <button id="sheet-submit-btn" onclick="submitSheetOrder()"
           class="w-full rounded-xl py-3 text-sm font-extrabold uppercase tracking-wider transition
@@ -115,6 +165,7 @@ Stock Sheet (modal slide-up/side panel for chart + trade on mobile & desktop)
                  hover:-translate-y-0.5 hover:shadow-emerald-500/30 active:translate-y-0">
           Buy / Long
         </button>
+
         {# Balance #}
         <div class="flex items-center justify-between rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5">
           <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Balance</span>

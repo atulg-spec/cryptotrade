@@ -406,9 +406,17 @@
       const up = updates.find(u => u.symbol === sym);
       if (!up) return;
       const qty = Number(pnlEl.dataset.qty), avg = Number(pnlEl.dataset.avg), cur = Number(up.current_price);
+      const side = pnlEl.dataset.side || 'LONG'; // fallback to LONG for spot
       if (!qty || !avg) return;
-      const pnl = (cur - avg) * qty;
-      const pct = ((cur - avg) / avg) * 100;
+      
+      let pnl;
+      if (side === 'LONG' || side === 'buy') {
+        pnl = (cur - avg) * qty;
+      } else {
+        pnl = (avg - cur) * qty;
+      }
+      
+      const pct = (avg > 0) ? (pnl / (avg * qty)) * 100 : 0;
       totalPnL += pnl;
       const clr = pnl >= 0 ? 'text-emerald-400' : 'text-rose-400';
       pnlEl.textContent = signed(pnl);

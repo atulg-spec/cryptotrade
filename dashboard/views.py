@@ -6,7 +6,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import PromoCode
-from assets.models import Position, order as Order, Watchlist
+from assets.models import Position, order as Order, Watchlist, MarginPosition
 from stockmanagement.models import Stock
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -82,14 +82,28 @@ def dashboard(request):
         portfolio_value += Decimal(position.stock.current_price) * Decimal(position.quantity)
         portfolio_purchased_value += Decimal(str(position.buy_price)) * Decimal(position.quantity)
 
-    unrealised_pnl = float(portfolio_value - portfolio_purchased_value) if open_positions else 0
-    total_equity = float(request.user.wallet) + float(portfolio_value)
+    recent_orders = Order.objects.filter(user=request.user).order_by('-created_at')[:50]
+
+    # Margin Positions logic
+    margin_positions = (
+        MarginPosition.objects
+        .filter(user=request.user, status=MarginPosition.STATUS_OPEN)
+        .select_related('stock')
+    )
+    
+    margin_unrealised_pnl = Decimal('0')
+    for mp in margin_positions:
+        cur = Decimal(str(mp.stock.current_price))
+        margin_unrealised_pnl += mp.unrealised_pnl(cur)
+
+    unrealised_pnl = float(portfolio_value - portfolio_purchased_value + margin_unrealised_pnl)
+    total_equity = float(request.user.wallet) + float(portfolio_value) + float(margin_unrealised_pnl)
     invested_amount = float(portfolio_purchased_value)
+    
     today_pnl = float(unrealised_pnl)
     daily_return_pct = (today_pnl / invested_amount * 100) if invested_amount > 0 else 0
     pnl_history_data = [] 
     pnl_history_labels = []
-    recent_orders = Order.objects.filter(user=request.user).order_by('-created_at')[:50]
 
     # Use datetime.datetime.now() because assets/position_logic.py uses it 
     # to save naive local datetimes that Django interprets as UTC.
@@ -130,6 +144,7 @@ def dashboard(request):
         'recent_orders': recent_orders,
         'closed_positions_today': closed_positions_today,
         'closed_positions_yesterday': closed_positions_yesterday,
+        'margin_positions': margin_positions,
     }
 
     return render(request, "dashboard/index.html", context)

@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.db.models import Q, Sum
 from django.utils import timezone
 from .models import order as Order
-from .models import Position
+from .models import Position, MarginPosition
 from decimal import Decimal, InvalidOperation
 import json
 from django.core.serializers.json import DjangoJSONEncoder
@@ -14,6 +14,10 @@ from django.http import JsonResponse
 from django.urls import reverse
 from assets.models import Watchlist
 from tradehub.services.listing import apply_time_filter, paginate_queryset
+from assets.services.margin_service import (
+    execute_margin_trade,
+    close_margin_position,
+)
 
 @login_required
 def orders_view(request):
@@ -301,3 +305,145 @@ def stock_search(request):
         })
 
     return JsonResponse({'results': results})
+
+
+# ────────────────────────────────────────────────────────────────────────────
+#  MARGIN ORDER ENDPOINTS
+# ────────────────────────────────────────────────────────────────────────────
+
+@login_required
+def initiate_margin_order(request):
+    """
+    Open or add to a margin (leveraged) position.
+
+    POST params
+    -----------
+    symbol       : str   e.g. 'BTCUSDT'
+    side         : str   'LONG' | 'SHORT'
+    margin_amount: float collateral from wallet
+    leverage     : int   1–125
+    """
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'POST required.'}, status=405)
+
+    symbol       = (request.POST.get('symbol') or '').strip().upper()
+    side         = (request.POST.get('side') or 'LONG').upper()
+    leverage_raw = request.POST.get('leverage', '10')
+    margin_raw   = request.POST.get('margin_amount')
+
+    stock = Stock.objects.filter(symbol=symbol).first()
+    if not stock:
+        return JsonResponse({'success': False, 'message': 'Stock not found.'}, status=404)
+
+    try:
+        margin_amount = Decimal(str(margin_raw))
+        leverage      = int(leverage_raw)
+        if margin_amount <= 0 or leverage < 1:
+            raise InvalidOperation
+    except (InvalidOperation, TypeError, ValueError):
+        return JsonResponse(
+            {'success': False, 'message': 'Invalid margin amount or leverage.'}, status=400
+        )
+
+    success, message = execute_margin_trade(
+        user=request.user,
+        stock=stock,
+        margin_amount=margin_amount,
+        leverage=leverage,
+        side=side,
+    )
+
+    status_code = 200 if success else 400
+    return JsonResponse({'success': success, 'message': message}, status=status_code)
+
+
+@login_required
+def close_margin_order(request):
+    """
+    Close (fully or partially) an open margin position.
+
+    POST params
+    -----------
+    symbol    : str
+    side      : 'LONG' | 'SHORT'
+    quantity  : float  (optional — omit for full close)
+    """
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'POST required.'}, status=405)
+
+    symbol       = (request.POST.get('symbol') or '').strip().upper()
+    side         = (request.POST.get('side') or 'LONG').upper()
+    quantity_raw = request.POST.get('quantity')  # optional
+
+    stock = Stock.objects.filter(symbol=symbol).first()
+    if not stock:
+        return JsonResponse({'success': False, 'message': 'Stock not found.'}, status=404)
+
+    close_qty = None
+    if quantity_raw:
+        try:
+            close_qty = Decimal(str(quantity_raw))
+            if close_qty <= 0:
+                raise InvalidOperation
+        except (InvalidOperation, TypeError, ValueError):
+            return JsonResponse({'success': False, 'message': 'Invalid quantity.'}, status=400)
+
+    success, message = close_margin_position(
+        user=request.user,
+        stock=stock,
+        side=side,
+        close_qty=close_qty,
+    )
+
+    status_code = 200 if success else 400
+    return JsonResponse({'success': success, 'message': message}, status=status_code)
+
+
+@login_required
+def margin_positions_api(request):
+    """
+    Return current open margin positions as JSON (used by the dashboard
+    to populate the Margin tab without a full page reload).
+    """
+    positions = (
+        MarginPosition.objects
+        .filter(user=request.user, status=MarginPosition.STATUS_OPEN)
+        .select_related('stock')
+    )
+
+    data = []
+    for pos in positions:
+        current_price = float(pos.stock.current_price)
+        entry = float(pos.entry_price)
+        qty = float(pos.quantity)
+        lev = pos.leverage
+        margin = float(pos.margin_used)
+        liq = float(pos.liquidation_price)
+
+        if pos.side == MarginPosition.LONG:
+            upnl = (current_price - entry) * qty
+        else:
+            upnl = (entry - current_price) * qty
+
+        roe_pct = (upnl / margin * 100) if margin > 0 else 0
+
+        data.append({
+            'id': pos.id,
+            'symbol': pos.stock.symbol,
+            'side': pos.side,
+            'leverage': lev,
+            'margin_used': round(margin, 2),
+            'position_size': float(pos.position_size),
+            'quantity': qty,
+            'entry_price': entry,
+            'current_price': current_price,
+            'liquidation_price': liq,
+            'unrealised_pnl': round(upnl, 2),
+            'roe_pct': round(roe_pct, 2),
+            'opened_at': pos.opened_at.isoformat(),
+        })
+
+    return JsonResponse({'positions': data})
+
