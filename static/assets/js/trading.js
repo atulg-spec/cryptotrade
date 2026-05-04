@@ -412,6 +412,336 @@ class TradingPanelController {
         } catch(e) { btn.disabled = false; btn.innerHTML = originalText; }
     }
 
+    async closePosition(symbol, quantity, btn) {
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '...';
+        const formData = new URLSearchParams();
+        formData.append('symbol', symbol);
+        formData.append('order_type', 'SELL');
+        formData.append('quantity', quantity);
+        try {
+            const r = await fetch('/assets/initiate-order/', { 
+                method: 'POST', 
+                headers: { 'X-CSRFToken': this.getCSRFToken(), 'X-Requested-With': 'XMLHttpRequest' }, 
+                body: formData 
+            });
+            const result = await r.json();
+            if (result.success) {
+                this.showNotification(result.message || 'Position closed successfully.', 'success');
+                document.dispatchEvent(new CustomEvent('order_update', { detail: { status: 'completed' } }));
+            } else {
+                this.showNotification(result.message || 'Failed to close position.', 'error');
+                btn.disabled = false; 
+                btn.innerHTML = originalText;
+            }
+        } catch(e) { 
+            this.showNotification('An error occurred.', 'error');
+            btn.disabled = false; 
+            btn.innerHTML = originalText; 
+        }
+    }
+
     getCSRFToken() { return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''; }
 }
 window.TradingPanel = new TradingPanelController();
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MARGIN RISK MONITOR  v2  (fixed)
+   ─────────────────────────────────────────────────────────────────────────
+   Monitors all open margin positions on every price tick.
+   ≥ 90% wallet risk → orange warning toast (once per spike)
+   ≥ 95% wallet risk → red critical toast + auto-close via API
+   ═══════════════════════════════════════════════════════════════════════════ */
+class MarginRiskMonitor {
+    constructor() {
+        this._state     = new Map();   // key=`${sym}_${side}` → 'warned'|'closing'
+        this._wallet    = 0;
+        this._positions = [];          // [{symbol,side,margin_used,quantity,entry_price}]
+        this._pollTimer = null;
+        this._bindEvents();
+        // Poll positions + wallet every 5 s as a safety net
+        this._startPoll();
+    }
+
+    /* ── Called from Django template after DOMContentLoaded ── */
+    init(walletBalance, marginPositions) {
+        this._wallet    = this._parseNum(walletBalance);
+        this._positions = marginPositions || [];
+        console.log('[MRM] init — wallet:', this._wallet, '| positions:', this._positions.length);
+    }
+
+    setWallet(balance) {
+        const v = this._parseNum(balance);
+        if (v > 0) {
+            this._wallet = v;
+        }
+    }
+
+    setPositions(positions) {
+        this._positions = positions || [];
+        // Release closing locks so re-opened positions can be monitored
+        for (const [key, st] of this._state.entries()) {
+            if (st === 'closing') this._state.delete(key);
+        }
+    }
+
+    /* ── Read wallet balance straight from the DOM ── */
+    _readWalletFromDOM() {
+        const el = document.getElementById('topbar-wallet-balance')
+               || document.getElementById('wallet-balance')
+               || document.getElementById('sheet-wallet-balance');
+        if (!el) return 0;
+        return this._parseNum(el.textContent.replace(/[^\d.]/g, ''));
+    }
+
+    _parseNum(v) {
+        if (v === null || v === undefined || v === '') return 0;
+        // strip currency symbols & commas (handles "₹1,10,000.00")
+        const n = parseFloat(String(v).replace(/[₹,\s]/g, ''));
+        return isNaN(n) ? 0 : n;
+    }
+
+    _bindEvents() {
+        /* ── price tick (legacy DOM event dispatched by websocket.js) ── */
+        document.addEventListener('price_update', (e) => {
+            const updates = Array.isArray(e.detail) ? e.detail : [];
+            if (updates.length) this._onPriceUpdate(updates);
+        });
+
+        /* ── wallet sync — legacy event ── */
+        document.addEventListener('balance_update', (e) => {
+            const b = e.detail?.balance ?? e.detail?.wallet_balance ?? e.detail;
+            this.setWallet(b);
+        });
+
+        /* ── wallet sync — new AppRealtime channel ── */
+        if (window.AppRealtime?.subscribeWallet) {
+            window.AppRealtime.subscribeWallet((payload) => {
+                const b = payload?.balance ?? payload?.wallet_balance;
+                this.setWallet(b);
+            });
+        }
+
+        /* ── refresh positions after any order completes ── */
+        document.addEventListener('order_update', () => {
+            this._refreshPositions();
+        });
+
+        /* ── BACKEND RISK ALERTS (primary channel) ── */
+        /* Warning pushed by margin_monitor management command at 90% */
+        document.addEventListener('margin_risk_warning', (e) => {
+            const d = e.detail || {};
+            console.warn('[MRM] Backend warning received:', d);
+            this._toast(
+                `⚠️ Margin Risk Warning — ${d.symbol} ${d.side}`,
+                d.message || `Account risk at ${d.risk_pct}% of wallet. Consider closing this position.`,
+                'warning', 10000
+            );
+        });
+
+        /* Auto-close notification pushed by margin_monitor at 95% */
+        document.addEventListener('margin_risk_closed', (e) => {
+            const d = e.detail || {};
+            console.error('[MRM] Backend auto-close received:', d);
+            this._toast(
+                `🚨 Position Auto-Closed — ${d.symbol} ${d.side}`,
+                d.message || `Position closed at ${d.risk_pct}% account risk to protect your funds.`,
+                'critical', 15000
+            );
+            /* Refresh open positions table in UI */
+            window.TradingPanel?.updateMarginPositions?.();
+            document.dispatchEvent(new CustomEvent('order_update', { detail: { status: 'completed' } }));
+        });
+
+        /* Also subscribe via AppRealtime channels for the new routing */
+        if (window.AppRealtime?.subscribe) {
+            window.AppRealtime.subscribe('margin:margin_risk_warning', (d) => {
+                console.warn('[MRM] AppRealtime warning:', d);
+                this._toast(
+                    `⚠️ Margin Risk Warning — ${d.symbol} ${d.side}`,
+                    d.message || `Account risk at ${d.risk_pct}% of wallet.`,
+                    'warning', 10000
+                );
+            });
+            window.AppRealtime.subscribe('margin:margin_risk_closed', (d) => {
+                console.error('[MRM] AppRealtime auto-close:', d);
+                this._toast(
+                    `🚨 Position Auto-Closed — ${d.symbol} ${d.side}`,
+                    d.message || `Position closed at ${d.risk_pct}% account risk.`,
+                    'critical', 15000
+                );
+                window.TradingPanel?.updateMarginPositions?.();
+                document.dispatchEvent(new CustomEvent('order_update', { detail: { status: 'completed' } }));
+            });
+        }
+    }
+
+
+    _startPoll() {
+        this._pollTimer = setInterval(() => this._refreshPositions(), 5000);
+    }
+
+    async _refreshPositions() {
+        try {
+            const r    = await fetch('/assets/margin/positions/');
+            const data = await r.json();
+            
+            if (Array.isArray(data.positions)) {
+                const oldLen = this._positions.length;
+                const newLen = data.positions.length;
+                
+                this.setPositions(data.positions.map(p => ({
+                    id:          p.id,
+                    symbol:      p.symbol,
+                    side:        p.side,
+                    margin_used: parseFloat(p.margin_used),
+                    quantity:    parseFloat(p.quantity),
+                    entry_price: parseFloat(p.entry_price),
+                })));
+
+                /* If positions disappeared and we didn't initiate a close, the backend monitor likely auto-closed them! */
+                if (oldLen > newLen) {
+                    console.warn('[MRM] Position count decreased (backend auto-close detected). Refreshing UI...');
+                    
+                    this._toast(
+                        `🚨 Position Auto-Closed`,
+                        `A margin position was closed automatically by the backend to protect your account.`,
+                        'critical', 15000
+                    );
+
+                    window.TradingPanel?.updateMarginPositions?.();
+                    document.dispatchEvent(new CustomEvent('order_update', { detail: { status: 'completed' } }));
+                }
+            }
+            if (data.wallet_balance !== undefined) {
+                this.setWallet(data.wallet_balance);
+            }
+        } catch (_) { /* silent */ }
+    }
+
+    _onPriceUpdate(updates) {
+        /* Always try to sync wallet from DOM in case events were missed */
+        if (this._wallet <= 0) {
+            this._wallet = this._readWalletFromDOM();
+        }
+
+        if (this._wallet <= 0 || this._positions.length === 0) return;
+
+        const priceMap = {};
+        updates.forEach(u => { priceMap[u.symbol] = parseFloat(u.current_price); });
+
+        this._positions.forEach(pos => {
+            const cur = priceMap[pos.symbol];
+            if (!cur || cur <= 0) return;
+
+            const key   = `${pos.symbol}_${pos.side}`;
+            const state = this._state.get(key);
+            if (state === 'closing') return;
+
+            const upnl = pos.side === 'LONG'
+                ? (cur - pos.entry_price) * pos.quantity
+                : (pos.entry_price - cur) * pos.quantity;
+
+            const effective_loss = Math.max(0, -upnl);
+            const risk_ratio     = pos.margin_used > 0 ? (effective_loss / pos.margin_used) : 0;
+
+            console.log(`[MRM] ${key} | cur=${cur} entry=${pos.entry_price} upnl=${upnl.toFixed(2)} risk=${(risk_ratio*100).toFixed(1)}% margin=${pos.margin_used}`);
+
+            if (risk_ratio >= 0.95) {
+                if (state !== 'closing') {
+                    this._state.set(key, 'closing');
+                    console.log(`[MRM] Client detected 95% risk. Waiting for backend to auto-close...`);
+                }
+            } else if (risk_ratio >= 0.90) {
+                if (state !== 'warned') {
+                    this._state.set(key, 'warned');
+                    console.log(`[MRM] Client detected 90% risk. Waiting for backend warning...`);
+                }
+            } else {
+                if (state === 'warned') this._state.delete(key);
+            }
+        });
+    }
+
+
+    /* ── Full-featured toast — top-center, dismissible ── */
+    _toast(title, body, type, duration = 8000) {
+        const styles = {
+            warning:  { bg: '#d97706', border: '#fbbf24', icon: '⚠️' },   // amber-600
+            critical: { bg: '#dc2626', border: '#f87171', icon: '🚨' },   // red-600
+            success:  { bg: '#059669', border: '#34d399', icon: '✅' },   // emerald-600
+            error:    { bg: '#991b1b', border: '#fca5a5', icon: '❌' },   // red-800
+        };
+        const s = styles[type] || styles.warning;
+
+        let container = document.getElementById('mrm-toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'mrm-toast-container';
+            Object.assign(container.style, {
+                position: 'fixed', top: '16px', left: '50%', transform: 'translateX(-50%)',
+                zIndex: '999999', display: 'flex', flexDirection: 'column',
+                gap: '8px', alignItems: 'center', pointerEvents: 'none', minWidth: '340px'
+            });
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        Object.assign(toast.style, {
+            background: s.bg,
+            border: `1px solid ${s.border}`,
+            borderRadius: '12px',
+            padding: '12px 16px',
+            color: '#fff',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+            pointerEvents: 'auto',
+            maxWidth: '420px',
+            width: '100%',
+            opacity: '0',
+            transform: 'translateY(-8px) scale(0.95)',
+            transition: 'opacity 0.25s ease, transform 0.25s ease',
+            fontFamily: 'Inter, system-ui, sans-serif',
+        });
+
+        toast.innerHTML = `
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+                <span style="font-size:20px;line-height:1;flex-shrink:0;margin-top:1px">${s.icon}</span>
+                <div style="flex:1;min-width:0">
+                    <div style="font-weight:700;font-size:13px;line-height:1.3">${title}</div>
+                    ${body ? `<div style="margin-top:4px;font-size:11px;opacity:0.85;line-height:1.5">${body}</div>` : ''}
+                </div>
+                <button id="mrm-dismiss" style="flex-shrink:0;background:transparent;border:none;color:rgba(255,255,255,0.7);cursor:pointer;font-size:18px;line-height:1;padding:0 2px" title="Dismiss">×</button>
+            </div>
+        `;
+
+        const dismissBtn = toast.querySelector('#mrm-dismiss');
+        if (dismissBtn) dismissBtn.addEventListener('click', () => _removeToast(toast));
+
+        function _removeToast(el) {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(-8px) scale(0.95)';
+            setTimeout(() => el.remove(), 300);
+        }
+
+        container.appendChild(toast);
+        requestAnimationFrame(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0) scale(1)';
+        });
+
+        setTimeout(() => _removeToast(toast), duration);
+    }
+
+    /* ── Public simulation helper (call from console to test) ── */
+    simulate(symbol, side, marginUsed, quantity, entryPrice, currentPrice) {
+        this._positions = [{ symbol, side, margin_used: marginUsed, quantity, entry_price: entryPrice }];
+        this._wallet = this._readWalletFromDOM() || this._wallet;
+        console.log('[MRM] simulate — wallet:', this._wallet);
+        this._onPriceUpdate([{ symbol, current_price: currentPrice }]);
+    }
+}
+
+window.MarginRiskMonitor = new MarginRiskMonitor();
+

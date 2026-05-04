@@ -176,6 +176,18 @@ def portfolio_view(request):
     today_positions = positions.filter(last_traded_datetime__date=today)
     today_pnl = sum(position.realised_pnl for position in today_positions)
 
+    # Margin Positions logic
+    margin_positions = MarginPosition.objects.filter(user=request.user)
+    closed_margin_positions = margin_positions.filter(status__in=[MarginPosition.STATUS_CLOSED, MarginPosition.STATUS_LIQUIDATED])
+    today_margin_positions = closed_margin_positions.filter(closed_at__date=today)
+    
+    total_realised_pnl += sum(pos.realised_pnl for pos in closed_margin_positions)
+    today_pnl += sum(pos.realised_pnl for pos in today_margin_positions)
+    
+    # Update counts to include margin
+    open_positions_count = open_positions.count() + margin_positions.filter(status=MarginPosition.STATUS_OPEN).count()
+    closed_positions_count = closed_positions.count() + closed_margin_positions.count()
+
     # Group positions by stock for summary
     position_summary = {}
     for position in open_positions:
@@ -188,13 +200,34 @@ def portfolio_view(request):
                 'total_investment': position.buy_price * position.quantity,
                 'current_value': Decimal(position.quantity) * Decimal(position.stock.current_price),
                 'unrealised_pnl': Decimal((position.quantity*position.stock.current_price))-Decimal((position.buy_price*position.quantity)),
+                'type': 'spot'
             }
+            
+    # Include margin open positions in the summary table
+    for mpos in margin_positions.filter(status=MarginPosition.STATUS_OPEN):
+        stock_symbol = mpos.stock.symbol
+        if stock_symbol not in position_summary:
+            position_summary[stock_symbol] = {
+                'stock': mpos.stock,
+                'total_quantity': mpos.quantity,
+                'avg_buy_price': mpos.entry_price,
+                'total_investment': mpos.margin_used, # Use margin as investment
+                'current_value': mpos.position_size, # Or something else
+                'unrealised_pnl': mpos.unrealised_pnl(mpos.stock.current_price),
+                'type': 'margin'
+            }
+        else:
+            # Simple addition for demo purposes if same stock has both
+            position_summary[stock_symbol]['total_quantity'] += mpos.quantity
+            position_summary[stock_symbol]['total_investment'] += mpos.margin_used
+            position_summary[stock_symbol]['unrealised_pnl'] += mpos.unrealised_pnl(mpos.stock.current_price)
         
     
     # Calculate average buy price and P&L for each stock
     for symbol, summary in position_summary.items():
         summary['pnl_percentage'] = (Decimal(summary['unrealised_pnl']) / Decimal(summary['total_investment']) * 100) if summary['total_investment'] > 0 else 0
-        current_value += summary['current_value']
+        if summary.get('type') != 'margin':
+            current_value += summary['current_value']
     
     total_unrealised_pnl = current_value - total_investment
     
@@ -208,9 +241,9 @@ def portfolio_view(request):
         'total_unrealised_pnl': total_unrealised_pnl,
         'total_realised_pnl': total_realised_pnl,
         'today_pnl': today_pnl,
-        'total_positions': positions.count(),
-        'open_positions_count': open_positions.count(),
-        'closed_positions_count': closed_positions.count(),
+        'total_positions': positions.count() + margin_positions.count(),
+        'open_positions_count': open_positions_count,
+        'closed_positions_count': closed_positions_count,
         'chart_data_json': chart_data_json,
         'chart_data': chart_data,
     }
@@ -445,5 +478,5 @@ def margin_positions_api(request):
             'opened_at': pos.opened_at.isoformat(),
         })
 
-    return JsonResponse({'positions': data})
+    return JsonResponse({'positions': data, 'wallet_balance': float(request.user.wallet)})
 

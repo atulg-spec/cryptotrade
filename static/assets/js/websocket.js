@@ -233,6 +233,26 @@ class RealtimeManager {
                 }];
             }
 
+            /* ── Backend margin risk alerts ── */
+            if (eventName === 'margin_risk_warning' || eventName === 'margin_risk_closed') {
+                const alert = {
+                    event:    eventName,
+                    symbol:   raw.symbol,
+                    side:     raw.side,
+                    risk_pct: raw.risk_pct,
+                    message:  raw.message,
+                };
+                return [{
+                    channel: `margin:${eventName}`,
+                    payload: alert,
+                    options: {
+                        legacyEvent: eventName,
+                        legacyDetail: alert,
+                    }
+                }];
+            }
+
+
             if (eventName === 'portfolio_update') {
                 const positions = Array.isArray(raw.positions) ? raw.positions.map(position => ({
                     stock_id: position.stock_id,

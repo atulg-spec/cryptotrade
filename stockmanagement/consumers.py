@@ -149,6 +149,7 @@ class UserEventsConsumer(AsyncWebsocketConsumer):
     async def user_event(self, event):
         """
         Handler for events sent via channel_layer.group_send with type 'user_event'.
+        Forwards the payload to the connected WebSocket client.
         """
         payload = event.get("payload", {})
         await self.send(text_data=json.dumps(payload))

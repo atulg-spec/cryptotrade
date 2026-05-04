@@ -186,52 +186,68 @@
     const container = document.getElementById('sheet-pos-content');
     if (!container) return;
     
-    let pos = openPositions[symbol];
+    // Query the unified positions table to support both spot and margin positions
+    const rows = document.querySelectorAll(`#positions-table-body tr[data-symbol="${symbol}"]`);
     
-    // Bulletproof fallback: check the DOM directly if not in JS object
-    if (!pos) {
-      const posEl = document.querySelector(`[data-position-symbol="${symbol}"]`);
-      if (posEl) {
-        pos = {
-          symbol: symbol,
-          qty: parseFloat(posEl.dataset.positionQty),
-          avg: parseFloat(posEl.dataset.positionAvg),
-          market: parseFloat(posEl.dataset.positionMarket) || window.FinancialUI?.state?.prices?.get(symbol)?.current_price || 0
-        };
-        openPositions[symbol] = pos; // cache it back
-      }
-    }
-
-    if (!pos || pos.qty <= 0) {
+    if (rows.length === 0) {
       container.innerHTML = `<div class="rounded-xl border border-dashed border-slate-700 bg-blue-500/5 px-4 py-8 text-center m-3"><p class="font-semibold text-white">No active position</p><p class="mt-1 text-xs text-slate-500">Use the Trade tab to open a new position.</p></div>`;
       return;
     }
-    const pnl = (pos.market - pos.avg) * pos.qty;
-    const pct = pos.avg > 0 ? ((pos.market - pos.avg) / pos.avg) * 100 : 0;
-    const clr = pnl >= 0 ? 'text-emerald-400' : 'text-rose-400';
-    const sign = pnl >= 0 ? '+' : '-';
-    const fmt = n => Math.abs(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    container.innerHTML = `
+    
+    let html = '';
+    rows.forEach(row => {
+      const tds = row.querySelectorAll('td');
+      if(tds.length < 10) return;
+      
+      const side = tds[1].textContent.trim();
+      const mode = tds[2].textContent.trim();
+      const isMargin = mode !== 'SPOT';
+      
+      const qtyStr = tds[3].textContent.trim().replace('₹', '');
+      const avgStr = tds[4].textContent.trim().replace('₹', '');
+      
+      const pnlEl = tds[7];
+      const pctEl = tds[8];
+      const pnlText = pnlEl.textContent.trim();
+      const pctText = pctEl.textContent.trim();
+      const clr = pnlEl.classList.contains('text-rose-400') ? 'text-rose-400' : 'text-emerald-400';
+      
+      const qty = pnlEl.dataset.qty || qtyStr;
+      const avg = pnlEl.dataset.avg || avgStr;
+      
+      const typeLabel = isMargin ? 'Margin ' + mode + ' ' + side : 'Spot ' + side;
+      const typeColor = side === 'LONG' || side === 'BUY' ? 'text-emerald-400' : 'text-rose-400';
+      const closeFunc = isMargin ? `TradingPanel.closeMarginPosition('${symbol}','${side}',this)` : `TradingPanel.closePosition('${symbol}','${qty}',this)`;
+      
+      html += `
       <div class="group flex items-center justify-between border-b border-slate-800/60 px-3 py-2.5 transition hover:bg-slate-800/60">
         <div>
           <div class="font-mono text-xs font-semibold text-white">${symbol}</div>
-          <div class="text-[10px] text-emerald-400">
-            Qty: <span class="sidebar-pos-qty" data-symbol="${symbol}">${pos.qty.toFixed(4)}</span>
+          <div class="text-[10px] ${typeColor}">
+            ${typeLabel} • ${isMargin ? 'Margin' : 'Qty'}: <span class="sidebar-pos-qty" data-symbol="${symbol}">${qtyStr}</span>
           </div>
         </div>
         <div class="flex items-center gap-3">
           <div class="text-right">
-            <div class="pnl-value px-0 py-0 text-right font-mono text-xs font-semibold ${clr}" data-symbol="${symbol}" data-qty="${pos.qty}" data-avg="${pos.avg}">${sign}₹${fmt(pnl)}</div>
-            <div class="pnl-percent px-0 py-0 mt-0.5 text-right font-mono text-[10px] ${clr}" data-symbol="${symbol}">${pct >= 0 ? '+' : '-'}${Math.abs(pct).toFixed(2)}%</div>
+            <div class="pnl-value px-0 py-0 text-right font-mono text-xs font-semibold ${clr}" data-symbol="${symbol}" data-qty="${qty}" data-avg="${avg}" data-side="${side}">${pnlText}</div>
+            <div class="pnl-percent px-0 py-0 mt-0.5 text-right font-mono text-[10px] ${clr}" data-symbol="${symbol}">${pctText}</div>
           </div>
           <button type="button"
             class="rounded border border-rose-500/20 bg-rose-500/10 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-rose-400 transition hover:bg-rose-500 hover:text-white"
-            onclick="TradingPanel.closePosition('${symbol}','${pos.qty}',this)">
+            onclick="${closeFunc}">
             Close
           </button>
         </div>
       </div>
-    `;
+      `;
+    });
+    
+    if (html === '') {
+      container.innerHTML = `<div class="rounded-xl border border-dashed border-slate-700 bg-blue-500/5 px-4 py-8 text-center m-3"><p class="font-semibold text-white">No active position</p><p class="mt-1 text-xs text-slate-500">Use the Trade tab to open a new position.</p></div>`;
+      return;
+    }
+    
+    container.innerHTML = html;
   }
 
   /* ─── SHEET TABS ─────────────────────────────────────────────── */
@@ -476,6 +492,23 @@
     if (window.WatchlistManager?.init) WatchlistManager.init();
     if (window.TradingChart?.init) TradingChart.init();
     if (window.WSManager?.init) WSManager.init();
+
+    /* ── Margin Risk Monitor bootstrap ── */
+    if (window.MarginRiskMonitor) {
+      const walletBalance = {{ wallet|floatformat:2 }};
+      const serverMarginPositions = [
+        {% for mp in margin_positions %}
+        {
+          symbol:      "{{ mp.stock.symbol }}",
+          side:        "{{ mp.side }}",
+          margin_used: {{ mp.margin_used }},
+          quantity:    {{ mp.quantity }},
+          entry_price: {{ mp.entry_price }},
+        },
+        {% endfor %}
+      ];
+      window.MarginRiskMonitor.init(walletBalance, serverMarginPositions);
+    }
   });
 </script>
 {% endblock %}

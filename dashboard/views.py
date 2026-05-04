@@ -110,15 +110,55 @@ def dashboard(request):
     server_local_today = datetime.datetime.now().date()
     server_local_yesterday = server_local_today - datetime.timedelta(days=1)
     
-    all_closed_positions = Position.objects.filter(
+    class DummyStock:
+        def __init__(self, symbol):
+            self.symbol = symbol
+
+    class UnifiedClosedPos:
+        def __init__(self, symbol, qty, buy_price, sell_price, pnl, time):
+            self.stock = DummyStock(symbol)
+            self.last_traded_quantity = qty
+            self.buy_price = buy_price
+            self.sell_price = sell_price
+            self.realised_pnl = pnl
+            self.last_traded_datetime = time
+
+    unified_closed = []
+
+    all_closed_spot = Position.objects.filter(
         user=request.user, is_closed=True
     ).select_related('stock').order_by('-last_traded_datetime')[:100]
+
+    for pos in all_closed_spot:
+        unified_closed.append(UnifiedClosedPos(
+            symbol=pos.stock.symbol,
+            qty=pos.last_traded_quantity,
+            buy_price=pos.buy_price,
+            sell_price=pos.sell_price,
+            pnl=pos.realised_pnl,
+            time=pos.last_traded_datetime
+        ))
+
+    all_closed_margin = MarginPosition.objects.filter(
+        user=request.user, status__in=[MarginPosition.STATUS_CLOSED, MarginPosition.STATUS_LIQUIDATED]
+    ).select_related('stock').order_by('-closed_at')[:100]
+
+    for mpos in all_closed_margin:
+        unified_closed.append(UnifiedClosedPos(
+            symbol=mpos.stock.symbol,
+            qty=mpos.quantity,  # Use preserved quantity
+            buy_price=mpos.entry_price,
+            sell_price=mpos.close_price,
+            pnl=mpos.realised_pnl,
+            time=mpos.closed_at or mpos.opened_at
+        ))
+
+    unified_closed.sort(key=lambda x: x.last_traded_datetime, reverse=True)
     
     closed_positions_today = []
     closed_positions_yesterday = []
     
-    for pos in all_closed_positions:
-        # Extract the date directly without tz conversion since it was saved naively
+    for pos in unified_closed:
         pos_date = pos.last_traded_datetime.date()
         if pos_date == server_local_today:
             closed_positions_today.append(pos)

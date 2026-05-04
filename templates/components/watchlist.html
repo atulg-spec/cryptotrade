@@ -127,10 +127,13 @@ Includes unified Spot + Margin positions in a single list.
       {% endfor %}
 
       {# ── Closed Positions ── #}
-      {% if closed_positions_today %}
+      {% if closed_positions_today or closed_positions_yesterday %}
       <div class="sticky top-0 bg-slate-900/95 px-3 py-1.5 backdrop-blur z-10 border-b border-slate-800/60 mt-4">
         <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Recently Closed</span>
       </div>
+      
+      {% if closed_positions_today %}
+      <div class="bg-slate-800/20 px-3 py-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">Today</div>
       {% for pos in closed_positions_today %}
       <div class="flex items-center justify-between border-b border-slate-800/60 px-3 py-2.5 opacity-70">
         <div>
@@ -141,13 +144,33 @@ Includes unified Spot + Margin positions in a single list.
           <div class="font-mono text-xs font-semibold {% if pos.realised_pnl >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
             {% if pos.realised_pnl > 0 %}+{% endif %}₹{{ pos.realised_pnl|floatformat:2 }}
           </div>
-          <div class="text-[10px] text-slate-500 text-right uppercase tracking-widest mt-0.5">Closed Today</div>
+          <div class="text-[10px] text-slate-500 text-right uppercase tracking-widest mt-0.5">Closed {{ pos.last_traded_datetime|date:"H:i" }}</div>
         </div>
       </div>
       {% endfor %}
       {% endif %}
 
-      {% if not margin_positions and not open_positions and not closed_positions_today %}
+      {% if closed_positions_yesterday %}
+      <div class="bg-slate-800/20 px-3 py-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">Yesterday</div>
+      {% for pos in closed_positions_yesterday %}
+      <div class="flex items-center justify-between border-b border-slate-800/60 px-3 py-2.5 opacity-70">
+        <div>
+          <div class="font-mono text-xs font-semibold text-white">{{ pos.stock.symbol }}</div>
+          <div class="text-[10px] text-slate-400">Qty: {{ pos.last_traded_quantity|floatformat:4 }}</div>
+        </div>
+        <div class="text-right">
+          <div class="font-mono text-xs font-semibold {% if pos.realised_pnl >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
+            {% if pos.realised_pnl > 0 %}+{% endif %}₹{{ pos.realised_pnl|floatformat:2 }}
+          </div>
+          <div class="text-[10px] text-slate-500 text-right uppercase tracking-widest mt-0.5">Closed {{ pos.last_traded_datetime|date:"H:i" }}</div>
+        </div>
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      {% endif %}
+
+      {% if not margin_positions and not open_positions and not closed_positions_today and not closed_positions_yesterday %}
       <div class="flex flex-col items-center justify-center gap-3 px-4 py-12 text-center">
         <div class="rounded-full bg-slate-800 p-4">
           <svg class="h-8 w-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

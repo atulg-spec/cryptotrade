@@ -225,9 +225,6 @@ def close_margin_position(user, stock, side, close_qty=None):
 
         if close_qty >= total_qty:
             # Full close
-            pos.quantity = Decimal('0')
-            pos.margin_used = Decimal('0')
-            pos.position_size = Decimal('0')
             pos.status = MarginPosition.STATUS_CLOSED
             pos.closed_at = timezone.now()
         else:
@@ -285,9 +282,6 @@ def liquidate_position(user, stock, side):
         pos.close_price = current_price
         pos.status = MarginPosition.STATUS_LIQUIDATED
         pos.closed_at = timezone.now()
-        pos.quantity = Decimal('0')
-        pos.margin_used = Decimal('0')
-        pos.position_size = Decimal('0')
         pos.save()
 
     logger.warning(
