@@ -10,19 +10,19 @@
             <p class="text-xl font-bold mt-1" 
                data-dashboard-total-assets 
                data-base-value="{{ portfolio_value|floatformat:2 }}">
-                ₹{{ portfolio_value|floatformat:2 }}
+                ${{ portfolio_value|floatformat:2 }}
             </p>
         </div>
         <div class="bg-gray-800 rounded-2xl p-4 shadow-md">
             <p class="text-gray-400 text-sm">Available Funds</p>
-            <p class="text-xl font-bold mt-1">₹{{ request.user.wallet|floatformat:2 }}</p>
+            <p class="text-xl font-bold mt-1">${{ request.user.wallet|floatformat:2 }}</p>
         </div>
         <div class="bg-gray-800 rounded-2xl p-4 shadow-md">
             <p class="text-gray-400 text-sm">Today's P/L</p>
             <p class="text-xl font-bold mt-1 {% if unrealised_pnl >= 0 %}text-green-500{% else %}text-red-500{% endif %}"
                data-dashboard-unrealised-pnl
                data-base-unrealised="{{ unrealised_pnl|floatformat:2 }}">
-                ₹{{ unrealised_pnl|floatformat:2 }}
+                ${{ unrealised_pnl|floatformat:2 }}
             </p>
         </div>
         <div class="bg-gray-800 rounded-2xl p-4 shadow-md">
@@ -69,11 +69,11 @@
                     </div>
                     <div class="text-right">
                         <p class="text-white font-semibold text-sm">{{ position.last_traded_quantity }} shares</p>
-                        <p class="text-gray-400 text-xs">₹{{ position.buy_price|floatformat:2 }}</p>
+                        <p class="text-gray-400 text-xs">${{ position.buy_price|floatformat:2 }}</p>
                         {% if position.realised_pnl != 0 %}
                         <p
                             class="text-xs {% if position.realised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %} mt-1">
-                            P&L: ₹{{ position.realised_pnl|floatformat:2 }}
+                            P&L: ${{ position.realised_pnl|floatformat:2 }}
                         </p>
                         {% endif %}
                     </div>
@@ -128,11 +128,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (portfolioValue > 0) {
-            totalAssetsEl.textContent = `₹${portfolioValue.toFixed(2)}`;
+            totalAssetsEl.textContent = `$${portfolioValue.toFixed(2)}`;
         }
         if (portfolioCost > 0) {
             const pnl = portfolioValue - portfolioCost;
-            pnlEl.textContent = `₹${pnl.toFixed(2)}`;
+            pnlEl.textContent = `$${pnl.toFixed(2)}`;
             pnlEl.classList.toggle('text-green-500', pnl >= 0);
             pnlEl.classList.toggle('text-red-500', pnl < 0);
         }

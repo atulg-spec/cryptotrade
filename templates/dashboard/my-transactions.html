@@ -46,11 +46,11 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-4">
         <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Deposits</p>
-        <p class="font-mono text-lg font-bold text-emerald-400">₹{{ total_deposits|floatformat:2|intcomma }}</p>
+        <p class="font-mono text-lg font-bold text-emerald-400">${{ total_deposits|floatformat:2|intcomma }}</p>
       </div>
       <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-4">
         <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Withdrawals</p>
-        <p class="font-mono text-lg font-bold text-rose-400">₹{{ total_withdrawals|floatformat:2|intcomma }}</p>
+        <p class="font-mono text-lg font-bold text-rose-400">${{ total_withdrawals|floatformat:2|intcomma }}</p>
       </div>
       <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-4">
         <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Pending</p>
@@ -96,7 +96,7 @@
               </td>
               <td class="px-6 py-4 text-right">
                 <p class="text-sm font-mono font-bold {% if transaction.transaction_type == 'DEPOSIT' %}text-emerald-400{% else %}text-rose-400{% endif %}">
-                  {% if transaction.transaction_type == 'DEPOSIT' %}+{% else %}-{% endif %}₹{{ transaction.amount|floatformat:2|intcomma }}
+                  {% if transaction.transaction_type == 'DEPOSIT' %}+{% else %}-{% endif %}${{ transaction.amount|floatformat:2|intcomma }}
                 </p>
               </td>
               <td class="px-6 py-4 text-center">

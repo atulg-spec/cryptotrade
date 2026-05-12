@@ -32,7 +32,7 @@
                         <p class="text-white font-bold text-1xl text-center"
                            data-portfolio-total-investment
                            data-base-value="{{ total_investment|floatformat:2 }}">
-                            ₹ {{ total_investment|floatformat:2|intcomma }}
+                            $ {{ total_investment|floatformat:2|intcomma }}
                         </p>
                     </div>
                 </div>
@@ -45,7 +45,7 @@
                         <p class="text-gray-400 text-sm mb-2 text-center">Current Value</p>
                         <p class="{% if current_value > total_investment %}text-green-500{% else %}text-red-500{% endif %} font-bold text-1xl text-center"
                            data-portfolio-current-value>
-                            ₹ {{ current_value|floatformat:2|intcomma }}
+                            $ {{ current_value|floatformat:2|intcomma }}
                         </p>
                     </div>
                 </div>
@@ -104,16 +104,16 @@
                                         <p class="text-white font-medium">{{ summary.total_quantity }}</p>
                                     </td>
                                     <td class="py-4 px-4 text-right">
-                                        <p class="text-white font-medium">₹{{ summary.avg_buy_price|floatformat:2 }}</p>
+                                        <p class="text-white font-medium">${{ summary.avg_buy_price|floatformat:2 }}</p>
                                     </td>
                                     <td class="py-4 px-4 text-right">
-                                        <p class="text-white font-medium" data-cell="current_value">₹{{ summary.current_value|floatformat:2 }}</p>
+                                        <p class="text-white font-medium" data-cell="current_value">${{ summary.current_value|floatformat:2 }}</p>
                                     </td>
                                     <td class="py-4 px-4 text-right">
                                         <div class="flex flex-col items-end">
                                             <p class="font-medium {% if summary.unrealised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %}"
                                                data-cell="unrealised_pnl">
-                                                ₹{{ summary.unrealised_pnl|floatformat:2 }}
+                                                ${{ summary.unrealised_pnl|floatformat:2 }}
                                             </p>
                                             <p class="text-xs {% if summary.unrealised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %}"
                                                data-cell="pnl_percentage">
@@ -195,10 +195,10 @@
                             </div>
                             <div class="text-right">
                                 <p class="text-white font-semibold text-sm">{{ position.last_traded_quantity }} shares</p>
-                                <p class="text-gray-400 text-xs">₹{{ position.buy_price|floatformat:2 }}</p>
+                                <p class="text-gray-400 text-xs">${{ position.buy_price|floatformat:2 }}</p>
                                 {% if position.realised_pnl != 0 %}
                                 <p class="text-xs {% if position.realised_pnl >= 0 %}text-green-400{% else %}text-red-400{% endif %} mt-1">
-                                    P&L: ₹{{ position.realised_pnl|floatformat:2 }}
+                                    P&L: ${{ position.realised_pnl|floatformat:2 }}
                                 </p>
                                 {% endif %}
                             </div>
@@ -311,9 +311,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const pnlCell = h.row.querySelector('[data-cell="unrealised_pnl"]');
             const pctCell = h.row.querySelector('[data-cell="pnl_percentage"]');
 
-            if (currentCell) currentCell.textContent = `₹${currentValue.toFixed(2)}`;
+            if (currentCell) currentCell.textContent = `$${currentValue.toFixed(2)}`;
             if (pnlCell) {
-                pnlCell.textContent = `₹${unrealised.toFixed(2)}`;
+                pnlCell.textContent = `$${unrealised.toFixed(2)}`;
                 pnlCell.classList.toggle('text-green-400', unrealised >= 0);
                 pnlCell.classList.toggle('text-red-400', unrealised < 0);
             }
@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (currentValueEl && totalCurrentValue > 0) {
-            currentValueEl.textContent = `₹ ${totalCurrentValue.toFixed(2)}`;
+            currentValueEl.textContent = `$ ${totalCurrentValue.toFixed(2)}`;
             currentValueEl.classList.toggle('text-green-500', totalCurrentValue > baseInvestment);
             currentValueEl.classList.toggle('text-red-500', totalCurrentValue <= baseInvestment);
         }

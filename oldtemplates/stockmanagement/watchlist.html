@@ -99,7 +99,7 @@
                         <div class="text-gray-400 text-sm sm:hidden">Market Price</div>
                         <div class="flex space-x-4">
                             <div id="price-{{ stock.id }}" class="text-white font-semibold text-sm price-value">
-                                ₹{{ stock.current_price|floatformat:2|intcomma }}</div>
+                                ${{ stock.current_price|floatformat:2|intcomma }}</div>
 
                             {% with change=stock.percentage_change %}
                             <div id="change-{{ stock.id }}" class="flex items-center gap-1 justify-end sm:justify-start change-value">
@@ -234,17 +234,17 @@
             
             if (!priceElement || !stockItem) return;
 
-            const oldPrice = parseFloat(priceElement.textContent.replace(/[₹,]/g, ''));
+            const oldPrice = parseFloat(priceElement.textContent.replace(/[$,]/g, ''));
             const newPrice = update.current_price;
             const streamPercentage = update.percentage_change;
 
             if (!oldPrice || oldPrice === 0) {
-                priceElement.textContent = `₹${newPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                priceElement.textContent = `$${newPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                 return;
             }
 
             // 🔥 PRICE COLOR
-            priceElement.textContent = `₹${newPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            priceElement.textContent = `$${newPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             priceElement.classList.remove('text-green-400', 'text-red-400', 'text-white');
             if (newPrice > oldPrice) priceElement.classList.add('text-green-400');
             else if (newPrice < oldPrice) priceElement.classList.add('text-red-400');

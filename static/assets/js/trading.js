@@ -104,7 +104,7 @@ class TradingPanelController {
                 marginInfo?.classList.remove('hidden');
                 marginSideRow?.classList.remove('hidden');
                 spotToggle?.classList.add('hidden');
-                if (inputLabel) inputLabel.textContent = 'Margin (₹)';
+                if (inputLabel) inputLabel.textContent = 'Margin ($)';
                 if (submitBtn) submitBtn.textContent = this.marginSide === 'LONG' ? 'Buy / Long' : 'Sell / Short';
             } else {
                 if (marginBtn) { marginBtn.classList.remove('bg-slate-700', 'text-white'); marginBtn.classList.add('text-slate-500'); }
@@ -113,7 +113,7 @@ class TradingPanelController {
                 marginInfo?.classList.add('hidden');
                 marginSideRow?.classList.add('hidden');
                 spotToggle?.classList.remove('hidden');
-                if (inputLabel) inputLabel.textContent = this.inputMode === 'qty' ? 'Quantity' : 'Amount (₹)';
+                if (inputLabel) inputLabel.textContent = this.inputMode === 'qty' ? 'Quantity' : 'Amount ($)';
                 if (submitBtn) submitBtn.textContent = this.side === 'buy' ? 'Buy / Long' : 'Sell / Short';
             }
         });
@@ -178,8 +178,8 @@ class TradingPanelController {
             } else {
                 if (toggleAmtBtn) { toggleAmtBtn.classList.add('bg-blue-500/15', 'text-blue-400'); toggleAmtBtn.classList.remove('text-slate-500'); }
                 if (toggleQtyBtn) { toggleQtyBtn.classList.remove('bg-blue-500/15', 'text-blue-400'); toggleQtyBtn.classList.add('text-slate-500'); }
-                if (inputLabel) inputLabel.textContent = 'Amount (₹)';
-                if (currencyDisplay) currencyDisplay.textContent = '₹';
+                if (inputLabel) inputLabel.textContent = 'Amount ($)';
+                if (currencyDisplay) currencyDisplay.textContent = '$';
             }
         });
         this.updateEstimate();
@@ -210,7 +210,7 @@ class TradingPanelController {
             estContainer?.classList.remove('hidden');
             if (this.inputMode === 'qty') {
                 if (estLabel) estLabel.textContent = 'Est. Amount:';
-                if (estValue) estValue.textContent = '₹' + (inputVal * price).toFixed(2);
+                if (estValue) estValue.textContent = '$' + (inputVal * price).toFixed(2);
             } else {
                 if (estLabel) estLabel.textContent = 'Est. Qty:';
                 if (estValue) estValue.textContent = (inputVal / price).toFixed(4);
@@ -231,9 +231,9 @@ class TradingPanelController {
             const mmr = 0.004;
             const liq = this.marginSide === 'LONG' ? price * (1 - 1/this.leverage + mmr) : price * (1 + 1/this.leverage - mmr);
             
-            data.ps = '₹' + size.toLocaleString('en-IN', {minimumFractionDigits:2});
+            data.ps = '$' + size.toLocaleString('en-IN', {minimumFractionDigits:2});
             data.q = qty.toFixed(4);
-            data.l = '₹' + liq.toLocaleString('en-IN', {minimumFractionDigits:2});
+            data.l = '$' + liq.toLocaleString('en-IN', {minimumFractionDigits:2});
             data.r = (100/this.leverage).toFixed(2) + '%';
         }
 
@@ -280,7 +280,7 @@ class TradingPanelController {
     updateBalanceUI(data) {
         const balance = data.balance ?? data.wallet_balance;
         if (balance !== undefined) {
-             const formattedBalance = `₹${parseFloat(balance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+             const formattedBalance = `$${parseFloat(balance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
              document.querySelectorAll('[data-dashboard-total-assets]').forEach(el => el.textContent = formattedBalance);
              document.querySelectorAll('#wallet-balance, #sheet-wallet-balance, #topbar-wallet-balance').forEach(el => el.textContent = formattedBalance);
         }
@@ -371,11 +371,11 @@ class TradingPanelController {
                             <td class="px-3 py-2 font-mono font-semibold text-blue-400">${p.symbol}</td>
                             <td class="px-3 py-2 text-center font-bold ${sideColor}">${p.side}</td>
                             <td class="px-3 py-2 text-center font-mono text-amber-400">${p.leverage}x</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-300">₹${p.margin_used.toLocaleString()}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-300">₹${p.position_size.toLocaleString()}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-300">₹${p.entry_price.toLocaleString()}</td>
-                            <td class="px-3 py-2 text-right font-mono text-rose-500 font-bold">₹${p.liquidation_price.toLocaleString()}</td>
-                            <td class="px-3 py-2 text-right font-mono font-bold ${pnlColor}">${p.unrealised_pnl >= 0 ? '+' : ''}₹${p.unrealised_pnl.toLocaleString()}</td>
+                            <td class="px-3 py-2 text-right font-mono text-slate-300">$${p.margin_used.toLocaleString()}</td>
+                            <td class="px-3 py-2 text-right font-mono text-slate-300">$${p.position_size.toLocaleString()}</td>
+                            <td class="px-3 py-2 text-right font-mono text-slate-300">$${p.entry_price.toLocaleString()}</td>
+                            <td class="px-3 py-2 text-right font-mono text-rose-500 font-bold">$${p.liquidation_price.toLocaleString()}</td>
+                            <td class="px-3 py-2 text-right font-mono font-bold ${pnlColor}">${p.unrealised_pnl >= 0 ? '+' : ''}$${p.unrealised_pnl.toLocaleString()}</td>
                             <td class="px-3 py-2 text-right font-mono font-bold ${pnlColor}">${p.roe_pct >= 0 ? '+' : ''}${p.roe_pct}%</td>
                             <td class="px-3 py-2 text-center">
                                 <button class="rounded border border-rose-500/20 bg-rose-500/10 px-2 py-1 text-[9px] font-bold uppercase text-rose-400 hover:bg-rose-500 hover:text-white transition"
@@ -498,8 +498,8 @@ class MarginRiskMonitor {
 
     _parseNum(v) {
         if (v === null || v === undefined || v === '') return 0;
-        // strip currency symbols & commas (handles "₹1,10,000.00")
-        const n = parseFloat(String(v).replace(/[₹,\s]/g, ''));
+        // strip currency symbols & commas (handles "$1,10,000.00")
+        const n = parseFloat(String(v).replace(/[$,\s]/g, ''));
         return isNaN(n) ? 0 : n;
     }
 

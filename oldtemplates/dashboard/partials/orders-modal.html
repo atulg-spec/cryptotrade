@@ -13,7 +13,7 @@
                         <p class="text-gray-400 text-sm mt-1 flex items-center gap-2">
                             <span id="modalSubtitle">Place Order</span>
                             <span class="text-gray-500">•</span>
-                            <span class="text-green-400 font-medium" id="modalStockPrice">₹0.00</span>
+                            <span class="text-green-400 font-medium" id="modalStockPrice">$0.00</span>
                         </p>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
                         class="bg-gradient-to-br from-gray-700/50 to-gray-800/50 border border-gray-600/30 rounded-lg px-4 py-2">
                         <div class="flex justify-between items-center">
                             <span class="text-gray-400 text-sm">Current Price</span>
-                            <span class="text-white font-bold text-lg" id="modalCurrentPrice">₹0.00</span>
+                            <span class="text-white font-bold text-lg" id="modalCurrentPrice">$0.00</span>
                         </div>
                     </div>
 
@@ -83,7 +83,7 @@
                                     class="w-full bg-gray-700/50 border border-gray-600/30 rounded-lg px-4 py-2 text-lg text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200"
                                     placeholder="Enter amount to invest">
                                 <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
-                                    ₹
+                                    $
                                 </div>
                             </div>
                             <p class="text-xs text-gray-500 mt-1">
@@ -118,16 +118,16 @@
                             class="bg-gradient-to-br from-gray-700/50 to-gray-800/50 border border-gray-600/30 rounded-2xl p-4 space-y-3">
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-400">Estimated Amount</span>
-                                <span class="text-white font-semibold" id="estimatedCost">₹0.00</span>
+                                <span class="text-white font-semibold" id="estimatedCost">$0.00</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-400">Available Funds</span>
-                                <span class="text-gray-400">₹{{request.user.wallet}}</span>
+                                <span class="text-gray-400">${{request.user.wallet}}</span>
                             </div>
                             <div class="h-px bg-gray-600/50 my-2"></div>
                             <div class="flex justify-between text-lg">
                                 <span class="text-gray-300 font-semibold">Total Amount</span>
-                                <span class="text-emerald-400 font-bold" id="totalAmount">₹0.00</span>
+                                <span class="text-emerald-400 font-bold" id="totalAmount">$0.00</span>
                             </div>
                         </div>
                     </div>
@@ -146,22 +146,22 @@
                         <div
                             class="bg-gradient-to-br from-gray-700/50 to-gray-800/50 border border-gray-600/30 rounded-2xl p-4 text-center">
                             <p class="text-gray-400 text-sm mb-2">Open</p>
-                            <p class="text-white font-bold text-lg" id="ohlcOpen">₹0.00</p>
+                            <p class="text-white font-bold text-lg" id="ohlcOpen">$0.00</p>
                         </div>
                         <div
                             class="bg-gradient-to-br from-gray-700/50 to-gray-800/50 border border-green-500/20 rounded-2xl p-4 text-center">
                             <p class="text-gray-400 text-sm mb-2">High</p>
-                            <p class="text-green-400 font-bold text-lg" id="ohlcHigh">₹0.00</p>
+                            <p class="text-green-400 font-bold text-lg" id="ohlcHigh">$0.00</p>
                         </div>
                         <div
                             class="bg-gradient-to-br from-gray-700/50 to-gray-800/50 border border-red-500/20 rounded-2xl p-4 text-center">
                             <p class="text-gray-400 text-sm mb-2">Low</p>
-                            <p class="text-red-400 font-bold text-lg" id="ohlcLow">₹0.00</p>
+                            <p class="text-red-400 font-bold text-lg" id="ohlcLow">$0.00</p>
                         </div>
                         <div
                             class="bg-gradient-to-br from-gray-700/50 to-gray-800/50 border border-blue-500/20 rounded-2xl p-4 text-center">
                             <p class="text-gray-400 text-sm mb-2">Close</p>
-                            <p class="text-blue-400 font-bold text-lg" id="ohlcClose">₹0.00</p>
+                            <p class="text-blue-400 font-bold text-lg" id="ohlcClose">$0.00</p>
                         </div>
                     </div>
 
@@ -184,7 +184,7 @@
                                 </div>
                                 <div class="flex justify-between items-center py-2 border-b border-gray-600/30">
                                     <span class="text-gray-400 text-sm">Market Cap</span>
-                                    <span class="text-white font-medium" id="marketCap">₹0.00</span>
+                                    <span class="text-white font-medium" id="marketCap">$0.00</span>
                                 </div>
                                 <div class="flex justify-between items-center py-2 border-b border-gray-600/30">
                                     <span class="text-gray-400 text-sm">P/E Ratio</span>
@@ -210,15 +210,15 @@
                             <div class="space-y-3">
                                 <div class="flex justify-between items-center py-2 border-b border-gray-600/30">
                                     <span class="text-gray-400 text-sm">Daily Range</span>
-                                    <span class="text-white font-medium" id="dailyRange">₹0.00</span>
+                                    <span class="text-white font-medium" id="dailyRange">$0.00</span>
                                 </div>
                                 <div class="flex justify-between items-center py-2 border-b border-gray-600/30">
                                     <span class="text-gray-400 text-sm">52W High</span>
-                                    <span class="text-green-400 font-medium" id="weekHigh">₹0.00</span>
+                                    <span class="text-green-400 font-medium" id="weekHigh">$0.00</span>
                                 </div>
                                 <div class="flex justify-between items-center py-2 border-b border-gray-600/30">
                                     <span class="text-gray-400 text-sm">52W Low</span>
-                                    <span class="text-red-400 font-medium" id="weekLow">₹0.00</span>
+                                    <span class="text-red-400 font-medium" id="weekLow">$0.00</span>
                                 </div>
                                 <div class="flex justify-between items-center py-2">
                                     <span class="text-gray-400 text-sm">Last Updated</span>
@@ -260,13 +260,13 @@
 
         // Update modal header
         document.getElementById('modalStockName').textContent = currentStockData.name;
-        document.getElementById('modalStockPrice').textContent = `₹${currentStockData.currentPrice.toFixed(2)}`;
+        document.getElementById('modalStockPrice').textContent = `$${currentStockData.currentPrice.toFixed(2)}`;
 
         // Calculate price change
         const priceChange = ((currentStockData.currentPrice - currentStockData.openPrice) / currentStockData.openPrice * 100).toFixed(2);
 
         // Update order content
-        document.getElementById('modalCurrentPrice').textContent = `₹${currentStockData.currentPrice.toFixed(2)}`;
+        document.getElementById('modalCurrentPrice').textContent = `$${currentStockData.currentPrice.toFixed(2)}`;
         // Initialize quantity and amount summary using the new fractional logic
         const qtyInput = document.getElementById('quantity');
         if (qtyInput) {
@@ -397,8 +397,8 @@
         const estimatedCost = effectiveAmount;
         const totalAmount = estimatedCost;
 
-        document.getElementById('estimatedCost').textContent = `₹${estimatedCost.toFixed(2)}`;
-        document.getElementById('totalAmount').textContent = `₹${totalAmount.toFixed(2)}`;
+        document.getElementById('estimatedCost').textContent = `$${estimatedCost.toFixed(2)}`;
+        document.getElementById('totalAmount').textContent = `$${totalAmount.toFixed(2)}`;
     }
 
     function setOrderButtonState(isLoading) {
@@ -430,14 +430,14 @@
         if (!currentStockData) return;
 
         // Update OHLC data
-        document.getElementById('ohlcOpen').textContent = `₹${currentStockData.openPrice.toFixed(2)}`;
-        document.getElementById('ohlcHigh').textContent = `₹${currentStockData.highPrice.toFixed(2)}`;
-        document.getElementById('ohlcLow').textContent = `₹${currentStockData.lowPrice.toFixed(2)}`;
-        document.getElementById('ohlcClose').textContent = `₹${currentStockData.closePrice.toFixed(2)}`;
+        document.getElementById('ohlcOpen').textContent = `$${currentStockData.openPrice.toFixed(2)}`;
+        document.getElementById('ohlcHigh').textContent = `$${currentStockData.highPrice.toFixed(2)}`;
+        document.getElementById('ohlcLow').textContent = `$${currentStockData.lowPrice.toFixed(2)}`;
+        document.getElementById('ohlcClose').textContent = `$${currentStockData.closePrice.toFixed(2)}`;
 
         // Update metrics
         document.getElementById('volume').textContent = currentStockData.volume.toLocaleString();
-        document.getElementById('marketCap').textContent = `₹${(currentStockData.marketCap / 10000000).toFixed(2)}Cr`;
+        document.getElementById('marketCap').textContent = `$${(currentStockData.marketCap / 10000000).toFixed(2)}Cr`;
         document.getElementById('peRatio').textContent = currentStockData.peRatio.toFixed(2);
         document.getElementById('dividendYield').textContent = `${currentStockData.dividendYield.toFixed(2)}%`;
 
@@ -446,9 +446,9 @@
         const weekHigh = (currentStockData.highPrice * 1.1).toFixed(2); // Simulated 52W high
         const weekLow = (currentStockData.lowPrice * 0.9).toFixed(2); // Simulated 52W low
 
-        document.getElementById('dailyRange').textContent = `₹${dailyRange}`;
-        document.getElementById('weekHigh').textContent = `₹${weekHigh}`;
-        document.getElementById('weekLow').textContent = `₹${weekLow}`;
+        document.getElementById('dailyRange').textContent = `$${dailyRange}`;
+        document.getElementById('weekHigh').textContent = `$${weekHigh}`;
+        document.getElementById('weekLow').textContent = `$${weekLow}`;
         document.getElementById('lastUpdated').textContent = new Date(currentStockData.lastUpdated).toLocaleString();
     }
 

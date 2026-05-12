@@ -24,7 +24,7 @@
       <!-- Balance Info -->
       <div class="p-8 text-center border-b border-slate-800/50 bg-slate-800/20">
         <p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Available for Withdrawal</p>
-        <p class="text-4xl font-mono font-bold text-emerald-400">₹{{ user.wallet|floatformat:2|intcomma }}</p>
+        <p class="text-4xl font-mono font-bold text-emerald-400">${{ user.wallet|floatformat:2|intcomma }}</p>
       </div>
 
       <div class="p-6 sm:p-8 space-y-8">
@@ -35,7 +35,7 @@
             {% for amount in "500,1000,2000,5000,10000,25000"|split:"," %}
             <button type="button" onclick="setWithdrawAmount({{ amount }})"
               class="withdraw-amount-btn px-4 py-3 bg-slate-800/40 hover:bg-slate-800 border border-slate-800 text-white rounded-2xl transition-all hover:scale-[1.02] active:scale-95 text-sm font-bold">
-              ₹{{ amount|intcomma }}
+              ${{ amount|intcomma }}
             </button>
             {% endfor %}
           </div>
@@ -47,13 +47,13 @@
           <div class="space-y-3">
             <label class="block text-xs font-bold uppercase tracking-widest text-slate-500">Custom Amount</label>
             <div class="relative group">
-              <span class="absolute left-5 top-1/2 -translate-y-1/2 text-2xl font-bold text-slate-600 group-focus-within:text-orange-500 transition-colors">₹</span>
+              <span class="absolute left-5 top-1/2 -translate-y-1/2 text-2xl font-bold text-slate-600 group-focus-within:text-orange-500 transition-colors">$</span>
               <input type="number" id="withdrawAmount" min="1" max="{{ user.wallet|floatformat:0 }}" step="100" name="amount"
                 placeholder="0.00"
                 class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl pl-12 pr-6 py-4 text-2xl font-mono font-bold text-white placeholder-slate-800 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all outline-none"
                 oninput="validateWithdrawAmount(this)">
             </div>
-            <p class="text-[10px] text-slate-600 font-medium">Maximum: ₹{{ user.wallet|floatformat:2|intcomma }}</p>
+            <p class="text-[10px] text-slate-600 font-medium">Maximum: ${{ user.wallet|floatformat:2|intcomma }}</p>
           </div>
         </form>
 
@@ -99,12 +99,12 @@
       <div class="bg-slate-950/50 rounded-2xl p-6 mb-8 space-y-4">
         <div class="flex justify-between text-xs font-bold uppercase tracking-widest">
           <span class="text-slate-600">Amount</span>
-          <span class="text-white" id="modalWithdrawAmount">₹0.00</span>
+          <span class="text-white" id="modalWithdrawAmount">$0.00</span>
         </div>
         <div class="h-px bg-slate-800"></div>
         <div class="flex justify-between text-xs font-bold uppercase tracking-widest">
           <span class="text-slate-600">Remaining</span>
-          <span class="text-rose-400" id="newWithdrawBalance">₹0.00</span>
+          <span class="text-rose-400" id="newWithdrawBalance">$0.00</span>
         </div>
       </div>
 

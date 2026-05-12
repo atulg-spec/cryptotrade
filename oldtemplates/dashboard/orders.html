@@ -16,7 +16,7 @@
                     </div>
                     <div>
                         <h1 class="text-lg font-bold text-white">Orders</h1>
-                        <p class="text-xs text-gray-400">{{ total_orders }} orders • ₹{{ total_investment|floatformat:2|intcomma }}</p>
+                        <p class="text-xs text-gray-400">{{ total_orders }} orders • ${{ total_investment|floatformat:2|intcomma }}</p>
                     </div>
                 </div>
                 <button onclick="toggleFilters()" class="p-2 bg-gray-800 rounded-xl">
@@ -42,7 +42,7 @@
             </div>
             <div class="bg-gray-800/50 rounded-xl p-3 text-center border border-gray-700/30">
                 <p class="text-xs text-gray-400 mb-1">Invested</p>
-                <p class="text-blue-400 font-bold">₹{{ total_investment|floatformat:2|intcomma }}</p>
+                <p class="text-blue-400 font-bold">${{ total_investment|floatformat:2|intcomma }}</p>
             </div>
         </div>
     </div>
@@ -168,11 +168,11 @@
                     </div>
                     <div>
                         <p class="text-gray-400 text-xs mb-1">Price</p>
-                        <p class="text-white font-semibold">₹{{ order.price|floatformat:2 }}</p>
+                        <p class="text-white font-semibold">${{ order.price|floatformat:2 }}</p>
                     </div>
                     <div class="col-span-2">
                         <p class="text-gray-400 text-xs mb-1">Total Amount</p>
-                        <p class="text-white font-bold text-lg">₹{{ order.amount|floatformat:2|intcomma }}</p>
+                        <p class="text-white font-bold text-lg">${{ order.amount|floatformat:2|intcomma }}</p>
                     </div>
                 </div>
             </div>

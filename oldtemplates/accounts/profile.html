@@ -72,7 +72,7 @@
       >
         <p class="text-gray-400 text-sm mb-1">Wallet Balance</p>
         <p class="text-green-400 font-bold text-2xl">
-          ₹{{ user.wallet|floatformat:2|intcomma }}
+          ${{ user.wallet|floatformat:2|intcomma }}
         </p>
       </div>
       <div
@@ -92,7 +92,7 @@
       >
         <p class="text-gray-400 text-sm mb-1">Total Invested</p>
         <p class="text-purple-400 font-bold text-2xl">
-          ₹{{ total_investment|floatformat:2|intcomma }}
+          ${{ total_investment|floatformat:2|intcomma }}
         </p>
       </div>
     </div>
@@ -463,7 +463,7 @@
               </div>
               <div class="text-right">
                 <p class="text-white font-semibold text-sm">
-                  ₹{{ order.amount|floatformat:2 }}
+                  ${{ order.amount|floatformat:2 }}
                 </p>
                 <span
                   class="text-xs px-2 py-1 rounded-full {% if order.status == 'completed' %}bg-green-500/20 text-green-400{% elif order.status == 'pending' %}bg-yellow-500/20 text-yellow-400{% else %}bg-gray-500/20 text-gray-400{% endif %}"
@@ -868,15 +868,15 @@
 
     // Update modal with current amount
     document.getElementById("confirmDepositAmount").textContent =
-      `₹${depositAmount.toLocaleString("en-IN")}`;
+      `$${depositAmount.toLocaleString("en-IN")}`;
     document.getElementById("modalDepositAmount").textContent =
-      `₹${depositAmount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      `$${depositAmount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     // Calculate new balance
     const currentBalance = parseFloat("{{ user.wallet }}") || 0;
     const newBalance = currentBalance + depositAmount;
     document.getElementById("newDepositBalance").textContent =
-      `₹${newBalance.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      `$${newBalance.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     // Show modal
     document.getElementById("depositModal").classList.remove("hidden");
@@ -966,14 +966,14 @@
 
     // Update modal with current amount
     document.getElementById("confirmWithdrawAmount").textContent =
-      `₹${withdrawAmount.toLocaleString("en-IN")}`;
+      `$${withdrawAmount.toLocaleString("en-IN")}`;
     document.getElementById("modalWithdrawAmount").textContent =
-      `₹${withdrawAmount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      `$${withdrawAmount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     // Calculate new balance
     const newBalance = currentBalance - withdrawAmount;
     document.getElementById("newWithdrawBalance").textContent =
-      `₹${newBalance.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      `$${newBalance.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     // Show modal
     document.getElementById("withdrawModal").classList.remove("hidden");

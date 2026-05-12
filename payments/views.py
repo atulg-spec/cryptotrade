@@ -294,7 +294,7 @@ def verify_payment(request, transaction_id):
             # The transaction model's save() method handles add_wallet(user, amount + promo_reward)
             tx.save()
             
-            messages.success(request, f"Transaction {tx.transaction_id} verified. ₹{tx.amount} added to your wallet.")
+            messages.success(request, f"Transaction {tx.transaction_id} verified. ${tx.amount} added to your wallet.")
         else:
             messages.error(request, "This transaction cannot be verified in its current state.")
     except transaction.DoesNotExist:

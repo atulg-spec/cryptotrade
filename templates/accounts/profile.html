@@ -27,7 +27,7 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                 <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-4 transition-all hover:bg-slate-900/60 group">
                     <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 group-hover:text-slate-400">Wallet Balance</p>
-                    <p class="text-lg sm:text-2xl font-bold text-emerald-400 font-mono">₹{{ user.wallet|floatformat:2|intcomma }}</p>
+                    <p class="text-lg sm:text-2xl font-bold text-emerald-400 font-mono">${{ user.wallet|floatformat:2|intcomma }}</p>
                 </div>
                 <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-4 transition-all hover:bg-slate-900/60 group">
                     <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 group-hover:text-slate-400">Total Orders</p>
@@ -39,7 +39,7 @@
                 </div>
                 <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-4 transition-all hover:bg-slate-900/60 group">
                     <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 group-hover:text-slate-400">Invested</p>
-                    <p class="text-lg sm:text-2xl font-bold text-purple-400 font-mono">₹{{ total_investment|floatformat:2|intcomma }}</p>
+                    <p class="text-lg sm:text-2xl font-bold text-purple-400 font-mono">${{ total_investment|floatformat:2|intcomma }}</p>
                 </div>
             </div>
         </div>
@@ -200,7 +200,7 @@
                                     </div>
                                 </div>
                                 <div class="text-right flex-shrink-0 ml-4">
-                                    <p class="text-white font-mono font-bold text-sm sm:text-base">₹{{ order.amount|floatformat:2 }}</p>
+                                    <p class="text-white font-mono font-bold text-sm sm:text-base">${{ order.amount|floatformat:2 }}</p>
                                     <span class="inline-block mt-1 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full {% if order.status == 'completed' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20{% elif order.status == 'pending' %}bg-amber-500/10 text-amber-400 border border-amber-500/20{% else %}bg-slate-500/10 text-slate-400 border border-slate-500/20{% endif %}">
                                         {{ order.status }}
                                     </span>

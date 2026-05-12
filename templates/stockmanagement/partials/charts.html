@@ -352,7 +352,7 @@
                     <!-- Balance -->
                     <div class="mt-3 flex items-center justify-between text-xs">
                         <span class="text-slate-500">Available</span>
-                        <span class="font-mono font-bold text-white">₹{{ request.user.wallet|default:0|floatformat:2 }}</span>
+                        <span class="font-mono font-bold text-white">${{ request.user.wallet|default:0|floatformat:2 }}</span>
                     </div>
                 </div>
             </div>
@@ -790,7 +790,7 @@ function openChart(stockItem) {
     
     if (currentPrice) {
         const priceEl = document.getElementById('chart-price');
-        if (priceEl) priceEl.textContent = `₹${parseFloat(currentPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        if (priceEl) priceEl.textContent = `$${parseFloat(currentPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
     
     if (percentageChange !== undefined) {

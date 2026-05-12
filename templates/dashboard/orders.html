@@ -18,7 +18,7 @@
           </div>
           <h1 class="text-2xl font-extrabold text-white tracking-tight">Order Management</h1>
         </div>
-        <p class="text-sm text-slate-400">{{ total_orders|default:0 }} orders • ₹{{ total_investment|default:0|floatformat:2|intcomma }} invested</p>
+        <p class="text-sm text-slate-400">{{ total_orders|default:0 }} orders • ${{ total_investment|default:0|floatformat:2|intcomma }} invested</p>
       </div>
 
       <form method="get" class="flex flex-wrap items-center gap-3">
@@ -77,8 +77,8 @@
                 </span>
               </td>
               <td class="px-6 py-4 text-right font-mono text-sm">{{ order.quantity|floatformat:4 }}</td>
-              <td class="px-6 py-4 text-right font-mono text-sm text-slate-300">₹{{ order.price|floatformat:2 }}</td>
-              <td class="px-6 py-4 text-right font-mono font-bold text-white">₹{{ order.amount|floatformat:2|intcomma }}</td>
+              <td class="px-6 py-4 text-right font-mono text-sm text-slate-300">${{ order.price|floatformat:2 }}</td>
+              <td class="px-6 py-4 text-right font-mono font-bold text-white">${{ order.amount|floatformat:2|intcomma }}</td>
               <td class="px-6 py-4 text-center">
                 <span class="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border
                   {% if order.status == 'completed' %}bg-emerald-500/10 text-emerald-400 border-emerald-500/20

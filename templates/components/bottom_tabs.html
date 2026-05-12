@@ -53,10 +53,10 @@ Unified Positions: Spot and Margin in one place.
             {{ mp.side }}
           </td>
           <td class="px-3 py-2 text-center font-mono text-amber-400 font-bold">{{ mp.leverage }}x</td>
-          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ mp.margin_used|floatformat:2 }}</td>
-          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ mp.entry_price|floatformat:2 }}</td>
-          <td class="market-price px-3 py-2 text-right font-mono text-slate-300" data-symbol="{{ mp.stock.symbol }}">₹{{ mp.stock.current_price|floatformat:2 }}</td>
-          <td class="px-3 py-2 text-right font-mono text-rose-500 font-bold">₹{{ mp.liquidation_price|floatformat:2 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">${{ mp.margin_used|floatformat:2 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">${{ mp.entry_price|floatformat:2 }}</td>
+          <td class="market-price px-3 py-2 text-right font-mono text-slate-300" data-symbol="{{ mp.stock.symbol }}">${{ mp.stock.current_price|floatformat:2 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-rose-500 font-bold">${{ mp.liquidation_price|floatformat:2 }}</td>
           <td class="pnl-value px-3 py-2 text-right font-mono font-bold" 
               data-symbol="{{ mp.stock.symbol }}" data-qty="{{ mp.quantity }}" data-avg="{{ mp.entry_price }}" data-side="{{ mp.side }}">--</td>
           <td class="pnl-percent px-3 py-2 text-right font-mono font-bold" data-symbol="{{ mp.stock.symbol }}">--%</td>
@@ -78,8 +78,8 @@ Unified Positions: Spot and Margin in one place.
           <td class="px-3 py-2 text-center font-bold text-emerald-400">BUY</td>
           <td class="px-3 py-2 text-center font-mono text-slate-500">SPOT</td>
           <td class="px-3 py-2 text-right font-mono text-slate-300">{{ pos.quantity|floatformat:4 }}</td>
-          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ pos.buy_price|floatformat:2 }}</td>
-          <td class="market-price px-3 py-2 text-right font-mono text-slate-300" data-symbol="{{ pos.stock.symbol }}">₹{{ pos.stock.current_price|floatformat:2 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">${{ pos.buy_price|floatformat:2 }}</td>
+          <td class="market-price px-3 py-2 text-right font-mono text-slate-300" data-symbol="{{ pos.stock.symbol }}">${{ pos.stock.current_price|floatformat:2 }}</td>
           <td class="px-3 py-2 text-right font-mono text-slate-700">--</td>
           <td class="pnl-value px-3 py-2 text-right font-mono font-bold" 
               data-symbol="{{ pos.stock.symbol }}" data-qty="{{ pos.quantity }}" data-avg="{{ pos.buy_price }}" data-side="LONG">--</td>
@@ -152,9 +152,9 @@ Unified Positions: Spot and Margin in one place.
             {% if order.order_type == 'BUY' %}text-emerald-400{% else %}text-rose-400{% endif %}">
             {{ order.order_type }}{% if order.is_margin %} (M){% endif %}
           </td>
-          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ order.price|floatformat:2 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">${{ order.price|floatformat:2 }}</td>
           <td class="px-3 py-2 text-right font-mono text-slate-300">{{ order.quantity|floatformat:4 }}</td>
-          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ order.amount|floatformat:2 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">${{ order.amount|floatformat:2 }}</td>
           <td class="px-3 py-2 text-center">
             <span class="rounded px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider
               {% if order.status == 'completed' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/20
@@ -196,10 +196,10 @@ Unified Positions: Spot and Margin in one place.
         <tr class="border-b border-slate-800/50 transition hover:bg-slate-800/40">
           <td class="px-3 py-2 font-mono font-semibold text-white">{{ pos.stock.symbol }}</td>
           <td class="px-3 py-2 text-right font-mono text-slate-300">{{ pos.last_traded_quantity|floatformat:4 }}</td>
-          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ pos.buy_price|floatformat:2 }}</td>
-          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ pos.sell_price|floatformat:2 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">${{ pos.buy_price|floatformat:2 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">${{ pos.sell_price|floatformat:2 }}</td>
           <td class="px-3 py-2 text-right font-mono font-semibold {% if pos.realised_pnl >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
-            {% if pos.realised_pnl > 0 %}+{% endif %}₹{{ pos.realised_pnl|floatformat:2 }}
+            {% if pos.realised_pnl > 0 %}+{% endif %}${{ pos.realised_pnl|floatformat:2 }}
           </td>
           <td class="px-3 py-2 font-mono text-slate-500">{{ pos.last_traded_datetime|date:"H:i" }}</td>
         </tr>
@@ -214,10 +214,10 @@ Unified Positions: Spot and Margin in one place.
         <tr class="border-b border-slate-800/50 transition hover:bg-slate-800/40">
           <td class="px-3 py-2 font-mono font-semibold text-white">{{ pos.stock.symbol }}</td>
           <td class="px-3 py-2 text-right font-mono text-slate-300">{{ pos.last_traded_quantity|floatformat:4 }}</td>
-          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ pos.buy_price|floatformat:2 }}</td>
-          <td class="px-3 py-2 text-right font-mono text-slate-300">₹{{ pos.sell_price|floatformat:2 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">${{ pos.buy_price|floatformat:2 }}</td>
+          <td class="px-3 py-2 text-right font-mono text-slate-300">${{ pos.sell_price|floatformat:2 }}</td>
           <td class="px-3 py-2 text-right font-mono font-semibold {% if pos.realised_pnl >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
-            {% if pos.realised_pnl > 0 %}+{% endif %}₹{{ pos.realised_pnl|floatformat:2 }}
+            {% if pos.realised_pnl > 0 %}+{% endif %}${{ pos.realised_pnl|floatformat:2 }}
           </td>
           <td class="px-3 py-2 font-mono text-slate-500">{{ pos.last_traded_datetime|date:"H:i" }}</td>
         </tr>

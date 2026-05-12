@@ -55,13 +55,13 @@
         }
         
         // Update modal with current amount
-        document.getElementById('confirmDepositAmount').textContent = `₹${depositAmount.toLocaleString('en-IN')}`;
-        document.getElementById('modalDepositAmount').textContent = `₹${depositAmount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        document.getElementById('confirmDepositAmount').textContent = `$${depositAmount.toLocaleString('en-IN')}`;
+        document.getElementById('modalDepositAmount').textContent = `$${depositAmount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
         
         // Calculate new balance
         const currentBalance = parseFloat('{{ user.wallet }}') || 0;
         const newBalance = currentBalance + depositAmount;
-        document.getElementById('newDepositBalance').textContent = `₹${newBalance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        document.getElementById('newDepositBalance').textContent = `$${newBalance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
         
         // Show modal
         document.getElementById('depositModal').classList.remove('hidden');
@@ -138,12 +138,12 @@
         }
         
         // Update modal with current amount
-        document.getElementById('confirmWithdrawAmount').textContent = `₹${withdrawAmount.toLocaleString('en-IN')}`;
-        document.getElementById('modalWithdrawAmount').textContent = `₹${withdrawAmount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        document.getElementById('confirmWithdrawAmount').textContent = `$${withdrawAmount.toLocaleString('en-IN')}`;
+        document.getElementById('modalWithdrawAmount').textContent = `$${withdrawAmount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
         
         // Calculate new balance
         const newBalance = currentBalance - withdrawAmount;
-        document.getElementById('newWithdrawBalance').textContent = `₹${newBalance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        document.getElementById('newWithdrawBalance').textContent = `$${newBalance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
         
         // Show modal
         document.getElementById('withdrawModal').classList.remove('hidden');

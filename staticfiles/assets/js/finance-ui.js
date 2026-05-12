@@ -18,11 +18,11 @@ class FinanceFormatter {
 
         if (compact) {
             const sign = signed ? (number >= 0 ? '+' : '-') : '';
-            return `${sign}₹${this.formatCompactNumber(Math.abs(number), { decimals })}`;
+            return `${sign}$${this.formatCompactNumber(Math.abs(number), { decimals })}`;
         }
 
         const sign = signed ? (number >= 0 ? '+' : '-') : '';
-        return `${sign}₹${Math.abs(number).toLocaleString('en-IN', {
+        return `${sign}$${Math.abs(number).toLocaleString('en-IN', {
             minimumFractionDigits: decimals,
             maximumFractionDigits: decimals
         })}`;
@@ -244,12 +244,12 @@ class FinancialUISync {
 
             document.querySelectorAll(`[data-mini-buy="${symbol}"]`).forEach(el => {
                 const buy = price.ask ?? price.current_price;
-                el.textContent = this.formatter.formatCurrency(buy).replace('₹', '');
+                el.textContent = this.formatter.formatCurrency(buy).replace('$', '');
             });
 
             document.querySelectorAll(`[data-mini-sell="${symbol}"]`).forEach(el => {
                 const sell = price.bid ?? price.current_price;
-                el.textContent = this.formatter.formatCurrency(sell).replace('₹', '');
+                el.textContent = this.formatter.formatCurrency(sell).replace('$', '');
             });
         });
 

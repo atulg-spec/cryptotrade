@@ -169,7 +169,7 @@ Includes Spot/Margin toggle and leverage selector for mobile.
         {# Balance #}
         <div class="flex items-center justify-between rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5">
           <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Balance</span>
-          <span class="font-mono text-sm font-semibold text-emerald-400" id="sheet-wallet-balance">₹{{ wallet|floatformat:2 }}</span>
+          <span class="font-mono text-sm font-semibold text-emerald-400" id="sheet-wallet-balance">${{ wallet|floatformat:2 }}</span>
         </div>
       </div>
     </div>

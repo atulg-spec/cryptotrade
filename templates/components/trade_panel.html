@@ -198,7 +198,7 @@ AND a Margin Mode toggle + leverage selector (mirrors Binance UI).
     {# Balance Card #}
     <div class="flex items-center justify-between rounded-xl border border-slate-700/60 bg-slate-800/60 px-3 py-2.5">
       <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Available Balance</span>
-      <span class="font-mono text-sm font-semibold text-emerald-400" id="wallet-balance">₹{{ wallet|floatformat:2 }}</span>
+      <span class="font-mono text-sm font-semibold text-emerald-400" id="wallet-balance">${{ wallet|floatformat:2 }}</span>
     </div>
 
     <p class="text-center text-[10px] text-slate-600">Select a symbol from watchlist to trade.</p>

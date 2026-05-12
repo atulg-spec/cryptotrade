@@ -31,24 +31,24 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-5 group hover:border-slate-700 transition-colors">
         <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Total Investment</p>
-        <p class="font-mono text-xl font-bold text-white group-hover:text-blue-400 transition-colors">₹{{ total_investment|floatformat:2|intcomma }}</p>
+        <p class="font-mono text-xl font-bold text-white group-hover:text-blue-400 transition-colors">${{ total_investment|floatformat:2|intcomma }}</p>
       </div>
       <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-5 group hover:border-slate-700 transition-colors">
         <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Current Value</p>
-        <p class="font-mono text-xl font-bold text-white group-hover:text-blue-400 transition-colors">₹{{ current_value|floatformat:2|intcomma }}</p>
+        <p class="font-mono text-xl font-bold text-white group-hover:text-blue-400 transition-colors">${{ current_value|floatformat:2|intcomma }}</p>
       </div>
       <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-5 group hover:border-slate-700 transition-colors">
         <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Unrealized P&L</p>
         <div class="flex items-baseline gap-2">
           <p class="font-mono text-xl font-bold {% if total_unrealised_pnl >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
-            {% if total_unrealised_pnl >= 0 %}+{% endif %}₹{{ total_unrealised_pnl|floatformat:2|intcomma }}
+            {% if total_unrealised_pnl >= 0 %}+{% endif %}${{ total_unrealised_pnl|floatformat:2|intcomma }}
           </p>
         </div>
       </div>
       <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-2xl p-5 group hover:border-slate-700 transition-colors">
         <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Realized Profits</p>
         <p class="font-mono text-xl font-bold {% if total_realised_pnl >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
-          {% if total_realised_pnl >= 0 %}+{% endif %}₹{{ total_realised_pnl|floatformat:2|intcomma }}
+          {% if total_realised_pnl >= 0 %}+{% endif %}${{ total_realised_pnl|floatformat:2|intcomma }}
         </p>
       </div>
     </div>
@@ -82,12 +82,12 @@
                 </div>
               </td>
               <td class="px-6 py-4 text-right font-mono text-sm">{{ summary.total_quantity|floatformat:4 }}</td>
-              <td class="px-6 py-4 text-right font-mono text-sm text-slate-400">₹{{ summary.avg_buy_price|floatformat:2 }}</td>
-              <td class="px-6 py-4 text-right font-mono text-sm">₹{{ summary.current_value|floatformat:2 }}</td>
+              <td class="px-6 py-4 text-right font-mono text-sm text-slate-400">${{ summary.avg_buy_price|floatformat:2 }}</td>
+              <td class="px-6 py-4 text-right font-mono text-sm">${{ summary.current_value|floatformat:2 }}</td>
               <td class="px-6 py-4 text-right">
                 <div class="flex flex-col items-end">
                   <p class="font-mono text-sm font-bold {% if summary.unrealised_pnl >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
-                    {% if summary.unrealised_pnl >= 0 %}+{% endif %}₹{{ summary.unrealised_pnl|floatformat:2 }}
+                    {% if summary.unrealised_pnl >= 0 %}+{% endif %}${{ summary.unrealised_pnl|floatformat:2 }}
                   </p>
                   <p class="text-[10px] font-bold {% if summary.pnl_percentage >= 0 %}text-emerald-500/60{% else %}text-rose-500/60{% endif %}">
                     {% if summary.pnl_percentage >= 0 %}+{% endif %}{{ summary.pnl_percentage|floatformat:2 }}%

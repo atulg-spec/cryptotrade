@@ -126,7 +126,7 @@ class WatchlistController {
         } else {
             this.searchResults.innerHTML = results.map(s => {
                 const isUSDT = s.symbol.endsWith('USDT') || s.symbol.endsWith('USD');
-                const symbol_prefix = isUSDT ? '$' : '₹';
+                const symbol_prefix = isUSDT ? '$' : '$';
                 return `
                 <div class="flex items-center justify-between p-3 hover:bg-white/[0.05] cursor-pointer border-b border-white/5 transition-colors" 
                     onclick="WatchlistManager.handleSearchResultClick('${s.symbol}', event)">
@@ -262,7 +262,7 @@ class WatchlistController {
                     const newPrice = update.current_price;
                     
                     const isUSDT = symbol.endsWith('USDT') || symbol.endsWith('USD');
-                    const prefix = isUSDT ? '$' : '₹';
+                    const prefix = isUSDT ? '$' : '$';
 
                     priceEl.textContent = `${prefix}${newPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 

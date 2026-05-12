@@ -173,7 +173,7 @@ class PromoCodeAdmin(admin.ModelAdmin):
     # Custom method to show amount/percentage cleanly
     def reward_value(self, obj):
         if obj.promo_type == "amount":
-            return f"₹{obj.reward_amount}"
+            return f"${obj.reward_amount}"
         return f"{obj.reward_percentage}%"
     
     reward_value.short_description = "Reward Value"

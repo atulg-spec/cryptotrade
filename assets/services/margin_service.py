@@ -5,9 +5,9 @@ Margin (leveraged) trading service — mirrors Binance Isolated Margin logic.
 
 Key concepts
 ────────────
-• Margin (collateral)  : real wallet funds deducted (e.g. ₹1 000)
+• Margin (collateral)  : real wallet funds deducted (e.g. $1 000)
 • Leverage             : multiplier (e.g. 10×)
-• Position size        : notional value = margin × leverage (e.g. ₹10 000)
+• Position size        : notional value = margin × leverage (e.g. $10 000)
 • Quantity             : position_size / entry_price
 • Liquidation price    : the market price at which the margin is fully wiped out
       Long  : entry × (1 − 1/leverage + MMR)
@@ -21,7 +21,7 @@ Profit / Loss formula (Long example)
 
 Admin-level rules enforced here
 ────────────────────────────────
-• Minimum margin    : ₹1
+• Minimum margin    : $1
 • Maximum leverage  : 125× (hard cap)
 • Funding fee       : not applied (simplified)
 • Liquidation       : closes position, returns zero to wallet
@@ -100,7 +100,7 @@ def execute_margin_trade(user, stock, margin_amount, leverage, side):
     if leverage < 1 or leverage > MAX_LEVERAGE:
         return False, f'Leverage must be between 1× and {MAX_LEVERAGE}×.'
     if margin_amount < MIN_MARGIN:
-        return False, f'Minimum margin is ₹{MIN_MARGIN}.'
+        return False, f'Minimum margin is ${MIN_MARGIN}.'
     if side not in (MarginPosition.LONG, MarginPosition.SHORT):
         return False, 'Invalid side — must be LONG or SHORT.'
 
@@ -168,11 +168,11 @@ def execute_margin_trade(user, stock, margin_amount, leverage, side):
 
     logger.info(
         f'{action} margin position: {user.username} {side} {stock.symbol} '
-        f'x{leverage} margin=₹{margin_amount} qty={quantity}'
+        f'x{leverage} margin=${margin_amount} qty={quantity}'
     )
     return True, (
         f'{action} {side} position: {quantity:.4f} {stock.symbol} '
-        f'@ ₹{entry_price:.2f} | Liq: ₹{pos.liquidation_price:.2f}'
+        f'@ ${entry_price:.2f} | Liq: ${pos.liquidation_price:.2f}'
     )
 
 
@@ -257,9 +257,9 @@ def close_margin_position(user, stock, side, close_qty=None):
     label = 'Closed' if pos.status == MarginPosition.STATUS_CLOSED else 'Partially closed'
     logger.info(
         f'{label} margin position: {user.username} {side} {stock.symbol} '
-        f'qty={close_qty} pnl={pnl:.2f} returned=₹{returned:.2f}'
+        f'qty={close_qty} pnl={pnl:.2f} returned=${returned:.2f}'
     )
-    return True, f'{label} {side} {stock.symbol}: P&L ₹{pnl:.2f}, returned ₹{returned:.2f}'
+    return True, f'{label} {side} {stock.symbol}: P&L ${pnl:.2f}, returned ${returned:.2f}'
 
 
 def liquidate_position(user, stock, side):
@@ -285,6 +285,6 @@ def liquidate_position(user, stock, side):
         pos.save()
 
     logger.warning(
-        f'LIQUIDATED: {user.username} {side} {stock.symbol} @ ₹{current_price}'
+        f'LIQUIDATED: {user.username} {side} {stock.symbol} @ ${current_price}'
     )
-    return True, f'Position liquidated at ₹{current_price:.2f}. Margin lost.'
+    return True, f'Position liquidated at ${current_price:.2f}. Margin lost.'

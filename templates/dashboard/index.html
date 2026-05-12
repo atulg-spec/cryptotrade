@@ -19,7 +19,7 @@
       <span id="active-symbol-price" class="font-mono text-base text-slate-300">--</span>
       <span id="active-symbol-change" class="rounded px-2 py-0.5 font-mono text-xs"></span>
       <div class="ml-auto rounded-xl border border-slate-700 bg-slate-800/60 px-3 py-1 text-xs text-slate-300">
-        Equity: <span data-dashboard-total-assets>₹{{ total_equity|floatformat:2|intcomma }}</span>
+        Equity: <span data-dashboard-total-assets>${{ total_equity|floatformat:2|intcomma }}</span>
       </div>
     </div>
 
@@ -203,8 +203,8 @@
       const mode = tds[2].textContent.trim();
       const isMargin = mode !== 'SPOT';
       
-      const qtyStr = tds[3].textContent.trim().replace('₹', '');
-      const avgStr = tds[4].textContent.trim().replace('₹', '');
+      const qtyStr = tds[3].textContent.trim().replace('$', '');
+      const avgStr = tds[4].textContent.trim().replace('$', '');
       
       const pnlEl = tds[7];
       const pctEl = tds[8];
@@ -380,12 +380,12 @@
     const updates = e.detail;
     if (!Array.isArray(updates)) return;
     const fmt = (n, d = 2) => Math.abs(Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: d, maximumFractionDigits: d });
-    const signed = (n, d = 2) => `${n >= 0 ? '+' : '-'}₹${fmt(n, d)}`;
+    const signed = (n, d = 2) => `${n >= 0 ? '+' : '-'}$${fmt(n, d)}`;
     const signedPct = (n, d = 2) => `${n >= 0 ? '+' : '-'}${Math.abs(Number(n) || 0).toFixed(d)}%`;
 
     updates.forEach(su => {
       document.querySelectorAll(`.price-display[data-symbol="${su.symbol}"]`).forEach(el => {
-        el.textContent = `₹${Number(su.current_price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        el.textContent = `$${Number(su.current_price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       });
       document.querySelectorAll(`.change-display[data-symbol="${su.symbol}"]`).forEach(el => {
         const v = Number(su.percentage_change);
@@ -400,7 +400,7 @@
       if (au) {
         const pe = document.getElementById('active-symbol-price');
         const ce = document.getElementById('active-symbol-change');
-        if (pe) { pe.textContent = `₹${Number(au.current_price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; pe.className = `font-mono text-base ${au.percentage_change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`; }
+        if (pe) { pe.textContent = `$${Number(au.current_price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; pe.className = `font-mono text-base ${au.percentage_change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`; }
         if (ce) { ce.textContent = `${au.percentage_change >= 0 ? '+' : ''}${Number(au.percentage_change).toFixed(2)}%`; ce.className = `rounded px-2 py-0.5 font-mono text-xs ${au.percentage_change >= 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'}`; }
       }
     }
@@ -410,7 +410,7 @@
       if (su) {
         const sp = document.getElementById('sheet-price');
         const sc = document.getElementById('sheet-change');
-        if (sp) { sp.textContent = `₹${Number(su.current_price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; sp.className = `font-mono text-lg font-semibold ${su.percentage_change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`; }
+        if (sp) { sp.textContent = `$${Number(su.current_price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; sp.className = `font-mono text-lg font-semibold ${su.percentage_change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`; }
         if (sc) { sc.textContent = `${su.percentage_change >= 0 ? '+' : ''}${Number(su.percentage_change).toFixed(2)}%`; sc.className = `rounded px-2 py-0.5 font-mono text-[11px] ${su.percentage_change >= 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'}`; }
         if (openPositions[sheetSymbol]) openPositions[sheetSymbol].market = Number(su.current_price);
       }
@@ -444,7 +444,7 @@
         pp.classList.add(pnl >= 0 ? 'text-emerald-400' : 'text-rose-400');
       });
       document.querySelectorAll(`.market-price[data-symbol="${sym}"]`).forEach(mp => {
-        mp.textContent = `₹${fmt(cur)}`;
+        mp.textContent = `$${fmt(cur)}`;
       });
     });
 

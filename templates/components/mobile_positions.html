@@ -42,12 +42,12 @@ Mobile Positions Panel – rendered only on mobile when "Positions" tab is activ
         </div>
         <div class="px-3 py-2">
           <div class="mb-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">Avg Price</div>
-          <div class="font-mono text-xs text-slate-200">₹{{ pos.buy_price|floatformat:2 }}</div>
+          <div class="font-mono text-xs text-slate-200">${{ pos.buy_price|floatformat:2 }}</div>
         </div>
         <div class="px-3 py-2">
           <div class="mb-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">Market</div>
           <div class="market-price font-mono text-xs text-slate-200" data-symbol="{{ pos.stock.symbol }}">
-            ₹{{ pos.stock.current_price|floatformat:2 }}
+            ${{ pos.stock.current_price|floatformat:2 }}
           </div>
         </div>
       </div>
